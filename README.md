@@ -1,2 +1,2 @@
 # vires
-A simple multiplayer RTS
+A simple multiplayer RTS.
