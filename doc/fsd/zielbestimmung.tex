@@ -1,1 +1,35 @@
 \section{Zielbestimmung}
+
+% A criteria
+\newcommand{\crit}[2]{
+	\item[#1] \hfill
+		\begin{itemize}
+			#2
+		\end{itemize}
+}
+
+Im Folgenden werden eine Menge spielspezifische Begriffe verwendet, welche im Glossar (unter \ref{sec:glossar}) nachgeschlagen werden können.
+
+\subsection{Musskriterien}
+\begin{description}
+	\crit{Nutzer}{
+		\item Nach dem Besuchen der Website können Nutzer ihren Nutzernamen eingeben.
+		\item In der Pre-Match-Phase können Nutzer auswählen, ob sie Player oder Spectator sein wollen.
+		\item Nutzer können sich innerhalb eines Rooms dazu entscheiden, erneut dem Matchmaking beizutreten.
+		\item Nutzer können einem Room über die URL mit der Room-ID des Raumes beitreten.
+	}
+	\crit{Player}{
+		\item Während der Pre-Match-Phase können Players dafür abstimmen, dass das Match sofort gestartet wird.
+		\item Während der Match-Phase können Players \vires (unter \ref{sec:spielerklaerung} erklärt) spielen.
+		\item Zu jeder Zeit können sich Players dazu entscheiden, zum Spectator zu werden.
+	}
+	\crit{Spectator}{
+		\item Während der Match-Phase können Spectators das Match beobachten.
+		\item Während der Pre-Match-Phase können sich Spectators dazu entscheiden, zum Player zu werden.
+	}
+	\crit{Administrator}{
+		\item Administratoren können das client- und das serverseitige Fehler-Log einsehen.
+		\item Administratoren können die Spielstatistiken-Datenbank einsehen.
+		\item Administratoren können das Spiel während der Laufzeit konfigurieren.
+	}
+\end{description}
