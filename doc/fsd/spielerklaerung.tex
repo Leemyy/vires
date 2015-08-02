@@ -5,27 +5,28 @@ Bei ``\vires'' handelt es sich insgesamt um ein einfaches RTS-Spiel.
 Das Spiel wird in einer zweidimensionalen Vogelperspektive gespielt.
 
 Auf dem Spielfeld befinden sich mehrere Cells, welche im Spiel als Kreise dargestellt werden.
-Cells produzieren Vires, welche die eigentlichen Einheiten des Spiels darstellen. Dieser Produktionsvorgang wird als Replication bezeichnet.
+Cells produzieren Vires, welche die eigentlichen Einheiten des Spiels darstellen. Dieser Produktionsvorgang wird als Replication bezeichnet. \\
 Jede Cell hat eine gewisse Cell-Force, welche durch die Größe der Cell darstellt wird.
 Innerhalb eines gewissen Zeitintervals, welcher von der Cell-Force bestimmt wird, erhöht sich die Menge an Stationed Vires, also die Menge an Vires in einer Cell, um ein Virus.
-Hat die Cell eine geringe Cell-Force, so produziert sie langsamer Vires.
+Hat die Cell eine geringe Cell-Force, so ist auch die Replication dieser Cell langsamer. \\
 Jede Cell hat eine Capacity, also einen gewissen Maximalumfang an Vires, den sie enthalten kann.
-Die Capacity wird ebenfalls von der Cell-Force bestimmt: Je geringer die Cell-Force, desto kleiner ist auch die Capacity.
+Die Capacity wird ebenfalls von der Cell-Force bestimmt: Je geringer die Cell-Force, desto kleiner ist auch die Capacity. \\
 Jeder Player, also jeder aktiv am Match teilnehmende Nutzer, hat am Anfang des Matches eine Start-Cell. 
-Alle Start-Cells auf dem Feld haben die gleiche Cell-Force.
+Alle Start-Cells auf dem Feld haben die gleiche Cell-Force. \\
 Alle Cells auf dem Feld, die einem Player gehören, werden auch als Manned Cells bezeichnet.
-Alle Cells auf dem Feld, die keinem Player gehören, sind Neutral Cells. Neutral Cells verhalten sich wie Manned Cells, haben jedoch eine geringere Produktionsgeschwindigkeit.
+Alle Cells auf dem Feld, die keinem Player gehören, sind Neutral Cells. Neutral Cells verhalten sich wie Manned Cells, haben jedoch eine langsamere Replication.
 
-Vires können vom Player von seinen Manned Cells zu beliebigen anderen Cells bewegt werden. 
+Vires können von Players, ausgehend von Manned Cells, die ihnen gehören, zu beliebigen anderen Cells, bewegt werden. 
 Jedes Movement, also jede Bewegung von Vires, bewegt die Hälfte der Stationed Vires in der jeweiligen Manned Cell in Richtung der Target-Cell.
-Es können auch mehrere Movements gleichzeitig auf die gleiche Target-Cell gestartet werden, indem der Player mehrere seiner Manned Cells auswählt.
-Die Vires innerhalb eines Movements heißen Moving Vires: Je größer die Anzahl an Moving Vires innerhalb eines Movements ist, desto langsamer wird das eigentliche Movement.
-Movements werden ebenfalls durch Kreise dargestellt, deren Größe von der Anzahl der Moving Vires innerhalb des Movements bestimmt wird.
-Treffen zwei Movements des gleichen Players auf die gleiche Target-Cell aufeinander, so vereinen sich die Movements und bilden ein einzelnes Movement.
-Treffen zwei Movements unterschiedlicher Player aufeinander, so tritt ein Conflict auf: Die Vires bekämpfen sich, indem die Mengen an Moving Vires in den beiden Movements voneinander abgezogen werden. Nach einem Conflict während eines Movements bleibt nur das Movement über, das die größere Anzahl an Moving Vires hat, verkleinert aber seine Anzahl durch das Aufeinandertreffen mit dem Feind.
-Cells, die das Movement auf dem Weg zur Target-Cell überquert, werden einfach ignoriert und durchlaufen.
+Es können auch mehrere Movements gleichzeitig auf die gleiche Target-Cell gestartet werden, indem Players mehrere ihrer Manned Cells auswählen. \\
+Die Vires innerhalb eines Movements heißen Moving Vires: Je größer die Anzahl an Moving Vires innerhalb eines Movements ist, desto größer wird die Movement-Force.
+Je kleiner die Movement-Force eines Movements ist, desto schneller ist auch das Movement.
+Movements werden ebenfalls durch Kreise dargestellt, deren Größe von der Movement-Force bestimmt wird. \\
+Treffen zwei Movements des gleichen Players auf die gleiche Target-Cell aufeinander, so vereinen sich die Movements und bilden ein einzelnes Movement mit einer Movement-Force der beiden vereinten Movements.
+Treffen zwei Movements unterschiedlicher Player aufeinander, so tritt ein Conflict auf: Die Vires bekämpfen sich, indem die Movement-Forces der beiden Movements voneinander abgezogen werden. Nach einem Conflict während eines Movements bleibt nur das Movement über, das die stärkere Movement-Force hat, verkleinert aber seine Movement-Force durch das Aufeinandertreffen mit dem Feind. \\
+Cells, die das Movement auf dem Weg zur Target-Cell überquert, werden einfach ignoriert und durchlaufen. \\
 Trifft ein Movement auf seine Target-Cell und gehört diese dem selben Player, der das Movement losgeschickt hat, so werden die Moving Vires des Movements in die Stationed Vires der Target-Cell aufgenommen.
 Trifft ein Movement aber auf seine Target-Cell und gehört diese einem anderen Player, so tritt ebenfalls ein Conflict auf: Die Moving Vires werden von den Stationed Vires der Target-Cell abgezogen. Ist die Menge an Moving Vires größer als die Menge an Stationed Vires, so übernimmt der angreifende Player die Cell.
 Überschreitet der Übergang von Moving Vires in Stationed Vires die Capacity, so gehen die überbleibenden Moving Vires verloren.
 
-Insgesamt gewinnt der Player das Match, der als letzter noch auf dem Spielfeld vorhanden ist.
+Insgesamt gewinnt ein Player das Match, wenn er/sie als letzter noch auf dem Spielfeld vorhanden ist.
