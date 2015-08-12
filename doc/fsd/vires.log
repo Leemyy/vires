@@ -1,22 +1,15 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2015.5.18)  2 AUG 2015 18:04
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/W32TeX) (preloaded format=pdflatex 2015.4.11)  12 AUG 2015 18:27
 entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
 **vires.tex
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\vires.tex
-LaTeX2e <2011/06/27>
-Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, ar
-abic, armenian, assamese, basque, bengali, bokmal, bulgarian, catalan, coptic, 
-croatian, czech, danish, dutch, esperanto, estonian, farsi, finnish, french, ga
-lician, german, german-x-2013-05-26, greek, gujarati, hindi, hungarian, iceland
-ic, indonesian, interlingua, irish, italian, kannada, kurmanji, latin, latvian,
- lithuanian, malayalam, marathi, mongolian, mongolianlmc, monogreek, ngerman, n
-german-x-2013-05-26, nynorsk, oriya, panjabi, pinyin, polish, portuguese, roman
-ian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, swissgerm
-an, tamil, telugu, turkish, turkmen, ukenglish, ukrainian, uppersorbian, usengl
-ishmax, welsh, loaded.
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\article.cls"
-Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\size10.clo"
-File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+(./vires.tex
+LaTeX2e <2014/05/01>
+Babel <3.9l> and hyphenation patterns for 79 languages loaded.
+(c:/texlive/2014/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(c:/texlive/2014/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -30,40 +23,39 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\babel\babel.sty"
-Package: babel 2008/07/08 v3.8m The Babel package
+(c:/texlive/2014/texmf-dist/tex/generic/babel/babel.sty
+Package: babel 2014/09/25 3.9l The Babel package
 
-*************************************
-* Local config file bblopts.cfg used
-*
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\bblopts.cfg"
-File: bblopts.cfg 2006/07/31 v1.0 MiKTeX 'babel' configuration
-)
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\babel\germanb.ldf"
-Language: germanb 2008/06/01 v2.6m German support from the babel system
+(c:/texlive/2014/texmf-dist/tex/generic/babel-german/german.ldf
+Language: german 2014/10/10 v2.7b German support for babel (traditional orthogr
+aphy)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\babel\babel.def"
-File: babel.def 2008/07/08 v3.8m Babel common definitions
+(c:/texlive/2014/texmf-dist/tex/generic/babel-german/germanb.ldf
+Language: germanb 2014/10/10 v2.7b German support for babel (traditional orthog
+raphy)
+
+(c:/texlive/2014/texmf-dist/tex/generic/babel/babel.def
+File: babel.def 2014/09/25 3.9l Babel common definitions
 \babel@savecnt=\count87
 \U@D=\dimen103
 )
 \l@austrian = a dialect from \language\l@german 
-Package babel Info: Making " an active character on input line 102.
-))
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\inputenc.sty"
-Package: inputenc 2008/03/30 v1.1d Input encoding file
+Package babel Info: Making " an active character on input line 110.
+)))
+(c:/texlive/2014/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2014/04/30 v1.2b Input encoding file
 \inpenc@prehook=\toks14
 \inpenc@posthook=\toks15
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
-File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
+(c:/texlive/2014/texmf-dist/tex/latex/base/utf8.def
+File: utf8.def 2014/09/29 v1.1m UTF-8 support for inputenc
 Now handling font encoding OML ...
 ... no UTF-8 mapping file for font encoding OML
 Now handling font encoding T1 ...
 ... processing UTF-8 mapping file for font encoding T1
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1enc.dfu"
-File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
+(c:/texlive/2014/texmf-dist/tex/latex/base/t1enc.dfu
+File: t1enc.dfu 2014/09/29 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00AB (decimal 171)
@@ -212,8 +204,8 @@ File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OT1 ...
 ... processing UTF-8 mapping file for font encoding OT1
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\ot1enc.dfu"
-File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
+(c:/texlive/2014/texmf-dist/tex/latex/base/ot1enc.dfu
+File: ot1enc.dfu 2014/09/29 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00B8 (decimal 184)
@@ -243,8 +235,8 @@ File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OMS ...
 ... processing UTF-8 mapping file for font encoding OMS
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omsenc.dfu"
-File: omsenc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
+(c:/texlive/2014/texmf-dist/tex/latex/base/omsenc.dfu
+File: omsenc.dfu 2014/09/29 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A7 (decimal 167)
    defining Unicode char U+00B6 (decimal 182)
    defining Unicode char U+00B7 (decimal 183)
@@ -267,23 +259,23 @@ Now handling font encoding U ...
    defining Unicode char U+2122 (decimal 8482)
    defining Unicode char U+2423 (decimal 9251)
 ))
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\fontenc.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/base/fontenc.sty
 Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1enc.def"
+(c:/texlive/2014/texmf-dist/tex/latex/base/t1enc.def
 File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
 ))
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\hyperref.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2012/11/06 v6.83m Hypertext links for LaTeX
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\hobsub-hyperref.sty"
-Package: hobsub-hyperref 2012/04/25 v1.12 Bundle oberdiek, subset hyperref (HO)
+(c:/texlive/2014/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
+Package: hobsub-hyperref 2012/05/28 v1.13 Bundle oberdiek, subset hyperref (HO)
 
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\hobsub-generic.sty"
-Package: hobsub-generic 2012/04/25 v1.12 Bundle oberdiek, subset generic (HO)
-Package: hobsub 2012/04/25 v1.12 Construct package bundles (HO)
+(c:/texlive/2014/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
+Package: hobsub-generic 2012/05/28 v1.13 Bundle oberdiek, subset generic (HO)
+Package: hobsub 2012/05/28 v1.13 Construct package bundles (HO)
 Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
@@ -314,7 +306,7 @@ Package: uniquecounter 2011/01/30 v1.2 Provide unlimited unique counter (HO)
 )
 Package hobsub Info: Skipping package `hobsub' (already loaded).
 Package: letltxmacro 2010/09/02 v1.4 Let assignment for LaTeX macros (HO)
-Package: hopatch 2011/06/24 v1.1 Wrapper for package hooks (HO)
+Package: hopatch 2012/05/28 v1.2 Wrapper for package hooks (HO)
 Package: xcolor-patch 2011/01/30 xcolor patch
 Package: atveryend 2011/06/30 v1.8 Hooks at the very end of document (HO)
 Package atveryend Info: \enddocument detected (standard20110627).
@@ -322,31 +314,31 @@ Package: atbegshi 2011/10/05 v1.16 At begin shipout hook (HO)
 Package: refcount 2011/10/16 v3.4 Data extraction from label references (HO)
 Package: hycolor 2011/01/30 v1.7 Color options for hyperref/bookmark (HO)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
-Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+(c:/texlive/2014/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
 \KV@toks@=\toks16
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\ifxetex\ifxetex.sty"
+(c:/texlive/2014/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\oberdiek\auxhook.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/oberdiek/auxhook.sty
 Package: auxhook 2011/03/04 v1.3 Hooks for auxiliary files (HO)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\oberdiek\kvoptions.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/oberdiek/kvoptions.sty
 Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
 )
 \@linkdim=\dimen104
 \Hy@linkcounter=\count88
 \Hy@pagecounter=\count89
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\pd1enc.def"
+(c:/texlive/2014/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2012/11/06 v6.83m Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
 ... no UTF-8 mapping file for font encoding PD1
 )
 \Hy@SavedSpaceFactor=\count90
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\hyperref.cfg"
+(c:/texlive/2014/texmf-dist/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
 Package hyperref Info: Option `colorlinks' set `true' on input line 4319.
@@ -359,7 +351,7 @@ Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4688.
 \c@Hy@tempcnt=\count91
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\url\url.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
@@ -384,41 +376,50 @@ LaTeX Info: Redefining \pageref on input line 6369.
 
 Package hyperref Message: Driver (autodetected): hpdftex.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\hpdftex.def"
+(c:/texlive/2014/texmf-dist/tex/latex/hyperref/hpdftex.def
 File: hpdftex.def 2012/11/06 v6.83m Hyperref driver for pdfTeX
 \Fld@listcount=\count96
 \c@bookmark@seq@number=\count97
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\oberdiek\rerunfilecheck.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
 Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 82.
 )
 \Hy@SectionHShift=\skip43
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
-Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+(c:/texlive/2014/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
-Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+(c:/texlive/2014/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2014/10/28 v1.0p Standard LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\trig.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
-File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+(c:/texlive/2014/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
 )
 Package graphics Info: Driver file: pdftex.def on input line 91.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
+(c:/texlive/2014/texmf-dist/tex/latex/pdftex-def/pdftex.def
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
 \Gread@gobject=\count98
 ))
 \Gin@req@height=\dimen108
 \Gin@req@width=\dimen109
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\ltxmisc\here.sty")
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\vires.aux)
+(c:/texlive/2014/texmf-dist/tex/latex/here/here.sty)
+(c:/texlive/2014/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count99
+\float@exts=\toks17
+\float@box=\box26
+\@float@everytoks=\toks18
+\@floatcapt=\box27
+) (./vires.aux)
+\openout1 = `vires.aux'.
+
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 10.
 LaTeX Font Info:    ... okay on input line 10.
 LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 10.
@@ -433,147 +434,354 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 10.
 LaTeX Font Info:    ... okay on input line 10.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 10.
 LaTeX Font Info:    ... okay on input line 10.
-\AtBeginShipoutBox=\box26
+\AtBeginShipoutBox=\box28
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\color.sty"
-Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
+(c:/texlive/2014/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2014/10/28 v1.1a Standard LaTeX Color (DPC)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\color.cfg"
+(c:/texlive/2014/texmf-dist/tex/latex/latexconfig/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
-Package color Info: Driver file: pdftex.def on input line 130.
+Package color Info: Driver file: pdftex.def on input line 137.
 )
 Package hyperref Info: Link coloring ON on input line 10.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\nameref.sty"
+(c:/texlive/2014/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\gettitlestring.sty"
+(c:/texlive/2014/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
-\c@section@level=\count99
+\c@section@level=\count100
 )
 LaTeX Info: Redefining \ref on input line 10.
 LaTeX Info: Redefining \pageref on input line 10.
 LaTeX Info: Redefining \nameref on input line 10.
 
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\vires.out)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\vires.out)
+(./vires.out) (./vires.out)
 \@outlinefile=\write3
+\openout3 = `vires.out'.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
+
+(c:/texlive/2014/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count100
+\scratchcounter=\count101
 \scratchdimen=\dimen110
-\scratchbox=\box27
-\nofMPsegments=\count101
-\nofMParguments=\count102
-\everyMPshowfont=\toks17
-\MPscratchCnt=\count103
+\scratchbox=\box29
+\nofMPsegments=\count102
+\nofMParguments=\count103
+\everyMPshowfont=\toks19
+\MPscratchCnt=\count104
 \MPscratchDim=\dimen111
-\MPnumerator=\count104
-\makeMPintoPDFobject=\count105
-\everyMPtoPDFconversion=\toks18
+\MPnumerator=\count105
+\makeMPintoPDFobject=\count106
+\everyMPtoPDFconversion=\toks20
+) (c:/texlive/2014/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
+
+(c:/texlive/2014/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
 )
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 452.
+
+(c:/texlive/2014/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <12> on input line 19.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <8> on input line 19.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 19.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 19.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 19.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 19.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 19.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 19.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 19.
  [1
 
-{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}]
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\vires.toc
+{c:/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./vires.toc
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 4.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 4.
 )
 \tf@toc=\write4
+\openout4 = `vires.toc'.
+
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 21.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 21.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 21.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 21.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 21.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 21.
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.21 \begin{abstract}
-                      [1]pdfTeX warning (ext4): destination with the same ident
-ifier (name{page.1}) has been already used, duplicate ignored
+                      [1]
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 23.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 23.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 23.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 23.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 23.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 23.
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
+been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.23 \end{abstract}
-                    [1]
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\spielerklaerun
-g.texpdfTeX warning (ext4): destination with the same identifier (name{page.1})
- has been already used, duplicate ignored
+                    [1] (./spielerklaerung.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 31.
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
+been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.31 
-      [1])
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\zielbestimmung
-.tex
+      [1]) (./zielbestimmung.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 13.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 13.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 13.
 LaTeX Font Info:    Try loading font information for OMS+cmr on input line 20.
- ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omscmr.fd"
-File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+
+(c:/texlive/2014/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 20.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 37.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 37.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 37.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 42.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 42.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 42.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 42.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 42.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 42.
+ [2]
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 48.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 48.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 48.
 )
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\produkteinsatz
-.tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\produktumgebun
-g.tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\produktfunktio
-nen.tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\produktdaten.t
-ex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\produktleistun
-gen.tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\benutzeroberfl
-aeche.tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\qualitaetsziel
-bestimmung.tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\testszenarien.
-tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\entwicklungsum
-gebung.tex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\glossar.tex
-[2] [3])
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\meilensteine.t
-ex)
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\layoutdesign.t
-ex)
+(./produkteinsatz.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+) (./produktumgebung.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+) (./produktfunktionen.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+)
+(./produktdaten.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+) (./produktleistungen.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+) (./benutzeroberflaeche.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+)
+(./qualitaetszielbestimmung.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+) (./testszenarien.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+)
+(./entwicklungsumgebung.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+) (./glossar.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 8.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 8.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 8.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 8.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 8.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 8.
+ [3]
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 31.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 31.
+ [4]) (./meilensteine.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+)
+(./layoutdesign.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+)
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 40.
- [4]
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 40.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 40.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 40.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 40.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 40.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 40.
+ [5]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 40.
-
-(C:\Users\laze\Workspaces\Go\src\github.com\mhuisi\vires\doc\fsd\vires.aux)
+ (./vires.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 40.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 40.
 Package rerunfilecheck Info: File `vires.out' has not changed.
-(rerunfilecheck)             Checksum: 21DC40205AC80F8E9FD601DBCF022305;794.
+(rerunfilecheck)             Checksum: 6836F59AD57AEA8D9C910238CC940C83;914.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 40.
  ) 
 Here is how much of TeX's memory you used:
- 5848 strings out of 493921
- 85876 string characters out of 3144879
- 162949 words of memory out of 3000000
- 9027 multiletter control sequences out of 15000+200000
- 13944 words of font info for 33 fonts, out of 3000000 for 9000
- 841 hyphenation exceptions out of 8191
- 29i,6n,28p,438b,400s stack positions out of 5000i,500n,10000p,200000b,50000s
- <C:\Users\laze\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\e
-cbx1200.pk> <C:\Users\laze\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec
-\dpi600\ecbi1000.pk> <C:\Users\laze\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jk
-nappen\ec\dpi600\ecrm1000.pk> <C:\Users\laze\AppData\Local\MiKTeX\2.9\fonts\pk\
-ljfour\jknappen\ec\dpi600\ecbx1000.pk> <C:\Users\laze\AppData\Local\MiKTeX\2.9\
-fonts\pk\ljfour\jknappen\ec\dpi600\ecbx1440.pk> <C:\Users\laze\AppData\Local\Mi
-KTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\ecrm1200.pk> <C:\Users\laze\AppData
-\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\ecrm1728.pk> <C:\Users\laz
-e\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\ecbi1728.pk><C:/P
-rogram Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on vires.pdf (7 pages, 109225 bytes).
+ 6122 strings out of 493109
+ 87230 string characters out of 6138587
+ 177057 words of memory out of 5000000
+ 9454 multiletter control sequences out of 15000+600000
+ 13944 words of font info for 33 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 29i,6n,32p,438b,461s stack positions out of 5000i,500n,10000p,200000b,80000s
+{c:/texlive/2014/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}<c:/texl
+ive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2014/
+texmf-dist/fonts/type1/public/cm-super/sfbi1000.pfb><c:/texlive/2014/texmf-dist
+/fonts/type1/public/cm-super/sfbi1728.pfb><c:/texlive/2014/texmf-dist/fonts/typ
+e1/public/cm-super/sfbx1000.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/
+cm-super/sfbx1200.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/cm-super/s
+fbx1440.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pf
+b><c:/texlive/2014/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb><c:/texl
+ive/2014/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb>
+Output written on vires.pdf (8 pages, 163569 bytes).
 PDF statistics:
- 380 PDF objects out of 1000 (max. 8388607)
- 21 named destinations out of 1000 (max. 500000)
- 121 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 171 PDF objects out of 1000 (max. 8388607)
+ 150 compressed objects within 2 object streams
+ 24 named destinations out of 1000 (max. 500000)
+ 137 words of extra memory for PDF output out of 10000 (max. 10000000)
 
