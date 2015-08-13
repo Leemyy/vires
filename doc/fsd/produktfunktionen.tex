@@ -9,27 +9,53 @@
 
 \subsection{Benutzerfunktionen}
 \subsubsection{Hauptseite}
-Betritt der Nutzer die Hauptseite der Website, so kann er seinen Nutzernamen eingeben, dem Matchmaking beitreten oder direkt einem Match über die Room-ID des Matches beitreten.
+Betreten Nutzer die Hauptseite der Website, so können sie ihren Nutzernamen eingeben, dem Matchmaking beitreten oder direkt einem Match über die Room-ID des Matches beitreten.
 
 \begin{description}
 	\fn{0010}{Eingabe des Benutzernamens} 
-		Jeder Nutzer hat einen Nutzernamen, was es einfacher machen soll, die Farben eines Players einem Namen zuzordnen. 
+		Jeder Nutzer hat einen Nutzernamen, was es einfacher machen soll, Cells und Vires bestimmten Namen zuzuordnen.
 		\begin{itemize}
 			\item Nutzernamen müssen nicht eindeutig sein: Mehrere Nutzer können den gleichen Namen verwenden. 
 			\item Jeder Nutzername ist auf 20 Zeichen limitiert.
 			\item Wird der Nutzername nicht angegeben, so gilt dieser automatisch als der Nutzername ``Unknown''.
-			\item Nutzernamen werden über Cookies beim Nutzer abgespeichert.
-			\item Besucht ein Nutzer die Hauptseite erneut, so befindet sich sein Nutzername bereits im Eingabefeld.
+			\item Nutzernamen werden über Cookies bei den Nutzern abgespeichert.
+			\item Besuchen Nutzer die Hauptseite erneut, so befinden sich ihre Nutzernamen bereits im Eingabefeld.
 		\end{itemize}
 	\fn{0020}{Matchmaking} 
-		Auf der Hauptseite kann der Nutzer dem Matchmaking beitreten. Das Matchmaking sorgt dafür, dass der Nutzer an einen guten Room weitergeleitet wird. \\
+		Auf der Hauptseite können Nutzer dem Matchmaking beitreten. Das Matchmaking sorgt dafür, dass Nutzer in einen guten Room weitergeleitet werden. \\
 		Ein guter Room ist wie folgt definiert:
 		\begin{itemize}
 			\item Der Room befindet sich aktuell in der Pre-Match-Phase.
 			\item Die Maximalanzahl an Players in dem Room ist noch nicht erreicht.
 			\item Der Room hat die geringste Anzahl an Players aus allen Rooms, die in Frage kommen.
 		\end{itemize}
-		Lässt sich kein guter Room finden, so wird ein neuer Room erstellt, in den der Nutzer dann weitergeleitet wird.
+		Lässt sich kein guter Room finden, so wird ein neuer Room erstellt, in den die Nutzer dann weitergeleitet werden.
 	\fn{0030}{Direktes Beitreten}
-		Mithilfe der Room-ID kann der Nutzer auf der Hauptseite einem bestimmten Room direkt beitreten. Wird keine Room-ID angegeben, so wird der Nutzer stattdessen ins Matchmaking weitergeleitet.
+		Mithilfe der Room-ID können Nutzer auf der Hauptseite einem bestimmten Room direkt beitreten. Ist die Maximalanzahl an Players des Rooms erreicht, so treten Nutzer dem Room automatisch als Spectators bei.
+\end{description}
+
+\subsubsection{Room}
+Rooms stellen die eigentlichen Spielinstanzen des Spiels dar.
+
+\begin{description}
+	\fn{0110}{Phases}
+		Jeder Room befindet sich entweder in der Pre-Match-Phase oder in der Match-Phase. Wird die eine Phase beendet, so wird direkt die nächste Phase gestartet.
+	\fn{0120}{Pre-Match-Phase}
+		Während der Pre-Match-Phase wird auf Players für die Match-Phase gewartet. 
+	\fn{0130}{Countdown}
+		Sind zwei oder mehr Players im Room, so fängt ein Timer an, von 60 Sekunden aus herunterzuzählen. Erreicht der Timer null Sekunden, so beginnt das Match. Während dieser Wartezeit können die Players abstimmen, ob sie das Match sofort starten wollen. Die Abstimmung dauert 10 Sekunden und kann nur mit einer Zweidrittelmehrheit der an der Abstimmung teilnehmenden Players entschieden werden.
+	\fn{0140}{Match-Phase}
+		Während der Match-Phase wird von den Players \vires\ gespielt, während Spectators das Spiel beobachten.
+	\fn{0150}{Rollen}
+		Tritt man einem Room bei, so ist man standardmäßig Player. Players können sich in einem Room dazu entscheiden, zu Spectators zu werden.
+		\begin{itemize}
+			\item Lief während der Entscheidung der Timer, existiert aber nach der Entscheidung nur noch ein Player, so wird der Timer abgebrochen.
+			\item War der Player an einer Abstimmung beteiligt, so wird seine Stimme zurückgezogen. 
+			\item War der Player aktuell in der Match-Phase aktiv, so wird eine Neutralization auf alle seine Manned Cells durchgeführt und seine Moving Vires entfernt.
+		\end{itemize}
+		Während der Pre-Match-Phase können Spectators zurück zu Players wechseln, insofern die Maximalanzahl an Players des Rooms nicht erreicht ist. Das Zurückwechseln is während der Match-Phase nicht möglich.
+	\fn{0160}{Maximalanzahl an Players}
+		Jeder Room hat eine Maximalanzahl von 20 Players. Rooms können insgesamt auch mehr Nutzer enthalten, insofern die restlichen Nutzer alle Spectators sind.
+	\fn{0170}{Room-ID}
+		Jeder Room hat eine einzigartige Room-ID, welche sich auch in der URL des Rooms wiederfinden lässt. Die Room-ID kann verwendet werden, um einem Room direkt beizutreten.
 \end{description}
