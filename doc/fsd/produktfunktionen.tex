@@ -1,1 +1,35 @@
 \section{Produktfunktionen}
+
+% An \idit with an F as prefix.
+% The first argument is the ID 
+% of the function and the
+% second argument is the name of
+% the function.
+\newcommand{\fn}[2]{\idit{F#1}{#2}}
+
+\subsection{Benutzerfunktionen}
+\subsubsection{Hauptseite}
+Betritt der Nutzer die Hauptseite der Website, so kann er seinen Nutzernamen eingeben, dem Matchmaking beitreten oder direkt einem Match über die Room-ID des Matches beitreten.
+
+\begin{description}
+	\fn{0010}{Eingabe des Benutzernamens} 
+		Jeder Nutzer hat einen Nutzernamen, was es einfacher machen soll, die Farben eines Players einem Namen zuzordnen. 
+		\begin{itemize}
+			\item Nutzernamen müssen nicht eindeutig sein: Mehrere Nutzer können den gleichen Namen verwenden. 
+			\item Jeder Nutzername ist auf 20 Zeichen limitiert.
+			\item Wird der Nutzername nicht angegeben, so gilt dieser automatisch als der Nutzername ``Unknown''.
+			\item Nutzernamen werden über Cookies beim Nutzer abgespeichert.
+			\item Besucht ein Nutzer die Hauptseite erneut, so befindet sich sein Nutzername bereits im Eingabefeld.
+		\end{itemize}
+	\fn{0020}{Matchmaking} 
+		Auf der Hauptseite kann der Nutzer dem Matchmaking beitreten. Das Matchmaking sorgt dafür, dass der Nutzer an einen guten Room weitergeleitet wird. \\
+		Ein guter Room ist wie folgt definiert:
+		\begin{itemize}
+			\item Der Room befindet sich aktuell in der Pre-Match-Phase.
+			\item Die Maximalanzahl an Players in dem Room ist noch nicht erreicht.
+			\item Der Room hat die geringste Anzahl an Players aus allen Rooms, die in Frage kommen.
+		\end{itemize}
+		Lässt sich kein guter Room finden, so wird ein neuer Room erstellt, in den der Nutzer dann weitergeleitet wird.
+	\fn{0030}{Direktes Beitreten}
+		Mithilfe der Room-ID kann der Nutzer auf der Hauptseite einem bestimmten Room direkt beitreten. Wird keine Room-ID angegeben, so wird der Nutzer stattdessen ins Matchmaking weitergeleitet.
+\end{description}

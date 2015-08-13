@@ -1,6 +1,9 @@
 \section{Zielbestimmung}
 
-% A criteria
+% A criteria, where the first arg
+% is the name of the criteria
+% and the second arg
+% the body of the criteria itemize
 \newcommand{\crit}[2]{
 	\item[#1] \hfill
 		\begin{itemize}
@@ -13,7 +16,7 @@ Im Folgenden werden eine Menge spielspezifische Begriffe verwendet, welche im Gl
 \subsection{Musskriterien}
 \begin{description}
 	\crit{Nutzer}{
-		\item Nach dem Besuchen der Website können Nutzer ihren Nutzernamen eingeben und dem Matchmaking beitreten.
+		\item Nach dem Besuchen der Index-Seite der Website können Nutzer ihren Nutzernamen eingeben, dem Matchmaking beitreten oder direkt einem Match über die Room-ID beitreten.
 		\item In der Pre-Match-Phase können Nutzer auswählen, ob sie Player oder Spectator sein wollen.
 		\item Nutzer können sich innerhalb eines Rooms dazu entscheiden, erneut dem Matchmaking beizutreten.
 		\item Nutzer können einem Room über die URL mit der Room-ID des Raumes beitreten.
@@ -48,7 +51,6 @@ Im Folgenden werden eine Menge spielspezifische Begriffe verwendet, welche im Gl
 \subsection{Abgrenzungskriterien}
 \begin{itemize}
 	\item Das Spiel soll nur auf Englisch verfügbar sein.
-	\item Es soll keine extra Benutzeroberfläche zum Beitreten von Räumen existieren.
 	\item Spieler sollen nicht in der Lage sein, Spielelemente sichtbar für andere Spieler anzupassen.
 	\item Spieler sollen im Chat nicht in der Lage sein, private Nachrichten zu schreiben.
 	\item Das spielunterstützte Bilden von Teams soll nicht möglich sein.
