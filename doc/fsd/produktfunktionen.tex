@@ -36,9 +36,21 @@
 		Während der Pre-Match-Phase wird auf Players für die Match-Phase gewartet. 
 	\fn{0060}{Countdown}
 		Sind zwei oder mehr Players im Room, so fängt ein Timer an, von 60 Sekunden aus herunterzuzählen. Erreicht der Timer null Sekunden, so beginnt das Match. Während dieser Wartezeit können die Players abstimmen, ob sie das Match sofort starten wollen. Die Abstimmung dauert 10 Sekunden und kann nur mit einer Zweidrittelmehrheit der an der Abstimmung teilnehmenden Players entschieden werden.
-	\fn{0070}{Match-Phase}
-		Während der Match-Phase wird von den Players \vires\ gespielt, während Spectators das Spiel beobachten.
-	\fn{0080}{Rollen}
+	\fn{0070}{Map-Generation}
+		Am Ende der Pre-Match-Phase wird eine zufällige Spielkarte generiert. \\
+		Die generierte Spielkarte muss folgende Ansprüche erfüllen:
+		\begin{itemize}
+			\item Die Größe des Fields passt sich der Menge an Players an.
+			\item Cells werden gleichmäßig auf dem Field verteilt.
+			\item Jeder Player bekommt eine Start-Cell mit der gleichen Cell-Force, bei allen anderen Cells handelt es sich um Neutral-Cells.
+			\item Die Start-Cells werden gleichmäßig auf die Cells aufgeteilt, sodass zwischen den Start-Cells möglichst große Distanzen liegen.
+			\item Jede Cell erhält eine zufällige Cell-Force, welche die Größe der Cell vorgibt.
+			\item Die maximale Größe der Cell-Force ist limitiert.
+			\item Kleinere Cell-Forces sind wahrscheinlicher als größere Cell-Forces.
+		\end{itemize}
+	\fn{0080}{Match-Phase}
+		Während der Match-Phase wird von den Players \vires\, wie es unter \ref{sec:spielerklaerung} erklärt ist, gespielt, während Spectators das Spiel beobachten.
+	\fn{0090}{Rollen}
 		Tritt man einem Room bei, so ist man standardmäßig Player. Players können sich in einem Room dazu entscheiden, zu Spectators zu werden.
 		\begin{itemize}
 			\item Lief während der Entscheidung der Timer, existiert aber nach der Entscheidung nur noch ein Player, so wird der Timer abgebrochen.
@@ -46,10 +58,34 @@
 			\item War der Player aktuell in der Match-Phase aktiv, so wird eine Neutralization auf alle seine Manned Cells durchgeführt und seine Moving Vires entfernt.
 		\end{itemize}
 		Während der Pre-Match-Phase können Spectators zurück zu Players wechseln, insofern die Maximalanzahl an Players des Rooms nicht erreicht ist. Das Zurückwechseln is während der Match-Phase nicht möglich.
-	\fn{0090}{Maximalanzahl an Players}
+	\fn{0100}{Maximalanzahl an Players}
 		Jeder Room hat eine Maximalanzahl von 20 Players. Rooms können insgesamt auch mehr Nutzer enthalten, insofern die restlichen Nutzer alle Spectators sind.
-	\fn{0100}{Room-ID}
+	\fn{0110}{Room-ID}
 		Jeder Room hat eine einzigartige Room-ID, welche sich auch in der URL des Rooms wiederfinden lässt. Die Room-ID kann verwendet werden, um einem Room direkt beizutreten.
 \end{description}
 
 \subsection{Administratorfunktionen}
+\begin{description}
+	\fn{1010}{Backend-Logging}
+		Tritt ein Fehler im Backend der Applikation auf, so wird die Fehlermeldung in einem Log abgespeichert und versucht, den Ablauf fortzusetzen. Jede Server-Session erhält ihre eigenen Backend-Logfiles.
+	\fn{1020}{Frontend-Logging}
+		Tritt ein Fehler im Frontend der Applikation auf, so wird versucht, die Fehlermeldung an den Server zu schicken und den Ablauf fortzusetzen. Jede Server-Session erhält ihre eigenen Frontend-Logfiles.
+	\fn{1030}{Spielstatistiken}
+		Der Server sammelt Statistiken über das Spiel in einer Datenbank. Statistiken werden nach Matches und Players gesammelt. \\
+		Die folgenden Daten werden vom Server gesammelt:
+		\begin{itemize}
+			\item Dauer eines Matches
+			\item Namen der Players eines Matches
+			\item ...
+		\end{itemize}
+	\fn{1040}{Konfiguration}
+		Der Server kann während der Laufzeit über eine Konfigurationsdatei konfiguriert werden. \\
+		Die folgenden Dinge können konfiguriert werden:
+		\begin{itemize}
+			\item Maximalanzahl an Zeichen in einem Nutzernamen
+			\item Maximalanzahl an Players in einem Room
+			\item Dauer des Countdown-Timers
+			\item Konstanten der Map-Generation
+		\end{itemize}
+		Sollten sich während der Entwicklung weitere Faktoren finden, die sich zur Konfiguration eignen, so werden diese ebenfalls konfigurierbar sein.
+\end{description}
