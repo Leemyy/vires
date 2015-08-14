@@ -8,12 +8,10 @@
 \newcommand{\fn}[2]{\idit{F#1}{#2}}
 
 \subsection{Benutzerfunktionen}
-\subsubsection{Hauptseite}
-Betreten Nutzer die Hauptseite der Website, so können sie ihren Nutzernamen eingeben, dem Matchmaking beitreten oder direkt einem Match über die Room-ID des Matches beitreten.
-
 \begin{description}
 	\fn{0010}{Eingabe des Benutzernamens} 
 		Jeder Nutzer hat einen Nutzernamen, was es einfacher machen soll, Cells und Vires bestimmten Namen zuzuordnen.
+		Der Nutzername kann nach dem Betreten der Hauptseite eingegeben werden.
 		\begin{itemize}
 			\item Nutzernamen müssen nicht eindeutig sein: Mehrere Nutzer können den gleichen Namen verwenden. 
 			\item Jeder Nutzername ist auf 20 Zeichen limitiert.
@@ -32,21 +30,15 @@ Betreten Nutzer die Hauptseite der Website, so können sie ihren Nutzernamen ein
 		Lässt sich kein guter Room finden, so wird ein neuer Room erstellt, in den die Nutzer dann weitergeleitet werden.
 	\fn{0030}{Direktes Beitreten}
 		Mithilfe der Room-ID können Nutzer auf der Hauptseite einem bestimmten Room direkt beitreten. Ist die Maximalanzahl an Players des Rooms erreicht, so treten Nutzer dem Room automatisch als Spectators bei.
-\end{description}
-
-\subsubsection{Room}
-Rooms stellen die eigentlichen Spielinstanzen des Spiels dar.
-
-\begin{description}
-	\fn{0110}{Phases}
+	\fn{0040}{Phases}
 		Jeder Room befindet sich entweder in der Pre-Match-Phase oder in der Match-Phase. Wird die eine Phase beendet, so wird direkt die nächste Phase gestartet.
-	\fn{0120}{Pre-Match-Phase}
+	\fn{0050}{Pre-Match-Phase}
 		Während der Pre-Match-Phase wird auf Players für die Match-Phase gewartet. 
-	\fn{0130}{Countdown}
+	\fn{0060}{Countdown}
 		Sind zwei oder mehr Players im Room, so fängt ein Timer an, von 60 Sekunden aus herunterzuzählen. Erreicht der Timer null Sekunden, so beginnt das Match. Während dieser Wartezeit können die Players abstimmen, ob sie das Match sofort starten wollen. Die Abstimmung dauert 10 Sekunden und kann nur mit einer Zweidrittelmehrheit der an der Abstimmung teilnehmenden Players entschieden werden.
-	\fn{0140}{Match-Phase}
+	\fn{0070}{Match-Phase}
 		Während der Match-Phase wird von den Players \vires\ gespielt, während Spectators das Spiel beobachten.
-	\fn{0150}{Rollen}
+	\fn{0080}{Rollen}
 		Tritt man einem Room bei, so ist man standardmäßig Player. Players können sich in einem Room dazu entscheiden, zu Spectators zu werden.
 		\begin{itemize}
 			\item Lief während der Entscheidung der Timer, existiert aber nach der Entscheidung nur noch ein Player, so wird der Timer abgebrochen.
@@ -54,8 +46,10 @@ Rooms stellen die eigentlichen Spielinstanzen des Spiels dar.
 			\item War der Player aktuell in der Match-Phase aktiv, so wird eine Neutralization auf alle seine Manned Cells durchgeführt und seine Moving Vires entfernt.
 		\end{itemize}
 		Während der Pre-Match-Phase können Spectators zurück zu Players wechseln, insofern die Maximalanzahl an Players des Rooms nicht erreicht ist. Das Zurückwechseln is während der Match-Phase nicht möglich.
-	\fn{0160}{Maximalanzahl an Players}
+	\fn{0090}{Maximalanzahl an Players}
 		Jeder Room hat eine Maximalanzahl von 20 Players. Rooms können insgesamt auch mehr Nutzer enthalten, insofern die restlichen Nutzer alle Spectators sind.
-	\fn{0170}{Room-ID}
+	\fn{0100}{Room-ID}
 		Jeder Room hat eine einzigartige Room-ID, welche sich auch in der URL des Rooms wiederfinden lässt. Die Room-ID kann verwendet werden, um einem Room direkt beizutreten.
 \end{description}
+
+\subsection{Administratorfunktionen}
