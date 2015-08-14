@@ -62,6 +62,8 @@
 		Jeder Room hat eine Maximalanzahl von 20 Players. Rooms können insgesamt auch mehr Nutzer enthalten, insofern die restlichen Nutzer alle Spectators sind.
 	\fn{0110}{Room-ID}
 		Jeder Room hat eine einzigartige Room-ID, welche sich auch in der URL des Rooms wiederfinden lässt. Die Room-ID kann verwendet werden, um einem Room direkt beizutreten.
+	\fn{0120}{Schnittstellenversion}
+		Ändert sich die Client- oder die Serverversion des Kommunikationsprotokolls so wird der Nutzer über dies informiert. Der Client selbst wird so entkoppelt, dass außer dem Kommunikationsprotokoll keine Konflikte zwischen Versionen auftreten können. Treten serverseitig gravierende Veränderungen auf, welche nicht mit der Konfigurationsdatei umgesetzt werden können, so wird versucht, die Änderungen mithilfe von Hot-Patching einzufügen. Ist dies nicht möglich, so wird das System neu gestartet.
 \end{description}
 
 \subsection{Administratorfunktionen}
