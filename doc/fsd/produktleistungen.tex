@@ -1,1 +1,25 @@
 \section{Produktleistungen}
+
+% An \idit with an L as prefix.
+% The first argument is the ID 
+% of the effort and the
+% second argument is the name of
+% the effort.
+\newcommand{\lst}[2]{\idit{L#1}{#2}}
+
+\begin{description}
+	\lst{0010}{Fehlerhafte Eingaben}
+		Tätigen Nutzer eine fehlerhafte Eingabe, so werden sie über die Fehler in ihrer Eingabe informiert und können ihre fehlerhafte Eingabe modifizieren.
+	\lst{0020}{Konfiguration}
+		Die Basiskonfiguration des Systems muss anpassbar sein, ohne dass die Applikation neu gestartet werden muss.
+	\lst{0030}{Frontend- \& Backend-Abgrenzung}
+		Front- und Backend müssen komplett voneinander abgegrenzt sein. Die einzige Verbindung, welche Frontend und Backend teilen dürfen, ist das Kommunikationsprotokoll zwischen Client und Server.
+	\lst{0040}{Versionierung}
+		Ändert sich die Applikation, so dürfen aufgrund der Frontend- und Backend-Abgrenzung keine Versionskonflikte auftreten, während die Applikation genutzt wird. Ändert sich das Kommunikationsprotokoll zwischen Client und Server, so werden Nutzer über dies informiert und um einen Neustart gebeten.
+	\lst{0050}{Sicherheit}
+		Das Spiel muss komplett sicher sein. Players dürfen nicht mithilfe einer Modifikation ihres Clients dazu in der Lage sein, signifikante Vorteile gegenüber anderen Players zu erreichen.
+	\lst{0060}{Performanz}
+		Das Spiel selbst muss auf einem durchschnittlichen PC flüssig spielbar sein.
+	\lst{0070}{Fehlertoleranz}
+		Treten Fehler innerhalb der Applikation auf, so wird versucht, abhängig von der Situation des Fehlers, den aktuellen Ablauf insofern fortzusetzen, dass der Fehler keinen Einfluss auf den Ablauf der Applikation hat. Tritt beispielsweise ein Fehler innerhalb eines Verbindungsaufbaus auf, so wird die Verbindung zwar beendet, der Server stürzt aber nicht ab.
+\end{description}
