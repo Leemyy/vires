@@ -1,1 +1,21 @@
 \section{Testszenarien}
+
+% An \idit with a T as prefix.
+% The first argument is the ID 
+% of the test and the
+% second argument is the name of
+% the test.
+\newcommand{\test}[2]{\idit{T#1}{#2}}
+
+Alle nicht trivialen Algorithmen sollen automatisiert getestet werden, während alle trivialen Programmabläufe manuell getestet werden sollen. \\
+Die folgenden Funktionen werden als nicht trivial erachtet und sollen automatisiert getestet werden:
+
+\begin{description}
+	\test{0010}{Matchmaking}
+		Der Vorgang des Matchmakings soll mithilfe von automatisierten Tests getestet werden, um zu überprüfen, ob der Matchmaking-Algorithmus alle Bedingungen eines ``guten Rooms'' erfüllt.
+	\test{0020}{Map-Generation}
+		Der Vorgang der Map-Generation soll mithilfe von automatisierten Tests getestet werden, um zu überprüfen, ob die generierte Spielkarte alle Ansprüche erfüllt.
+\end{description}
+
+Alle anderen Funktionen werden manuell getestet. \\
+Sollten sich bei der Entwicklung weitere Funktionen als nicht trivial und gut testbar erweisen, so werden diese ebenfalls automatisiert getestet werden.
