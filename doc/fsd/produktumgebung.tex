@@ -1,28 +1,31 @@
 \section{Produktumgebung}
 
 \subsection{Software}
-	\begin{itemize}
-		\item Client:
-		\begin{itemize}
-			\item Webbrowser (Internet Explorer, Mozilla o.ä.)
-			\item JavaScript
-		\end{itemize}
-		\item Server: 
-		\begin{itemize}
-			\item Go Webserver
-		\end{itemize}
-	\end{itemize}
+\begin{description}
+	\crit{Client}{
+		\item Aktueller WebGL- und Websockets-fähiger Webbrowser (Internet Explorer 11, Firefox 4, o.ä.)
+		\item JavaScript
+	}
+	\crit{Server}{
+		\item Applikations-Binary (Webserver und Bibliotheken werden statisch gelinkt)
+	}
+\end{description}
 
 \subsection{Hardware}
-	\begin{itemize}
-		\item Client:
-		\begin{itemize}
-			\item Internetfähiger Rechner, die Internetverbindung muss dabei permanent bestehen um die Software nutzen zu können
-		\end{itemize}
-		\item Server: 
-		\begin{itemize}
-			\item Internetfähiger Server
-			\item Ausreichend Rechenleistung und RAM, da der Server viele Sessions auf einmal verarbeiten muss
-			\item Da keine permanenten Daten gespeichert werden, beschränkt sich der benötigte Speicherplatz auf die Größe der verwendeten Serversoftware
-		\end{itemize}
-	\end{itemize}
+\begin{description}
+	\crit{Client}{
+		\item Internetfähiger PC, die Internetverbindung muss dabei permanent bestehen um die Software nutzen zu können
+	}
+	\crit{Server}{
+		\item Internetfähiger Server
+		\item Ausreichend Rechenleistung und Arbeitsspeicher, da der Server viele Clients auf einmal verarbeiten können muss
+		\item Da keine permanenten Daten gespeichert werden, beschränkt sich der benötigte Speicherplatz auf die Größe der verwendeten Server-Software und die der vom Server erstellten Logs
+		\item Eine Architektur, welche von Go 1.5 unterstützt wird
+	}
+\end{description}
+
+\subsection{Orgware}
+\begin{itemize}
+	\item Gewährleistung der Server-Hardware-Anforderungen
+	\item Konfiguration der Applikation
+\end{itemize}
