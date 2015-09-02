@@ -22,5 +22,3 @@
 \contentsline {section}{\numberline {10}Testszenarien}{9}{section.10}
 \contentsline {section}{\numberline {11}Entwicklungsumgebung}{9}{section.11}
 \contentsline {section}{\numberline {12}Glossar}{10}{section.12}
-\contentsline {section}{\numberline {13}Meilensteine}{12}{section.13}
-\contentsline {section}{\numberline {14}Layoutdesign}{12}{section.14}
