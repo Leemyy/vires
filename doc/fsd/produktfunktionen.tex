@@ -53,18 +53,20 @@
 	\fn{0090}{Rollen}
 		Tritt man einem Room bei, so ist man standardmäßig Player. Players können sich in einem Room dazu entscheiden, zu Spectators zu werden.
 		\begin{itemize}
-			\item Lief während der Entscheidung der Timer, existiert aber nach der Entscheidung nur noch ein Player, so wird der Timer abgebrochen.
+			\item Lief während der Entscheidung der Countdown, existiert aber nach der Entscheidung nur noch ein Player, so wird der Countdown abgebrochen.
 			\item War der Player an einer Abstimmung beteiligt, so wird seine Stimme zurückgezogen. 
 			\item War der Player aktuell in der Match-Phase aktiv, so wird eine Neutralization auf alle seine Manned Cells durchgeführt und seine Moving Vires entfernt.
 		\end{itemize}
 		Während der Pre-Match-Phase können Spectators zurück zu Players wechseln, insofern die Maximalanzahl an Players des Rooms nicht erreicht ist. Das Zurückwechseln is während der Match-Phase nicht möglich.
-	\fn{0100}{Maximalanzahl an Players}
+	\fn{0100}{Zurückkehren zur Hauptseite}
+		Innerhalb eines Rooms können Nutzer zu jedem Zeitpunkt zur Hauptseite zurückkehren, um dort ihren Namen zu ändern oder einem anderen Room beizutreten.
+	\fn{0110}{Maximalanzahl an Players}
 		Jeder Room hat eine Maximalanzahl von 20 Players. Rooms können insgesamt auch mehr Nutzer enthalten, insofern die restlichen Nutzer alle Spectators sind.
-	\fn{0110}{Room-ID}
+	\fn{0120}{Room-ID}
 		Jeder Room hat eine einzigartige Room-ID, welche sich auch in der URL des Rooms wiederfinden lässt. Die Room-ID kann verwendet werden, um einem Room direkt beizutreten.
-	\fn{0120}{Schnittstellenversion}
+	\fn{0130}{Schnittstellenversion}
 		Ändert sich die Client- oder die Serverversion des Kommunikationsprotokolls so werden Nutzer über dies informiert. Der Client selbst wird so entkoppelt, dass außer dem Kommunikationsprotokoll keine Konflikte zwischen Versionen auftreten können. Treten serverseitig gravierende Veränderungen auf, welche nicht mit der Konfigurationsdatei umgesetzt werden können, so wird versucht, die Änderungen mithilfe von Hot-Patching einzufügen. Ist dies nicht möglich, so wird das System neu gestartet.
-	\fn{0130}{Timeout}
+	\fn{0140}{Timeout}
 		Sind Nutzer länger als 15 Minuten abwesend, so werden ihre Verbindungen geschlossen, sie zurück auf die Hauptseite geleitet und darauf hingewiesen, dass ihre Verbindung aufgrund der Abwesenheit geschlossen wurde.
 \end{description}
 
