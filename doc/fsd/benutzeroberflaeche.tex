@@ -1,1 +1,35 @@
 \section{Benutzeroberfläche}
+\tikzstyle{every node}=[draw=black,thick,anchor=west]
+\tikzstyle{duplicate}=[draw=black,fill=gray!20]
+\begin{tikzpicture}[%
+  grow via three points={one child at (0.5,-0.7) and
+  two children at (0.5,-0.7) and (0.5,-1.4)},
+  edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+  \node {Hauptseite}
+    child { node {Namenseingabe}		
+      child { node {Raumwahl}
+        child { node {Pre-Match}
+          child { node {Match}
+            child{ node [duplicate] {Pre-Match}}
+            child{ node [duplicate] {Raumwahl}}
+          }
+          child [missing] {}
+          child [missing] {}	
+          child{ node [duplicate] {Raumwahl}}
+        }
+        child [missing] {}
+        child [missing] {}
+        child [missing] {}
+        child [missing] {}
+        child{ node [duplicate] {Namenseingabe}}
+      }
+    }
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child{ node [duplicate] {Raumwahl}};
+\end{tikzpicture}
