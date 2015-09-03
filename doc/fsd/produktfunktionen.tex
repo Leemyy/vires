@@ -27,7 +27,8 @@
 			\item Die Maximalanzahl an Players in dem Room ist noch nicht erreicht.
 			\item Der Room hat die geringste Anzahl an Players aus allen Rooms, die in Frage kommen.
 		\end{itemize}
-		Lässt sich kein guter Room finden, so wird ein neuer Room erstellt, in den die Nutzer dann weitergeleitet werden.
+		Lässt sich kein guter Room finden, so wird ein neuer Room erstellt, in den die Nutzer dann weitergeleitet werden. \\
+		Während des Matchmakings können Nutzer das Matchmaking abbrechen und zur Hauptseite zurückkehren.
 	\fn{0030}{Direktes Beitreten}
 		Mithilfe der Room-ID können Nutzer auf der Hauptseite einem bestimmten Room direkt beitreten. Ist die Maximalanzahl an Players des Rooms erreicht oder treten sie dem Room während der Match-Phase bei, so betreten Nutzer den Room automatisch als Spectators.
 	\fn{0040}{Phases}
@@ -50,7 +51,9 @@
 		\end{itemize}
 	\fn{0080}{Match-Phase}
 		Während der Match-Phase wird von den Players \vires\, wie es unter \ref{sec:spielerklaerung} erklärt ist, gespielt, während Spectators das Spiel beobachten.
-	\fn{0090}{Rollen}
+	\fn{0090}{\vires}
+		Während der Match-Phase von \vires\ können Players Vires zwischen Cells bewegen, ihre Kamera bewegen und mithilfe der Kamera zoomen. Spectators können währenddessen nur ihre Kamera bewegen und mithilfe der Kamera zoomen.
+	\fn{0100}{Rollen}
 		Tritt man einem Room bei, so ist man standardmäßig Player. Players können sich in einem Room dazu entscheiden, zu Spectators zu werden.
 		\begin{itemize}
 			\item Lief während der Entscheidung der Countdown, existiert aber nach der Entscheidung nur noch ein Player, so wird der Countdown abgebrochen.
@@ -58,15 +61,15 @@
 			\item War der Player aktuell in der Match-Phase aktiv, so wird eine Neutralization auf alle seine Manned Cells durchgeführt und seine Moving Vires entfernt.
 		\end{itemize}
 		Während der Pre-Match-Phase können Spectators zurück zu Players wechseln, insofern die Maximalanzahl an Players des Rooms nicht erreicht ist. Das Zurückwechseln is während der Match-Phase nicht möglich.
-	\fn{0100}{Zurückkehren zur Hauptseite}
+	\fn{0110}{Zurückkehren zur Hauptseite}
 		Innerhalb eines Rooms können Nutzer zu jedem Zeitpunkt zur Hauptseite zurückkehren, um dort ihren Namen zu ändern oder einem anderen Room beizutreten.
-	\fn{0110}{Maximalanzahl an Players}
+	\fn{0120}{Maximalanzahl an Players}
 		Jeder Room hat eine Maximalanzahl von 20 Players. Rooms können insgesamt auch mehr Nutzer enthalten, insofern die restlichen Nutzer alle Spectators sind.
-	\fn{0120}{Room-ID}
+	\fn{0130}{Room-ID}
 		Jeder Room hat eine einzigartige Room-ID, welche sich auch in der URL des Rooms wiederfinden lässt. Die Room-ID kann verwendet werden, um einem Room direkt beizutreten.
-	\fn{0130}{Schnittstellenversion}
+	\fn{0140}{Schnittstellenversion}
 		Ändert sich die Client- oder die Serverversion des Kommunikationsprotokolls so werden Nutzer über dies informiert. Der Client selbst wird so entkoppelt, dass außer dem Kommunikationsprotokoll keine Konflikte zwischen Versionen auftreten können. Treten serverseitig gravierende Veränderungen auf, welche nicht mit der Konfigurationsdatei umgesetzt werden können, so wird versucht, die Änderungen mithilfe von Hot-Patching einzufügen. Ist dies nicht möglich, so wird das System neu gestartet.
-	\fn{0140}{Timeout}
+	\fn{0150}{Timeout}
 		Sind Nutzer länger als 15 Minuten abwesend, so werden ihre Verbindungen geschlossen, sie zurück auf die Hauptseite geleitet und darauf hingewiesen, dass ihre Verbindung aufgrund der Abwesenheit geschlossen wurde.
 \end{description}
 

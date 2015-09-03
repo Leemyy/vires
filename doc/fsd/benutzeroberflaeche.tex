@@ -4,12 +4,12 @@
 \tikzstyle{hidden}=[draw=gray!80,fill=gray!20]
 \tikzstyle{hiddendupe}=[draw=gray!80,dotted,fill=gray!20]
 
-Jeder Baum steht für ein Menü oder einen Zustand des Clients. 
+Jeder Baum steht für ein Menü oder einen Zustand des Clients, der dem Nutzer mithilfe einer grafischen Oberfläche sichtbar gemacht wird. Insgesamt enthält der Baum alle grafischen Elemente, bei denen der Nutzer eine Aktion ausführen kann.
 Alle Zweige des Baumes stehen für Funktionen, die in diesem Zustand aufgerufen werden können.
-Nach dem Aufrufen der Website befindet sich der Nutzer zunächst auf der Mainpage 
-und kann von dort aus den Rest der Seite Navigieren. \newline
+Nach dem Aufrufen der Website befindet sich der Nutzer zunächst auf der Hauptseite 
+und kann von dort aus den Rest der Seite navigieren. \\
 Ein gepunkteter Rand steht dabei für eine Weiterleitung in einen anderen Zustand.
-Eine graue hinterlegung zeigt an, das der Nutzer keine dierekte Kontrolle über die entsprechende Funktion hat.
+Eine graue Hinterlegung zeigt an, das der Nutzer keine direkte Kontrolle über die entsprechende Funktion hat.
 
 
 \vspace{0.5cm}
@@ -17,14 +17,15 @@ Eine graue hinterlegung zeigt an, das der Nutzer keine dierekte Kontrolle über 
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
-  \node {Mainpage}
-    child { node {Enter Name /F0010/}}
-    child{ node {Join Matchmaking /F0020/}
-      child { node [duplicate]{Looking for Room}}
+  \node {Hauptseite}
+    child { node {Nutzernameneingabe /F0010/}}
+    child{ node {Matchmaking beitreten /F0020/}
+      child { node [hiddendupe]{Matchmaking}}
     }
     child [missing]{}
-    child{ node {Join Room /F0030/}
-      child { node [duplicate]{Looking for Room}}
+    child{ node {Room direkt beitreten /F0030/}
+      child { node [hiddendupe]{Pre-Match-Phase}}
+      child { node [hiddendupe]{Match-Phase}}
     }
   ;
 \end{tikzpicture}
@@ -34,9 +35,11 @@ Eine graue hinterlegung zeigt an, das der Nutzer keine dierekte Kontrolle über 
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}] 
-  \node {Looking for Room}
-    child{ node [hiddendupe] {Pre-Match Phase}}
-    child{ node [hiddendupe] {Mainpage}}
+  \node {Matchmaking /F0020/}
+    child{ node [hiddendupe] {Pre-Match-Phase}}
+    child{ node {Abbrechen}
+      child { node [hiddendupe] {Hauptseite}}
+    }
   ;
 \end{tikzpicture}
 
@@ -45,17 +48,18 @@ Eine graue hinterlegung zeigt an, das der Nutzer keine dierekte Kontrolle über 
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
-  \node {Pre-Match Phase /F0050/}
-    child { node {Room ID /F0120/}}
-    child { node {Change Role /F0090/}}
-    child { node {Vote for Quickstart /F0060/}}
-    child { node [hidden] {Time up /F0060/}
-      child { node [hiddendupe] {Generating /F0070/}}
+  \node {Pre-Match-Phase /F0050/}
+    child { node {Rollenwechsel /F0100/}}
+    child { node {Sofortstart-Abstimmung /F0060/}
+      child { node [hiddendupe] {Map-Generation}}
     }
     child [missing] {}
+    child { node [hidden] {Countdown /F0060/}
+      child { node [hiddendupe] {Map-Generation}}
+    }
     child [missing] {}
-    child { node {Return to Mainpage /F0100/}
-      child { node [duplicate] {Mainpage}}
+    child { node {Zurückkehren zur Hauptseite /F0110/}
+      child { node [hiddendupe] {Hauptseite}}
     }
   ;
 \end{tikzpicture}
@@ -65,8 +69,8 @@ Eine graue hinterlegung zeigt an, das der Nutzer keine dierekte Kontrolle über 
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}] 
-  \node {Generating}
-    child{ node [hiddendupe] {Match Phase}}
+  \node {Map-Generation /F0070/}
+    child{ node [hiddendupe] {Match-Phase}}
   ;
 \end{tikzpicture}
 
@@ -75,14 +79,28 @@ Eine graue hinterlegung zeigt an, das der Nutzer keine dierekte Kontrolle über 
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
-  \node {Match Phase /F0080/}
-    child { node {Spectate /F0090/}}
-    child { node {Return to Mainpage /F0100/}
-      child { node [duplicate] {Mainpage}}
+  \node {Match-Phase /F0080/}
+    child { node {Zum Zuschauer wechseln /F0100/}}
+    child { node {Zurückkehren zur Hauptseite /F0110/}
+      child { node [hiddendupe] {Hauptseite}}
     }
     child [missing] {}
-    child { node [hidden] {End of Match}
-      child { node [hiddendupe] {Pre-Match Phase}}
+    child { node {\vires\ spielen /F0090/}
+      child { node {Vires zwischen Cells bewegen}}
+      child { node {Kamera bewegen}}
+      child { node {Kamera zoomen}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child { node {Zuschauen /F0090/}
+      child { node {Kamera bewegen}}
+      child { node {Kamera zoomen}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child { node [hidden] {Match-Ende}
+      child { node [hiddendupe] {Pre-Match-Phase}}
     }
   ;
 \end{tikzpicture}
