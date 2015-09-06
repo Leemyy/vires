@@ -1,6 +1,7 @@
 \section{Spielerklärung}
 \label{sec:spielerklaerung}
 
+\subsection{Das Spiel}
 Bei ``\vires'' handelt es sich insgesamt um ein einfaches RTS-Spiel. 
 Das Spiel wird in einer Draufsicht gespielt.
 
@@ -30,3 +31,6 @@ Trifft ein Movement aber auf seine Target-Cell und gehört diese einem anderen P
 Überschreitet der Übergang von Moving Vires in Stationed Vires die Capacity, so gehen die überbleibenden Moving Vires verloren.
 
 Insgesamt gewinnt ein Player das Match, wenn er/sie als letzter noch Cells auf dem Spielfeld besitzt oder wenn er/sie nach 15 Minuten in der Summe die größte Cell-Force besitzt. Haben nach 15 Minuten mehrere Players insgesamt eine gleich starke Cell-Force, so gewinnt der Player, welcher die meisten Vires besitzt. Sind alle diese Werte gleich, so entsteht ein unentschieden.
+
+\subsection{Steuerung}
+\vires\ wird mit der Maus gespielt. Hält man die rechte Maustaste, so kann man die Kamera mit der Maus bewegen. Das Auf- und Abscrollen mit dem Mausrad sorgt dafür, dass die Kamera näher an das Feld heranzoomt oder davon wegzoomt. Das Klicken mit der linken Maustaste auf eine Cell, die dem Player gehört, welcher die Aktion ausführt, legt die Cell als Source-Cell fest. Hält man beim Auswählen die linke Maustaste gedrückt, so können auch mehrere Cells, über die sich die Maus während dem Halten der Maustaste bewegt, als Source-Cells festgelegt werden. Nachdem die Auswahl abgeschlossen ist, kann auf eine andere Cell mit der linken Maustaste geklickt werden, um ein Movement von den ausgewählten Source-Cells zu der Target-Cell zu starten. Klickt man auf ein freies Feld, an dem sich keine Cell befindet, so wird die Auswahl abgebrochen.

@@ -9,7 +9,7 @@ Alle Zweige des Baumes stehen für Funktionen, die in diesem Zustand aufgerufen 
 Nach dem Aufrufen der Website befindet sich der Nutzer zunächst auf der Hauptseite 
 und kann von dort aus den Rest der Seite navigieren. \\
 Ein gepunkteter Rand steht dabei für eine Weiterleitung in einen anderen Zustand.
-Eine graue Hinterlegung zeigt an, das der Nutzer keine direkte Kontrolle über die entsprechende Funktion hat.
+Eine graue Hinterlegung zeigt an, dass der Nutzer keine direkte Kontrolle über die entsprechende Funktion hat.
 
 
 \vspace{0.5cm}
@@ -49,8 +49,8 @@ Eine graue Hinterlegung zeigt an, das der Nutzer keine direkte Kontrolle über d
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
   \node {Pre-Match-Phase /F0050/}
-    child { node {Rollenwechsel /F0100/}}
-    child { node {Sofortstart-Abstimmung /F0060/}
+    child { node {Rollenwechsel /F0110/}}
+    child { node {Quickstart-Vote /F0070/}
       child { node [hiddendupe] {Map-Generation}}
     }
     child [missing] {}
@@ -58,7 +58,7 @@ Eine graue Hinterlegung zeigt an, das der Nutzer keine direkte Kontrolle über d
       child { node [hiddendupe] {Map-Generation}}
     }
     child [missing] {}
-    child { node {Zurückkehren zur Hauptseite /F0110/}
+    child { node {Zurückkehren zur Hauptseite /F0120/}
       child { node [hiddendupe] {Hauptseite}}
     }
   ;
@@ -69,7 +69,7 @@ Eine graue Hinterlegung zeigt an, das der Nutzer keine direkte Kontrolle über d
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}] 
-  \node {Map-Generation /F0070/}
+  \node {Map-Generation /F0080/}
     child{ node [hiddendupe] {Match-Phase}}
   ;
 \end{tikzpicture}
@@ -79,13 +79,13 @@ Eine graue Hinterlegung zeigt an, das der Nutzer keine direkte Kontrolle über d
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
-  \node {Match-Phase /F0080/}
-    child { node {Zum Zuschauer wechseln /F0100/}}
-    child { node {Zurückkehren zur Hauptseite /F0110/}
+  \node {Match-Phase /F0090/}
+    child { node {Zum Zuschauer wechseln /F0110/}}
+    child { node {Zurückkehren zur Hauptseite /F0120/}
       child { node [hiddendupe] {Hauptseite}}
     }
     child [missing] {}
-    child { node {\vires\ spielen /F0090/}
+    child { node {\vires\ spielen /F0100/}
       child { node {Vires zwischen Cells bewegen}}
       child { node {Kamera bewegen}}
       child { node {Kamera zoomen}}
@@ -93,7 +93,7 @@ Eine graue Hinterlegung zeigt an, das der Nutzer keine direkte Kontrolle über d
     child [missing] {}
     child [missing] {}
     child [missing] {}
-    child { node {Zuschauen /F0090/}
+    child { node {Zuschauen /F0100/}
       child { node {Kamera bewegen}}
       child { node {Kamera zoomen}}
     }

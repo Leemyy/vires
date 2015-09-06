@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Arch Linux) (preloaded format=pdflatex 2015.8.28)  3 SEP 2015 22:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Arch Linux) (preloaded format=pdflatex 2015.8.28)  6 SEP 2015 17:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -760,9 +760,9 @@ Package babel Info: Redefining german shorthand "~
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./vires.toc
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 4.
+(Font)              <7> on input line 3.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 4.
+(Font)              <5> on input line 3.
 )
 \tf@toc=\write5
 \openout5 = `vires.toc'.
@@ -810,23 +810,36 @@ Package babel Info: Redefining german shorthand "|
 Package babel Info: Redefining german shorthand "~
 (babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 31.
+(babel)             in language append on input line 4.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 31.
+(babel)             in language append on input line 4.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 31.
+(babel)             in language append on input line 4.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 31.
+(babel)             in language append on input line 32.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 31.
+(babel)             in language append on input line 32.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 31.
+(babel)             in language append on input line 32.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 32.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 32.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 32.
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.31 
-      [1]) (./zielbestimmung.tex
+l.32 
+      [1]
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 35.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 35.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 35.
+) (./zielbestimmung.tex
 Package babel Info: Redefining german shorthand "f
 (babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "|
@@ -847,24 +860,24 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 12.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 28.
+(babel)             in language append on input line 17.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 28.
+(babel)             in language append on input line 17.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 28.
+(babel)             in language append on input line 17.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 33.
+(babel)             in language append on input line 17.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 33.
+(babel)             in language append on input line 17.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 33.
-Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 33.
-Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 33.
-Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 33.
+(babel)             in language append on input line 17.
  [2]
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 28.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 28.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 28.
 Package babel Info: Redefining german shorthand "f
 (babel)             in language append on input line 39.
 Package babel Info: Redefining german shorthand "|
@@ -891,26 +904,26 @@ Package babel Info: Redefining german shorthand "|
 Package babel Info: Redefining german shorthand "~
 (babel)             in language append on input line 6.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 12.
+(babel)             in language append on input line 9.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 12.
+(babel)             in language append on input line 9.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 12.
-)
-(./produktumgebung.tex
+(babel)             in language append on input line 9.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 1.
+(babel)             in language append on input line 9.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 1.
+(babel)             in language append on input line 9.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 1.
+(babel)             in language append on input line 9.
+
+[3]
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 1.
+(babel)             in language append on input line 12.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 1.
+(babel)             in language append on input line 12.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 1.
- [3]
+(babel)             in language append on input line 12.
+) (./produktumgebung.tex
 Package babel Info: Redefining german shorthand "f
 (babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "|
@@ -929,6 +942,19 @@ Package babel Info: Redefining german shorthand "|
 (babel)             in language append on input line 14.
 Package babel Info: Redefining german shorthand "~
 (babel)             in language append on input line 14.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 24.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 24.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 24.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 24.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 24.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 24.
+ [4]
 Package babel Info: Redefining german shorthand "f
 (babel)             in language append on input line 27.
 Package babel Info: Redefining german shorthand "|
@@ -949,59 +975,43 @@ Package babel Info: Redefining german shorthand "|
 Package babel Info: Redefining german shorthand "~
 (babel)             in language append on input line 10.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 17.
+(babel)             in language append on input line 38.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 17.
+(babel)             in language append on input line 38.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 17.
+(babel)             in language append on input line 38.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 17.
+(babel)             in language append on input line 38.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 17.
+(babel)             in language append on input line 38.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 17.
- [4]
-Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 43.
-Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 43.
-Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 43.
-Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 43.
-Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 43.
-Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 43.
+(babel)             in language append on input line 38.
  [5]
+Overfull \hbox (1.6623pt too wide) in paragraph at lines 40--42
+[]\T1/cmr/m/it/10 Quickstart:  \T1/cmr/m/n/10 Wäh-rend des Count-downs kön-nen 
+Players ein Quickstart-
+ []
+
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 72.
+(babel)             in language append on input line 68.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 72.
+(babel)             in language append on input line 68.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 72.
+(babel)             in language append on input line 68.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 72.
+(babel)             in language append on input line 68.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 72.
+(babel)             in language append on input line 68.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 72.
- [6]
+(babel)             in language append on input line 68.
+[6]
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 76.
+(babel)             in language append on input line 78.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 76.
+(babel)             in language append on input line 78.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 76.
-)
-(./produktdaten.tex
-Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 1.
-Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 1.
-Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 1.
-) (./produktleistungen.tex
+(babel)             in language append on input line 78.
+) (./produktdaten.tex
 Package babel Info: Redefining german shorthand "f
 (babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "|
@@ -1009,18 +1019,25 @@ Package babel Info: Redefining german shorthand "|
 Package babel Info: Redefining german shorthand "~
 (babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 13.
+(babel)             in language append on input line 3.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 13.
+(babel)             in language append on input line 3.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 13.
+(babel)             in language append on input line 3.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 13.
+(babel)             in language append on input line 3.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 13.
+(babel)             in language append on input line 3.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 13.
- [7]
+(babel)             in language append on input line 3.
+ [7]) (./produktleistungen.tex
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 1.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 1.
+
 Overfull \hbox (4.58743pt too wide) in paragraph at lines 17--19
 \T1/cmr/m/n/10 Frontend- und Backend-Abgrenzung kei-ne Ver-si-ons-kon-flik-te a
 uf-tre-ten, wäh-
@@ -1034,17 +1051,17 @@ Package babel Info: Redefining german shorthand "|
 Package babel Info: Redefining german shorthand "~
 (babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 44.
+(babel)             in language append on input line 13.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 44.
+(babel)             in language append on input line 13.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 44.
+(babel)             in language append on input line 13.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 44.
+(babel)             in language append on input line 13.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 44.
+(babel)             in language append on input line 13.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 44.
+(babel)             in language append on input line 13.
  [8]) (./qualitaetszielbestimmung.tex
 Package babel Info: Redefining german shorthand "f
 (babel)             in language append on input line 1.
@@ -1140,36 +1157,124 @@ Package babel Info: Redefining german shorthand "|
 Package babel Info: Redefining german shorthand "~
 (babel)             in language append on input line 28.
  [12])
+(./layoutdesign.tex
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 1.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 4.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 4.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 4.
+ <mainpage.png, id=246, 803.0pt x 602.25pt>
+File: mainpage.png Graphic file (type png)
+
+<use mainpage.png>
+Package pdftex.def Info: mainpage.png used on input line 7.
+(pdftex.def)             Requested size: 276.00105pt x 207.00455pt.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 10.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 10.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 10.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 10.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 10.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 10.
  [13]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 58.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 58.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 11.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 11.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 11.
+ <pre-match-phase.png, id=252, 803.0pt x 602.25pt>
+File: pre-match-phase.png Graphic file (type png)
+
+<use pre-match-phase.png>
+Package pdftex.def Info: pre-match-phase.png used on input line 14.
+(pdftex.def)             Requested size: 276.00105pt x 207.00455pt.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 18.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 18.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 18.
+ <match-phase.png, id=253, 803.0pt x 602.25pt>
+File: match-phase.png Graphic file (type png)
+
+<use match-phase.png>
+Package pdftex.def Info: match-phase.png used on input line 21.
+(pdftex.def)             Requested size: 276.00105pt x 207.00455pt.
+)
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 58.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 58.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 58.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 58.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 58.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 58.
+ [14pdfTeX warning (ext4): destination with the same identifier (name{figure.1}
+) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.58 
+     pdfTeX warning (ext4): destination with the same identifier (name{figure.2
+}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.58 
+      <./mainpage.png> <./pre-match-phase.png>]
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 59.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 59.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 59.
+Package babel Info: Redefining german shorthand "f
+(babel)             in language append on input line 59.
+Package babel Info: Redefining german shorthand "|
+(babel)             in language append on input line 59.
+Package babel Info: Redefining german shorthand "~
+(babel)             in language append on input line 59.
+ [15pdfTeX warning (ext4): destination with the same identifier (name{figure.3}
+) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.59 \end{document}
+                    <./match-phase.png>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 59.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 59.
  (./vires.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 58.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 58.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 59.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 59.
 Package rerunfilecheck Info: File `vires.out' has not changed.
-(rerunfilecheck)             Checksum: B4EC3F8E5302B96E571D62A33212F050;1329.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 58.
+(rerunfilecheck)             Checksum: FE6A592C4FB681673937FDC44F39E03A;1688.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 59.
  ) 
 Here is how much of TeX's memory you used:
- 16105 strings out of 493109
- 299163 string characters out of 6140856
- 365689 words of memory out of 5000000
- 19220 multiletter control sequences out of 15000+600000
+ 16144 strings out of 493109
+ 299752 string characters out of 6140856
+ 366028 words of memory out of 5000000
+ 19241 multiletter control sequences out of 15000+600000
  15398 words of font info for 35 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,10n,54p,551b,1005s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,10n,54p,908b,1005s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/font
 s/type1/public/cm-super/sfbi1000.pfb></usr/share/texmf-dist/fonts/type1/public/
@@ -1180,10 +1285,10 @@ fonts/type1/public/cm-super/sfrm0700.pfb></usr/share/texmf-dist/fonts/type1/pub
 lic/cm-super/sfrm1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sf
 rm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></us
 r/share/texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb>
-Output written on vires.pdf (16 pages, 223775 bytes).
+Output written on vires.pdf (18 pages, 305108 bytes).
 PDF statistics:
- 270 PDF objects out of 1000 (max. 8388607)
- 238 compressed objects within 3 object streams
- 38 named destinations out of 1000 (max. 500000)
- 197 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 320 PDF objects out of 1000 (max. 8388607)
+ 280 compressed objects within 3 object streams
+ 49 named destinations out of 1000 (max. 500000)
+ 260 words of extra memory for PDF output out of 10000 (max. 10000000)
 
