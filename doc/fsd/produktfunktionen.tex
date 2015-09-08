@@ -30,9 +30,9 @@
 		Lässt sich kein guter Room finden, so wird ein neuer Room erstellt, in den die Nutzer dann weitergeleitet werden. \\
 		Während des Matchmakings können Nutzer das Matchmaking abbrechen und zur Hauptseite zurückkehren.
 	\fn{0030}{Direktes Beitreten}
-		Mithilfe der Room-ID können Nutzer auf der Hauptseite einem bestimmten Room direkt beitreten. Ist die Maximalanzahl an Players des Rooms erreicht oder treten sie dem Room während der Match-Phase bei, so betreten Nutzer den Room automatisch als Spectators.
+		Mithilfe der Room-ID können Nutzer auf der Hauptseite einem bestimmten Room direkt beitreten. Ist die Maximalanzahl an Players des Rooms erreicht oder treten sie dem Room während der Match-Phase bei, so betreten Nutzer den Room automatisch als Spectators. Existiert der Room noch nicht und ist die Room-ID gültig, so wird ein neuer Room erstellt.
 	\fn{0040}{Phases}
-		Jeder Room befindet sich entweder in der Pre-Match-Phase oder in der Match-Phase. Wird die eine Phase beendet, so wird direkt die nächste Phase gestartet.
+		Jeder Room befindet sich entweder in der Pre-Match-Phase oder in der Match-Phase. Wird die eine Phase beendet, so wird direkt die nächste Phase gestartet. Wird ein neuer Room erstellt, so befindet sich dieser Room zuerst in der Pre-Match-Phase.
 	\fn{0050}{Pre-Match-Phase}
 		Während der Pre-Match-Phase wird auf Players für die Match-Phase gewartet. 
 	\fn{0060}{Countdown}
