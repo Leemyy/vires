@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Arch Linux) (preloaded format=pdflatex 2015.8.28)  6 SEP 2015 17:39
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Arch Linux) (preloaded format=pdflatex 2015.8.28)  14 SEP 2015 10:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -768,40 +768,40 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \openout5 = `vires.toc'.
 
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 23.
+(babel)             in language append on input line 25.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 23.
+(babel)             in language append on input line 25.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 23.
+(babel)             in language append on input line 25.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 23.
+(babel)             in language append on input line 25.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 23.
+(babel)             in language append on input line 25.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 23.
+(babel)             in language append on input line 25.
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.23 \begin{abstract}
+l.25 \begin{abstract}
                       [1]
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 25.
+(babel)             in language append on input line 27.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 25.
+(babel)             in language append on input line 27.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 25.
+(babel)             in language append on input line 27.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 25.
+(babel)             in language append on input line 27.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 25.
+(babel)             in language append on input line 27.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 25.
+(babel)             in language append on input line 27.
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.25 \end{abstract}
+l.27 \end{abstract}
                     [1] (./spielerklaerung.tex
 Package babel Info: Redefining german shorthand "f
 (babel)             in language append on input line 1.
@@ -1215,57 +1215,57 @@ Package pdftex.def Info: match-phase.png used on input line 21.
 (pdftex.def)             Requested size: 276.00105pt x 207.00455pt.
 )
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 60.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 60.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 60.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 60.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 60.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 58.
+(babel)             in language append on input line 60.
  [14pdfTeX warning (ext4): destination with the same identifier (name{figure.1}
 ) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.58 
+l.60 
      pdfTeX warning (ext4): destination with the same identifier (name{figure.2
 }) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.58 
+l.60 
       <./mainpage.png> <./pre-match-phase.png>]
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 59.
+(babel)             in language append on input line 61.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 59.
+(babel)             in language append on input line 61.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 59.
+(babel)             in language append on input line 61.
 Package babel Info: Redefining german shorthand "f
-(babel)             in language append on input line 59.
+(babel)             in language append on input line 61.
 Package babel Info: Redefining german shorthand "|
-(babel)             in language append on input line 59.
+(babel)             in language append on input line 61.
 Package babel Info: Redefining german shorthand "~
-(babel)             in language append on input line 59.
+(babel)             in language append on input line 61.
  [15pdfTeX warning (ext4): destination with the same identifier (name{figure.3}
 ) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.59 \end{document}
+l.61 \end{document}
                     <./match-phase.png>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 59.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 59.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 61.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 61.
  (./vires.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 59.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 59.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 61.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 61.
 Package rerunfilecheck Info: File `vires.out' has not changed.
 (rerunfilecheck)             Checksum: FE6A592C4FB681673937FDC44F39E03A;1688.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 59.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 61.
  ) 
 Here is how much of TeX's memory you used:
  16144 strings out of 493109
@@ -1285,7 +1285,7 @@ fonts/type1/public/cm-super/sfrm0700.pfb></usr/share/texmf-dist/fonts/type1/pub
 lic/cm-super/sfrm1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sf
 rm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></us
 r/share/texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb>
-Output written on vires.pdf (18 pages, 305108 bytes).
+Output written on vires.pdf (18 pages, 305033 bytes).
 PDF statistics:
  320 PDF objects out of 1000 (max. 8388607)
  280 compressed objects within 3 object streams
