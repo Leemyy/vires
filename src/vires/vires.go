@@ -2,26 +2,43 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/mhuisi/flog/weblog"
 )
 
-const staticDir = "./static/"
+const (
+	roomIDPattern = "{roomid:[0-9]+}"
+	staticDir     = "./static/"
+	tmplDir       = "./tmpl/"
+)
 
-func onMainPage(res http.ResponseWriter, req *http.Request) {
+var (
+	upgrader = websocket.Upgrader{}
+	roomTmpl = template.Must(template.ParseFiles(tmplDir + "room.html"))
+)
+
+func onMainPage(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Connected to main page")
 	// Possibly cache files?
-	http.ServeFile(res, req, staticDir+"main.html")
+	http.ServeFile(w, req, staticDir+"main.html")
 }
 
-func onRoom(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("Connected to room id:", mux.Vars(req)["roomid"])
-	http.ServeFile(res, req, staticDir+"room.html")
+func onRoom(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["roomid"]
+	fmt.Println("Connected to room id:", id)
+	roomTmpl.Execute(w, id)
 }
 
-func connectToRoom(res http.ResponseWriter, req *http.Request) {
+func connectToRoom(w http.ResponseWriter, r *http.Request) {
+	_, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		weblog.Backend().Printf("Cannot open websocket connection: %s\n", err)
+	}
+	// read json
 
 }
 
@@ -31,7 +48,6 @@ func main() {
 	// Main page
 	r.HandleFunc("/", onMainPage).Methods("GET")
 	// Rooms
-	roomIDPattern := "{roomid:[0-9]+}"
 	r.HandleFunc(fmt.Sprintf("/%s", roomIDPattern), onRoom).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/c", roomIDPattern), connectToRoom)
 	http.Handle("/", r)
