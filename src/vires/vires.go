@@ -34,10 +34,18 @@ func onRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func connectToRoom(w http.ResponseWriter, r *http.Request) {
-	_, err := upgrader.Upgrade(w, r, nil)
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		weblog.Backend().Printf("Cannot open websocket connection: %s\n", err)
+		return
 	}
+	msgType, msg, err := ws.ReadMessage()
+	if err != nil {
+		weblog.Backend().Printf("Cannot read websocket message: %s", err)
+		return
+	}
+	fmt.Println(string(msg))
+	ws.WriteMessage(msgType, []byte("Hello from the server!"))
 	// read json
 
 }

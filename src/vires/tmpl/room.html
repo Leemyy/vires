@@ -2,8 +2,18 @@
 <html>
 <head>
  	<title>Hi there</title>
+ 	<script>
+ 		var s = new WebSocket("ws://localhost/{{ . }}/c");
+ 		s.onopen = function() {
+ 			s.send("Hello from room {{ . }}!");
+ 		};
+ 		s.onmessage = function(m) {
+ 			document.getElementById("res").innerHTML += m.data;
+ 		};
+ 	</script>
 </head>
 <body>
 	This is room {{ . }}
+	<div id="res"></div>
 </body>
 </html>
