@@ -5,7 +5,7 @@
  	<script>
  		var s = new WebSocket("ws://localhost/{{ . }}/c");
  		s.onopen = function() {
- 			s.send("Hello from room {{ . }}!");
+ 			s.send("{\"Msg\": \"Hello from room {{ . }}!\"}");
  		};
  		s.onmessage = function(m) {
  			document.getElementById("res").innerHTML += m.data;

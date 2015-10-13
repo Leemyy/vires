@@ -21,6 +21,10 @@ var (
 	roomTmpl = template.Must(template.ParseFiles(tmplDir + "room.html"))
 )
 
+type Foo struct {
+	Msg string
+}
+
 func onMainPage(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Connected to main page")
 	// Possibly cache files?
@@ -39,13 +43,18 @@ func connectToRoom(w http.ResponseWriter, r *http.Request) {
 		weblog.Backend().Printf("Cannot open websocket connection: %s\n", err)
 		return
 	}
-	msgType, msg, err := ws.ReadMessage()
+	f := &Foo{}
+	err = ws.ReadJSON(f)
 	if err != nil {
 		weblog.Backend().Printf("Cannot read websocket message: %s", err)
 		return
 	}
-	fmt.Println(string(msg))
-	ws.WriteMessage(msgType, []byte("Hello from the server!"))
+	fmt.Println(f.Msg)
+	f2 := &Foo{Msg: "Hello from the server!"}
+	err = ws.WriteJSON(f2)
+	if err != nil {
+		weblog.Backend().Printf("Cannot write websocket message: %s", err)
+	}
 	// read json
 
 }
@@ -60,7 +69,6 @@ func main() {
 	r.HandleFunc(fmt.Sprintf("/%s/c", roomIDPattern), connectToRoom)
 	http.Handle("/", r)
 	err := http.ListenAndServe(":80", nil)
-
 	if err != nil {
 		weblog.Backend().Fatalf("Cannot start webserver: %s\n", err)
 	}
