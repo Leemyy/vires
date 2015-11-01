@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/mhuisi/flog/weblog"
+	"github.com/mhuisi/vires/src/room"
 )
 
 const (
@@ -20,10 +21,6 @@ var (
 	upgrader = websocket.Upgrader{}
 	roomTmpl = template.Must(template.ParseFiles(tmplDir + "room.html"))
 )
-
-type Foo struct {
-	Msg string
-}
 
 func onMainPage(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Connected to main page")
@@ -40,23 +37,12 @@ func onRoom(w http.ResponseWriter, r *http.Request) {
 func connectToRoom(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		weblog.Backend().Printf("Cannot open websocket connection: %s\n", err)
-		return
+		// if we cannot open a socket then
+		// something is wrong with the server
+		weblog.Backend().Fatalf("Cannot open socket: %s\n", err)
 	}
-	f := &Foo{}
-	err = ws.ReadJSON(f)
-	if err != nil {
-		weblog.Backend().Printf("Cannot read websocket message: %s", err)
-		return
-	}
-	fmt.Println(f.Msg)
-	f2 := &Foo{Msg: "Hello from the server!"}
-	err = ws.WriteJSON(f2)
-	if err != nil {
-		weblog.Backend().Printf("Cannot write websocket message: %s", err)
-	}
-	// read json
-
+	ro := room.NewRoom()
+	ro.Connect(ws)
 }
 
 func main() {
