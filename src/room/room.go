@@ -2,28 +2,15 @@ package room
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/gorilla/websocket"
-	"github.com/mhuisi/flog/weblog"
 )
 
 const (
-	version   = "0.1"
-	txBufSize = 1024
+	Version = "0.1"
 )
-
-type RX struct {
-	Type    string
-	Version string
-	Data    json.RawMessage
-}
-
-type TX struct {
-	Type    string
-	Version string
-	Data    interface{}
-}
 
 type Room struct {
 	users chan []*User
@@ -35,52 +22,17 @@ func NewRoom() *Room {
 	return &Room{users}
 }
 
-type User struct {
-	conn *websocket.Conn
-	quit chan struct{}
-	tx   chan TX
-}
-
-func NewUser(c *websocket.Conn) *User {
-	return &User{
-		c,
-		make(chan struct{}),
-		make(chan TX, txBufSize),
-	}
-}
-
-func transmitPackets(u *User) {
+func (r *Room) handlePackets(u *User) {
 	go func() {
-		for packet := range u.tx {
-			select {
-			case <-u.quit:
-				return
-			default:
-				err := u.conn.WriteJSON(packet)
-				if err != nil {
-					// if we cannot send then something is
-					// wrong with the server
-					weblog.Backend().Fatalf("Cannot send over socket: %s\n", err)
-				}
-			}
-		}
-	}()
-}
-
-func receivePackets(u *User, r *Room) {
-	go func() {
+		rx := u.Receive()
 		for {
 			select {
-			case <-u.quit:
+			case <-u.Quit:
 				return
-			default:
-				p := RX{}
-				err := u.conn.ReadJSON(&p)
-				if err != nil {
-					// handle read err
-				}
-				if p.Version != version {
-					// handle version err
+			case p := <-rx:
+				if p.Version != Version {
+					u.SendFatalf("Invalid protocol version.")
+					return
 				}
 				unmarshal := func(v interface{}) error {
 					return json.Unmarshal(p.Data, v)
@@ -96,7 +48,7 @@ func receivePackets(u *User, r *Room) {
 					}
 					fmt.Println(f)
 				default:
-					// handle unknown packet type err
+					u.SendFatalf("Unknown package type.")
 				}
 			}
 		}
@@ -104,11 +56,22 @@ func receivePackets(u *User, r *Room) {
 }
 
 func (r *Room) Connect(c *websocket.Conn) {
-	u := NewUser(c)
-	transmitPackets(u)
+	u := ConnectUser(c, Version)
 	us := <-r.users
 	us = append(us, u)
 	r.users <- us
-	receivePackets(u, r)
-	u.tx <- TX{"Foo", version, "Hello, World"}
+	r.handlePackets(u)
+	u.Send("Foo", "Hello, World")
+}
+
+func (r *Room) Disconnect(c *websocket.Conn) error {
+	users := <-r.users
+	for i, u := range users {
+		if u.Conn == c {
+			u.Disconnect()
+			users = append(users[:i], users[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("Connection to disconnect not found.")
 }

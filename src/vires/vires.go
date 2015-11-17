@@ -37,9 +37,8 @@ func onRoom(w http.ResponseWriter, r *http.Request) {
 func connectToRoom(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		// if we cannot open a socket then
-		// something is wrong with the server
-		weblog.Backend().Fatalf("Cannot open socket: %s\n", err)
+		// Updade already transmits an http error on error
+		return
 	}
 	ro := room.NewRoom()
 	ro.Connect(ws)
