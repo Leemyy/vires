@@ -16,34 +16,15 @@ type Match struct {
 type Field struct {
 	Cells            []*Cell
 	Movements        chan []*Movement
+	MovementID       chan int
 	Collisions       chan CollisionHeap
 	ReplaceFirstColl chan struct{}
 	Size             Vec
 	Quit             chan struct{}
+	CollisionUpdates chan *Collision
 }
 
-func winner(a *Movement, b *Movement) (*Movement, *Movement) {
-	switch {
-	case a.Moving > b.Moving:
-		return a, b
-	case a.Moving < b.Moving:
-		return b, a
-	}
-	return a, b
-}
-
-func (f *Field) removeMovement(m *Movement) {
-	// remove movement
-	movements := <-f.Movements
-	for i, mv := range movements {
-		if mv == m {
-			movements = append(movements[:i], movements[i+1:]...)
-			break
-		}
-	}
-	f.Movements <- movements
-
-	// remove collisions
+func (f *Field) removeCollisions(m *Movement) {
 	cols := <-f.Collisions
 	toRemove := []int{}
 	for i, c := range cols {
@@ -57,17 +38,57 @@ func (f *Field) removeMovement(m *Movement) {
 	f.Collisions <- cols
 }
 
-func (f *Field) collide(c *Collision) {
-	w, l := winner(c.A, c.B)
-	// safe, only the goroutine from runCollisions() is accessing these
-	w.Moving -= l.Moving
-	f.removeMovement(l)
-	if w.Moving == 0 {
-		f.removeMovement(w)
+func (f *Field) removeMovement(m *Movement) {
+	// remove movement
+	movements := <-f.Movements
+	for i, mv := range movements {
+		if mv == m {
+			movements = append(movements[:i], movements[i+1:]...)
+			break
+		}
 	}
+	f.Movements <- movements
+
+	f.removeCollisions(m)
 }
 
-func (f *Field) runCollisions() chan struct{} {
+func (f *Field) updateVires(m *Movement, n Vires) {
+	m.UpdateVires(n)
+	if n > 0 {
+		// amount of vires affects collisions, update collisions
+		f.removeCollisions(m)
+		f.findCollisions(m)
+		return
+	}
+	// movement died
+	f.removeMovement(m)
+}
+
+func (f *Field) collide(c *Collision) {
+	a := c.A
+	b := c.B
+	na := a.Moving
+	nb := b.Moving
+	// merge movements if two movements with the same owner and the same target collide
+	if a.Owner == b.Owner {
+		if a.Target == b.Target {
+			// collision with friendly movement
+			f.removeMovement(b)
+			// mutates the movements, CollisionUpdates receives updated values
+			f.updateVires(a, na+nb)
+			f.CollisionUpdates <- c
+		}
+		// no collision, friendly movements cross each other
+		return
+	}
+	// standard collision
+	// mutates the movements, CollisionUpdates receives updated values
+	f.updateVires(a, na-nb)
+	f.updateVires(b, nb-na)
+	f.CollisionUpdates <- c
+}
+
+func (f *Field) runCollisions() chan<- struct{} {
 	updateFirst := make(chan struct{}, 1)
 	go func() {
 		for {
@@ -109,11 +130,32 @@ type Player struct {
 }
 
 type Movement struct {
+	ID     int
+	Owner  *Player
 	Moving Vires
 	Target *Cell
 	Body   Circle
 	// |Direction| = v, [v] = points/s
 	Direction Vec
+}
+
+func Radius(n Vires) float64 {
+	// placeholder, needs testing
+	return float64(n)
+}
+
+func Speed(n Vires) float64 {
+	// placeholder, needs testing
+	if n == 0 {
+		return 0
+	}
+	return 100 / float64(n)
+}
+
+func (m *Movement) UpdateVires(n Vires) {
+	m.Moving = n
+	m.Direction = Scale(m.Direction, Speed(n))
+	m.Body.Radius = Radius(n)
 }
 
 type Collision struct {
@@ -141,9 +183,11 @@ func (h *CollisionHeap) Pop() interface{} {
 }
 
 func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
-	p := SubVec(m1.Body.Location, m2.Body.Location)
+	b1 := m1.Body
+	b2 := m2.Body
+	p := SubVec(b1.Location, b2.Location)
 	v := SubVec(m1.Direction, m2.Direction)
-	r := math.Max(m1.Body.Radius, m2.Body.Radius)
+	r := math.Max(b1.Radius, b2.Radius)
 	d := Unit(v)
 	tempP := Dot(p, d)
 	tempR := Sq(tempP) - Sq(p.X) - Sq(p.Y) + Sq(r)
@@ -168,34 +212,20 @@ func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
 	}
 }
 
-func Radius(n Vires) float64 {
-	// placeholder, needs testing
-	return float64(n)
-}
-
-func Speed(n Vires) float64 {
-	// placeholder, needs testing
-	return 100 / float64(n)
-}
-
-func (f *Field) Move(n Vires, start Vec, target *Cell) {
-	mov := &Movement{
-		Moving:    n,
-		Target:    target,
-		Body:      Circle{start, Radius(n)},
-		Direction: Scale(SubVec(target.Body.Location, start), Speed(n)),
-	}
-	movements := <-f.Movements
+func (f *Field) findCollisions(m *Movement) {
+	mov := <-f.Movements
 	cols := <-f.Collisions
 	first := cols[0]
 	replaceFirst := false
-	for _, m := range movements {
-		dt, collides := CollisionTime(mov, m)
-		if collides {
-			t := time.Now().Add(time.Duration(int64(dt * float64(time.Second))))
-			heap.Push(&cols, Collision{mov, m, t})
-			if t.Before(first.Time) {
-				replaceFirst = true
+	for _, mv := range mov {
+		if !(m.Owner == mv.Owner && m.Target == mv.Target) {
+			dt, collides := CollisionTime(mv, m)
+			if collides {
+				t := time.Now().Add(time.Duration(int64(dt * float64(time.Second))))
+				heap.Push(&cols, Collision{mv, m, t})
+				if t.Before(first.Time) {
+					replaceFirst = true
+				}
 			}
 		}
 	}
@@ -203,7 +233,24 @@ func (f *Field) Move(n Vires, start Vec, target *Cell) {
 		// notify runCollisions that it should stop the current timer
 		f.ReplaceFirstColl <- struct{}{}
 	}
+	f.Movements <- mov
+	f.Collisions <- cols
+}
+
+func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
+	id := <-f.MovementID
+	mov := &Movement{
+		ID:        id,
+		Owner:     owner,
+		Moving:    n,
+		Target:    target,
+		Body:      Circle{start, Radius(n)},
+		Direction: Scale(SubVec(target.Body.Location, start), Speed(n)),
+	}
+	id++
+	f.MovementID <- id
+	f.findCollisions(mov)
+	movements := <-f.Movements
 	movements = append(movements, mov)
 	f.Movements <- movements
-	f.Collisions <- cols
 }
