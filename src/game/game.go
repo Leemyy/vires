@@ -160,6 +160,12 @@ func MovementInCollision(m *Movement, c Collision) bool {
 }
 
 func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
+	// concept:
+	// we treat one movement relative to the other movement
+	// and then calculate the times at which the path of the smaller
+	// movement intersects the circle bounds of the larger movement.
+	// because we treat both movements relative to each other,
+	// the center of the larger movement is at (0, 0).
 	b1 := m1.Body
 	b2 := m2.Body
 	p := SubVec(b1.Location, b2.Location)
