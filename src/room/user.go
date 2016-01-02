@@ -28,48 +28,45 @@ type TX struct {
 
 type User struct {
 	Conn    *websocket.Conn
-	Quit    chan struct{}
+	quit    chan struct{}
 	Version string
 	tx      chan TX
 	rx      chan RX
 }
 
 func (u *User) transmitPackets() {
-	go func() {
-		for packet := range u.tx {
-			select {
-			case <-u.Quit:
+	for {
+		select {
+		case <-u.quit:
+			return
+		case packet := u.tx:
+			err := u.Conn.WriteJSON(packet)
+			close(packet.done)
+			if err != nil {
+				// does not send error to user to avoid recursive erroring
+				u.Disconnect()
 				return
-			default:
-				err := u.Conn.WriteJSON(packet)
-				close(packet.done)
-				if err != nil {
-					// does not send error to user to avoid recursive erroring
-					u.Disconnect()
-				}
 			}
 		}
-	}()
+	}
 }
 
 func (u *User) receivePackets() {
-	go func() {
-		for {
-			select {
-			case <-u.Quit:
+	for {
+		select {
+		case <-u.quit:
+			return
+		default:
+			p := RX{}
+			// issue: after a disconnect this waits until json is received
+			err := u.Conn.ReadJSON(&p)
+			if err != nil {
+				u.SendFatalf("Could not read from your websocket connection: %s", err)
 				return
-			default:
-				p := RX{}
-				err := u.Conn.ReadJSON(&p)
-				if err != nil {
-					// wait until message is transmitted
-					u.SendFatalf("Could not read from your websocket connection: %s", err)
-					return
-				}
-				u.rx <- p
 			}
+			u.rx <- p
 		}
-	}()
+	}
 }
 
 func ConnectUser(c *websocket.Conn, protocolVersion string) *User {
@@ -80,13 +77,15 @@ func ConnectUser(c *websocket.Conn, protocolVersion string) *User {
 		tx:      make(chan TX, txBufSize),
 		rx:      make(chan RX, rxBufSize),
 	}
-	u.transmitPackets(u)
-	u.receivePackets(u)
+	go u.transmitPackets(u)
+	go u.receivePackets(u)
 	return u
 }
 
 func (u *User) Disconnect() error {
-	close(u.Quit)
+	close(u.quit)
+	close(u.rx)
+
 	return u.Conn.Close()
 }
 

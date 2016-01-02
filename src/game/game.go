@@ -1,48 +1,60 @@
 package game
 
 import (
-	"container/heap"
 	"math"
 	"time"
 )
 
 type Vires int
 
-type Match struct {
-	Field   *Field
-	Players []*Player
-}
-
 type Field struct {
+	Players          []*Player
 	Cells            []*Cell
 	Movements        chan []*Movement
 	MovementID       chan int
-	Collisions       chan CollisionHeap
-	ReplaceFirstColl chan struct{}
+	Collisions       chan Timed
+	CollisionUpdates chan<- Collision
 	Size             Vec
-	Quit             chan struct{}
-	CollisionUpdates chan *Collision
+}
+
+func NewField(players []string, collisionUpdates chan<- Collision) *Field {
+	// mapgen algorithm here ...
+	mvs := make(chan []*Movement, 1)
+	mvs <- []*Movement{}
+	mvid := make(chan int, 1)
+	mvid <- 0
+	cols := make(chan Timed, 1)
+	cols <- NewTimed()
+	f := &Field{
+		Players: []*Player{},
+		// change to cells from mapgen algorithm later!
+		Cells:            nil,
+		Movements:        mvs,
+		MovementID:       mvid,
+		Collisions:       cols,
+		CollisionUpdates: collisionUpdates,
+		// change to size from mapgen algorithm later!
+		Size: Vec{},
+	}
+	return f
 }
 
 func (f *Field) removeCollisions(m *Movement) {
 	cols := <-f.Collisions
-	toRemove := []int{}
-	for i, c := range cols {
-		if c.A == m || c.B == m {
-			toRemove = append(toRemove, i)
+	for c := range cols {
+		collision := c.(Collision)
+		if MovementInCollision(m, collision) {
+			cols.Remove(c)
 		}
-	}
-	for _, r := range toRemove {
-		heap.Remove(&cols, r)
 	}
 	f.Collisions <- cols
 }
 
 func (f *Field) removeMovement(m *Movement) {
-	// remove movement
 	movements := <-f.Movements
 	for i, mv := range movements {
 		if mv == m {
+			// delete the movement
 			movements = append(movements[:i], movements[i+1:]...)
 			break
 		}
@@ -64,7 +76,7 @@ func (f *Field) updateVires(m *Movement, n Vires) {
 	f.removeMovement(m)
 }
 
-func (f *Field) collide(c *Collision) {
+func (f *Field) collide(c Collision) {
 	a := c.A
 	b := c.B
 	na := a.Moving
@@ -74,7 +86,7 @@ func (f *Field) collide(c *Collision) {
 		if a.Target == b.Target {
 			// collision with friendly movement
 			f.removeMovement(b)
-			// mutates the movements, CollisionUpdates receives updated values
+			// mutates the movements
 			f.updateVires(a, na+nb)
 			f.CollisionUpdates <- c
 		}
@@ -82,32 +94,10 @@ func (f *Field) collide(c *Collision) {
 		return
 	}
 	// standard collision
-	// mutates the movements, CollisionUpdates receives updated values
+	// mutates the movements
 	f.updateVires(a, na-nb)
 	f.updateVires(b, nb-na)
 	f.CollisionUpdates <- c
-}
-
-func (f *Field) runCollisions() chan<- struct{} {
-	updateFirst := make(chan struct{}, 1)
-	go func() {
-		for {
-			cols := <-f.Collisions
-			first := cols[0]
-			f.Collisions <- cols
-			t := time.NewTimer(first.Time.Sub(time.Now()))
-			select {
-			case <-f.Quit:
-				return
-			case <-updateFirst:
-				t.Stop()
-			case <-t.C:
-				f.collide(first)
-			}
-		}
-	}()
-	return updateFirst
-
 }
 
 type Circle struct {
@@ -137,6 +127,8 @@ type Movement struct {
 	Body   Circle
 	// |Direction| = v, [v] = points/s
 	Direction Vec
+	// Time the movement was started at
+	Start time.Time
 }
 
 func Radius(n Vires) float64 {
@@ -159,27 +151,12 @@ func (m *Movement) UpdateVires(n Vires) {
 }
 
 type Collision struct {
-	A    *Movement
-	B    *Movement
-	Time time.Time
+	A *Movement
+	B *Movement
 }
 
-type CollisionHeap []*Collision
-
-func (h CollisionHeap) Len() int           { return len(h) }
-func (h CollisionHeap) Less(i, j int) bool { return h[i].Time.Before(h[j].Time) }
-func (h CollisionHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-
-func (h *CollisionHeap) Push(x interface{}) {
-	*h = append(*h, x.(*Collision))
-}
-
-func (h *CollisionHeap) Pop() interface{} {
-	old := *h
-	n := len(old)
-	x := old[n-1]
-	*h = old[0 : n-1]
-	return x
+func MovementInCollision(m *Movement, c Collision) bool {
+	return c.A == m || c.B == m
 }
 
 func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
@@ -214,27 +191,32 @@ func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
 
 func (f *Field) findCollisions(m *Movement) {
 	mov := <-f.Movements
-	cols := <-f.Collisions
-	first := cols[0]
-	replaceFirst := false
 	for _, mv := range mov {
-		if !(m.Owner == mv.Owner && m.Target == mv.Target) {
+		// movements where the owner is the same
+		// but the target isn't don't collide;
+		// the movements just pass each other
+		if !(m.Owner == mv.Owner && m.Target != mv.Target) {
 			dt, collides := CollisionTime(mv, m)
 			if collides {
-				t := time.Now().Add(time.Duration(int64(dt * float64(time.Second))))
-				heap.Push(&cols, Collision{mv, m, t})
-				if t.Before(first.Time) {
-					replaceFirst = true
-				}
+				// t_d = t_0 + dt - t_n
+				// t_d = time to delay by
+				// t_0 = time the movement started at
+				// dt = time of the collision - t_0
+				// t_n = current time
+				delay := m.Start.Add(time.Duration(int64(dt * float64(time.Second)))).Sub(time.Now())
+				c := Collision{mv, m}
+				cols := <-f.Collisions
+				cols.Start(c, delay, func() {
+					// collisions are treated immutably,
+					// there is no need to lock c
+					// because it is never mutated
+					f.collide(c)
+				})
+				f.Collisions <- cols
 			}
 		}
 	}
-	if replaceFirst {
-		// notify runCollisions that it should stop the current timer
-		f.ReplaceFirstColl <- struct{}{}
-	}
 	f.Movements <- mov
-	f.Collisions <- cols
 }
 
 func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
@@ -246,6 +228,7 @@ func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
 		Target:    target,
 		Body:      Circle{start, Radius(n)},
 		Direction: Scale(SubVec(target.Body.Location, start), Speed(n)),
+		Start:     time.Now(),
 	}
 	id++
 	f.MovementID <- id
