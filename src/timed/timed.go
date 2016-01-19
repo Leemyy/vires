@@ -1,0 +1,234 @@
+package timed
+
+import (
+	"sync"
+	"time"
+)
+
+type Entry struct {
+	Key   interface{}
+	Timer *time.Timer
+}
+
+type Timed struct {
+	sync.Mutex
+	Entries []Entry
+	actions chan func()
+	quit    chan struct{}
+}
+
+func (t Timed) runActions() {
+	for {
+		select {
+		case a := <-t.actions:
+			a()
+		case <-t.quit:
+			return
+		}
+	}
+}
+
+func New() Timed {
+	t := Timed{
+		Entries: []Entry{},
+		actions: make(chan func(), 1024),
+		quit:    make(chan struct{}, 1),
+	}
+	go t.runActions()
+	return t
+}
+
+func (t *Timed) add(key interface{}, timer *time.Timer) {
+	t.Entries = append(t.Entries, Entry{key, timer})
+}
+
+func (t *Timed) At(key interface{}) (i int, ok bool) {
+	for i, e := range t.Entries {
+		if e.Key == key {
+			return i, true
+		}
+	}
+	return -1, false
+}
+
+func (t *Timed) Start(key interface{}, after time.Duration, action func()) {
+	t.add(key, time.AfterFunc(after, func() {
+		t.actions <- func() {
+			action()
+			t.Lock()
+			defer t.Unlock()
+			i, _ := t.At(key)
+			t.Remove(i)
+		}
+	}))
+}
+
+func (t *Timed) Remove(i int) {
+	es := t.Entries
+	n := len(es)
+	removed := es[i]
+	// remove without preserving order
+	es[i] = es[n-1]
+	t.Entries = es[:n-1]
+	removed.Timer.Stop()
+}
+
+func (t *Timed) Close() {
+	for _, e := range t.Entries {
+		e.Timer.Stop()
+	}
+	close(t.quit)
+}
+
+/*
+type timer struct {
+	at     time.Time
+	action func(actual time.Time)
+}
+
+type timed []*timer
+
+func (h timed) Len() int           { return len(h) }
+func (h timed) Less(i, j int) bool { return h[i].at.Before(h[j].at) }
+func (h timed) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *timed) Push(x interface{}) {
+	*h = append(*h, x.(*timer))
+}
+
+func (h *timed) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
+func (h *timed) Remove(t *timer) (int, bool) {
+	for i, v := range *h {
+		if v == t {
+			heap.Remove(h, i)
+			return i, true
+		}
+	}
+	return -1, false
+}
+
+type Timed struct {
+	timers     chan timed
+	newFirst   chan *timer
+	removeLast chan struct{}
+}
+
+func (t *Timed) takeFirst() *timer {
+	timers := <-t.timers
+	if len(timers) == 0 {
+		t.timers <- timers
+		// wait for first element to arrive
+		return <-t.newFirst
+	}
+	// first element is present, take it
+	first := timers[0]
+	t.timers <- timers
+	return first
+}
+
+func (t *Timed) schedule() {
+	first := t.takeFirst()
+	for {
+		timer := time.NewTimer(first.at.Sub(time.Now()))
+		select {
+		case first = <-t.newFirst:
+			// a new timer has been set as first, replace first preemptively
+			timer.Stop()
+		case <-t.removeLast:
+			// the last timer has been removed from externally, take the next first
+			first = t.takeFirst()
+		case actual := <-timer.C:
+			// the first timer has expired, execute its action
+			first.action(actual)
+			timers := <-t.timers
+			// remove instead of pop - pop might remove a newly added first timer
+			// that was added after the timer expired and before t.timers was locked
+			// (moving the lock before first.action doesn't solve the issue either
+			// because the goroutine might get unscheduled right after <-timer.C
+			// and also increases lock time to the time taken by first.action,
+			// which might be very long)
+
+			// ignore remove return because if first wasn't found then it was already
+			// removed from externally while action was executing
+			timers.Remove(first)
+			t.timers <- timers
+			first = t.takeFirst()
+		}
+	}
+}
+
+func (t *Timed) stop(tim *timer) bool {
+	timers := <-t.timers
+	i, ok := timers.Remove(tim)
+	if !ok {
+		t.timers <- timers
+		return false
+	}
+	// we removed the first
+	if i == 0 {
+		// we removed the last one remaining
+		if len(timers) == 0 {
+			t.timers <- timers
+			t.removeLast <- struct{}{}
+			return true
+		}
+		first := timers[0]
+		t.timers <- timers
+		t.newFirst <- first
+		return true
+	}
+	t.timers <- timers
+	return true
+}
+
+func NewTimed() *Timed {
+	timed := make(chan timed, 1)
+	timed <- []*timer{}
+	// small buffer size for both transmission channels
+	// to leave a bit of room for Start() with the
+	// earliest timer to remove being spammed faster
+	// than schedule() can handle it (so the caller of Start
+	// doesn't block unless 10 Start()s are waiting to replace
+	// the first element) and to leave room for Start() - stop() spam
+	// with only a single element so the caller of stop()
+	// doesn't block unless 10 stop()s are waiting to
+	// tell schedule() that the last element was removed.
+	// ... an alternative would be to launch all
+	// calls in a seperate goroutine, but this kind of optimization
+	// is up to the caller (downside: request spam in some context might
+	// kill the GC through too many goroutines being spawned
+	// while a limit of 10 would just block the spam if it's too much)
+	t := &Timed{timed, make(chan *timer, 10), make(chan struct{}, 10)}
+	go t.schedule()
+	return t
+}
+
+func (t *Timed) Start(at time.Time, action func(actual time.Time)) (stop func() bool) {
+	tim := &timer{at, action}
+	timers := <-t.timers
+	if len(timers) == 0 || at.Before(timers[0].at) {
+		// temporarily release t.timers.
+		// if t.newFirst blocks because we are Start()ing
+		// more early timers than schedule() can handle
+		// then t.timers would be locked by this goroutine and
+		// to unblock t.newFirst we might have to acquire
+		// t.timers after executing the action of a timer.
+		// this goroutine would wait for t.newFirst to
+		// unblock and the scheduling goroutine would wait
+		// for t.timers to be released - a deadlock occurs.
+		t.timers <- timers
+		t.newFirst <- tim
+		timers = <-t.timers
+	}
+	heap.Push(&timers, tim)
+	t.timers <- timers
+	return func() bool { return t.stop(tim) }
+}
+*/

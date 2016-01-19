@@ -3,51 +3,94 @@ package game
 import (
 	"math"
 	"time"
+
+	"github.com/mhuisi/vires/src/timed"
 )
 
 type Vires int
 
 type Field struct {
-	Players          []*Player
-	Cells            []*Cell
-	Movements        chan []*Movement
-	MovementID       chan int
-	Collisions       chan Timed
-	CollisionUpdates chan<- Collision
-	Size             Vec
+	Players    []*Player
+	PlayerID   int
+	Cells      []*Cell
+	Movements  chan []*Movement
+	MovementID chan int
+	Ops        timed.Timed
+	Notifier   StateNotifier
+	Size       Vec
 }
 
-func NewField(players []string, collisionUpdates chan<- Collision) *Field {
+type CellConflict struct {
+	Target   *Cell
+	Attacker *Movement
+}
+
+type StateNotifier struct {
+	Collisions      chan<- Collision
+	CellConflicts   chan<- CellConflict
+	EliminatePlayer chan<- *Player
+	Victory         chan<- *Player
+}
+
+func NewField(players []string, notifier StateNotifier) *Field {
 	// mapgen algorithm here ...
 	mvs := make(chan []*Movement, 1)
 	mvs <- []*Movement{}
 	mvid := make(chan int, 1)
 	mvid <- 0
-	cols := make(chan Timed, 1)
-	cols <- NewTimed()
+	ops := make(chan timed.Timed, 1)
+	ops <- timed.New()
 	f := &Field{
-		Players: []*Player{},
+		Players:  []*Player{},
+		PlayerID: 0,
 		// change to cells from mapgen algorithm later!
-		Cells:            nil,
-		Movements:        mvs,
-		MovementID:       mvid,
-		Collisions:       cols,
-		CollisionUpdates: collisionUpdates,
+		Cells:      []*Cell{},
+		Movements:  mvs,
+		MovementID: mvid,
+		Ops:        timed.New(),
+		Notifier:   notifier,
 		// change to size from mapgen algorithm later!
 		Size: Vec{},
 	}
 	return f
 }
 
-func (f *Field) removeCollisions(m *Movement) {
-	cols := <-f.Collisions
-	for c := range cols {
-		collision := c.(Collision)
-		if MovementInCollision(m, collision) {
-			cols.Remove(c)
+func (f *Field) Close() {
+	f.Ops.Close()
+}
+
+func (f *Field) checkDominationVictory() {
+	if len(f.Players) != 1 {
+		return
+	}
+	winner := f.Players[0]
+	f.Notifier.Victory <- winner
+	f.Close()
+}
+
+func (f *Field) removePlayer(pp *Player) {
+	ps := f.Players
+	for i, p := range ps {
+		if p == pp {
+			last := len(ps) - 1
+			ps[i] = ps[last]
+			f.Players = ps[:last]
+			f.Notifier.EliminatePlayer <- pp
+			f.checkDominationVictory()
 		}
 	}
-	f.Collisions <- cols
+}
+
+func (f *Field) removeCollisions(m *Movement) {
+	ops := f.Ops
+	ops.Lock()
+	defer ops.Unlock()
+	for i, e := range ops.Entries {
+		collision, ok := e.Key.(Collision)
+		if ok && MovementInCollision(m, collision) {
+			ops.Remove(i)
+		}
+	}
 }
 
 func (f *Field) removeMovement(m *Movement) {
@@ -60,44 +103,50 @@ func (f *Field) removeMovement(m *Movement) {
 		}
 	}
 	f.Movements <- movements
+}
 
+func (f *Field) updateCollisions(m *Movement) {
 	f.removeCollisions(m)
+	f.findCollisions(m)
 }
 
 func (f *Field) updateVires(m *Movement, n Vires) {
 	m.UpdateVires(n)
 	if n > 0 {
 		// amount of vires affects collisions, update collisions
-		f.removeCollisions(m)
-		f.findCollisions(m)
+		f.updateCollisions(m)
 		return
 	}
 	// movement died
 	f.removeMovement(m)
+	f.removeCollisions(m)
+}
+
+func (f *Field) mergeMovements(a, b *Movement) {
+	f.updateVires(b, 0)
+	f.updateVires(a, a.Moving+b.Moving)
 }
 
 func (f *Field) collide(c Collision) {
 	a := c.A
 	b := c.B
-	na := a.Moving
-	nb := b.Moving
 	// merge movements if two movements with the same owner and the same target collide
 	if a.Owner == b.Owner {
 		if a.Target == b.Target {
 			// collision with friendly movement
-			f.removeMovement(b)
-			// mutates the movements
-			f.updateVires(a, na+nb)
-			f.CollisionUpdates <- c
+			f.mergeMovements(a, b)
+			f.Notifier.Collisions <- c
 		}
 		// no collision, friendly movements cross each other
 		return
 	}
 	// standard collision
 	// mutates the movements
+	na := a.Moving
+	nb := b.Moving
 	f.updateVires(a, na-nb)
 	f.updateVires(b, nb-na)
-	f.CollisionUpdates <- c
+	f.Notifier.Collisions <- c
 }
 
 type Circle struct {
@@ -106,6 +155,7 @@ type Circle struct {
 }
 
 type Cell struct {
+	ID       int
 	Capacity int
 	// [ReplicationSpeed] = vires/s
 	ReplicationSpeed float64
@@ -115,8 +165,9 @@ type Cell struct {
 }
 
 type Player struct {
+	ID    int
 	Name  string
-	Cells []*Cell
+	Cells int
 }
 
 type Movement struct {
@@ -211,18 +262,55 @@ func (f *Field) findCollisions(m *Movement) {
 				// t_n = current time
 				delay := m.Start.Add(time.Duration(int64(dt * float64(time.Second)))).Sub(time.Now())
 				c := Collision{mv, m}
-				cols := <-f.Collisions
-				cols.Start(c, delay, func() {
+				f.Ops.Lock()
+				f.Ops.Start(c, delay, func() {
 					// collisions are treated immutably,
 					// there is no need to lock c
 					// because it is never mutated
 					f.collide(c)
 				})
-				f.Collisions <- cols
+				f.Ops.Unlock()
 			}
 		}
 	}
 	f.Movements <- mov
+}
+
+func (f *Field) conflict(cc CellConflict) {
+	atk := cc.Attacker
+	tgt := cc.Target
+	atkowner := atk.Owner
+	tgtowner := tgt.Owner
+	// same player, friendly units are merged into the cell
+	if atkowner == tgtowner {
+		tgt.Stationed += atk.Moving
+	} else {
+		cellVires := tgt.Stationed - atk.Moving
+		// cell died, change owner
+		if cellVires < 0 {
+			tgtowner.Cells -= 1
+			atkowner.Cells += 1
+			// target has no cells left, eliminate owner from game
+			if tgtowner.Cells == 0 {
+				f.removePlayer(tgtowner)
+			}
+			tgt.Owner = atkowner
+		}
+	}
+	f.updateVires(cc.Attacker, 0)
+	f.Notifier.CellConflicts <- cc
+}
+
+func (f *Field) findCellConflict(attacker *Movement, target *Cell) {
+	speed := Abs(attacker.Direction)
+	dist := Abs(SubVec(target.Body.Location, attacker.Body.Location))
+	delay := dist / speed
+	cc := CellConflict{target, attacker}
+	f.Ops.Lock()
+	defer f.Ops.Unlock()
+	f.Ops.Start(cc, time.Duration(delay)*time.Second, func() {
+		f.conflict(cc)
+	})
 }
 
 func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
@@ -239,7 +327,13 @@ func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
 	id++
 	f.MovementID <- id
 	f.findCollisions(mov)
+	f.findCellConflict(mov, target)
 	movements := <-f.Movements
 	movements = append(movements, mov)
 	f.Movements <- movements
+}
+
+type CellAttack struct {
+	Mov  *Movement
+	Cell *Cell
 }

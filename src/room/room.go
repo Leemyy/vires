@@ -50,15 +50,14 @@ func (r *Room) handlePackets(u *User) {
 
 func (r *Room) Connect(c *websocket.Conn) {
 	u := ConnectUser(c, Version)
-	us := <-r.users
-	us = append(us, u)
-	r.users <- us
+	r.users <- append(<-r.users, u)
 	go r.handlePackets(u)
 	u.Send("Foo", "Hello, World")
 }
 
 func (r *Room) Disconnect(c *websocket.Conn) error {
 	users := <-r.users
+	defer func() { r.users <- users }()
 	for i, u := range users {
 		if u.Conn == c {
 			u.Disconnect()

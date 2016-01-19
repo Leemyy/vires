@@ -39,7 +39,7 @@ func (u *User) transmitPackets() {
 		select {
 		case <-u.quit:
 			return
-		case packet := u.tx:
+		case packet := <-u.tx:
 			err := u.Conn.WriteJSON(packet)
 			close(packet.done)
 			if err != nil {
@@ -72,13 +72,13 @@ func (u *User) receivePackets() {
 func ConnectUser(c *websocket.Conn, protocolVersion string) *User {
 	u := &User{
 		Conn:    c,
-		Quit:    make(chan struct{}),
+		quit:    make(chan struct{}),
 		Version: protocolVersion,
 		tx:      make(chan TX, txBufSize),
 		rx:      make(chan RX, rxBufSize),
 	}
-	go u.transmitPackets(u)
-	go u.receivePackets(u)
+	go u.transmitPackets()
+	go u.receivePackets()
 	return u
 }
 
