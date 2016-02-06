@@ -7,17 +7,22 @@ import (
 	"github.com/mhuisi/vires/src/timed"
 )
 
+const (
+	ReplicationInterval = 1 * time.Second
+)
+
 type Vires int
 
 type Field struct {
-	Players    map[*Player]struct{}
-	Cells      map[*Cell]struct{}
-	Movements  map[*Movement]func() bool
-	MovementID int
-	Collisions map[Collision]func() bool
-	Ops        *timed.Timed
-	Notifier   StateNotifier
-	Size       Vec
+	Players         map[*Player]struct{}
+	Cells           map[*Cell]struct{}
+	Movements       map[*Movement]func() bool
+	MovementID      int
+	Collisions      map[Collision]func() bool
+	Ops             *timed.Timed
+	StopReplication func() bool
+	Notifier        StateNotifier
+	Size            Vec
 }
 
 type StateNotifier struct {
@@ -50,15 +55,28 @@ func NewField(players []string, notifier StateNotifier) *Field {
 		// change to size from mapgen algorithm later!
 		Size: Vec{},
 	}
+	f.startReplication()
 	return f
 }
 
 func (f *Field) Close() {
 	f.Ops.Close()
+	f.StopReplication()
+}
+
+func (f *Field) startReplication() {
+	var replicate func(time.Time)
+	replicate = func(time.Time) {
+		for c := range f.Cells {
+			c.Merge(c.Replication)
+		}
+		f.StopReplication = f.Ops.Start(time.Now().Add(ReplicationInterval), replicate)
+	}
+	f.StopReplication = f.Ops.Start(time.Now().Add(ReplicationInterval), replicate)
 }
 
 func (f *Field) checkDominationVictory() {
-	if len(f.Players) != 1 {
+	if len(f.Players) > 1 {
 		return
 	}
 	var winner *Player
@@ -100,6 +118,7 @@ func (f *Field) updateVires(m *Movement, n Vires) {
 	f.removeMovement(m)
 	f.removeCollisions(m)
 }
+
 func (f *Field) mergeMovements(a, b *Movement) {
 	f.updateVires(b, 0)
 	f.updateVires(a, a.Moving+b.Moving)
@@ -134,12 +153,49 @@ type Circle struct {
 
 type Cell struct {
 	ID       int
-	Capacity int
-	// [ReplicationSpeed] = vires/s
-	ReplicationSpeed float64
-	Stationed        Vires
-	Owner            *Player
-	Body             Circle
+	Capacity Vires
+	// [Replication] = vires/cycle
+	Replication Vires
+	Stationed   Vires
+	Owner       *Player
+	Body        Circle
+}
+
+func Capacity(force float64) Vires {
+	// placeholder, needs testing
+	return Vires(10 * force)
+}
+
+func Replication(force float64) Vires {
+	// placeholder, needs testing
+	return Vires(force)
+}
+
+func CellRadius(force float64) float64 {
+	// placeholder, needs testing
+	return force
+}
+
+func NewCell(id int, force float64, owner *Player, loc Vec) *Cell {
+	return &Cell{
+		ID:          id,
+		Capacity:    Capacity(force),
+		Replication: Replication(force),
+		Stationed:   0,
+		Owner:       owner,
+		Body:        Circle{loc, CellRadius(force)},
+	}
+}
+
+func (c *Cell) Merge(n Vires) {
+	newStationed := c.Stationed + n
+	switch {
+	case newStationed < 0:
+		newStationed = 0
+	case newStationed > c.Capacity:
+		newStationed = c.Capacity
+	}
+	c.Stationed = newStationed
 }
 
 type Player struct {
@@ -244,7 +300,7 @@ func (f *Field) conflict(mv *Movement) {
 	tgtowner := tgt.Owner
 	// same player, friendly units are merged into the cell
 	if atkowner == tgtowner {
-		tgt.Stationed += mv.Moving
+		tgt.Merge(mv.Moving)
 	} else {
 		cellVires := tgt.Stationed - mv.Moving
 		// cell died, change owner
@@ -254,8 +310,10 @@ func (f *Field) conflict(mv *Movement) {
 			// target has no cells left, eliminate owner from game
 			if tgtowner.Cells == 0 {
 				delete(f.Players, tgtowner)
+				f.checkDominationVictory()
 			}
 			tgt.Owner = atkowner
+			tgt.Merge(-cellVires)
 		}
 	}
 	f.updateVires(mv, 0)
