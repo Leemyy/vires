@@ -10,43 +10,41 @@ import (
 type Vires int
 
 type Field struct {
-	Players    []*Player
-	PlayerID   int
-	Cells      []*Cell
-	Movements  chan []*Movement
-	MovementID chan int
-	Ops        timed.Timed
+	Players    map[*Player]struct{}
+	Cells      map[*Cell]struct{}
+	Movements  map[*Movement]func() bool
+	MovementID int
+	Collisions map[Collision]func() bool
+	Ops        *timed.Timed
 	Notifier   StateNotifier
 	Size       Vec
 }
 
-type CellConflict struct {
-	Target   *Cell
-	Attacker *Movement
-}
-
 type StateNotifier struct {
 	Collisions      chan<- Collision
-	CellConflicts   chan<- CellConflict
+	Conflicts       chan<- *Movement
 	EliminatePlayer chan<- *Player
 	Victory         chan<- *Player
 }
 
 func NewField(players []string, notifier StateNotifier) *Field {
 	// mapgen algorithm here ...
-	mvs := make(chan []*Movement, 1)
-	mvs <- []*Movement{}
-	mvid := make(chan int, 1)
-	mvid <- 0
-	ops := make(chan timed.Timed, 1)
-	ops <- timed.New()
+
+	ps := make(map[*Player]struct{}, len(players))
+	for i, p := range players {
+		ps[&Player{
+			ID:    i,
+			Name:  p,
+			Cells: 1,
+		}] = struct{}{}
+	}
 	f := &Field{
-		Players:  []*Player{},
-		PlayerID: 0,
+		Players: ps,
 		// change to cells from mapgen algorithm later!
-		Cells:      []*Cell{},
-		Movements:  mvs,
-		MovementID: mvid,
+		Cells:      map[*Cell]struct{}{},
+		Movements:  map[*Movement]func() bool{},
+		MovementID: 0,
+		Collisions: map[Collision]func() bool{},
 		Ops:        timed.New(),
 		Notifier:   notifier,
 		// change to size from mapgen algorithm later!
@@ -63,46 +61,27 @@ func (f *Field) checkDominationVictory() {
 	if len(f.Players) != 1 {
 		return
 	}
-	winner := f.Players[0]
+	var winner *Player
+	for winner = range f.Players {
+		break
+	}
 	f.Notifier.Victory <- winner
 	f.Close()
 }
 
-func (f *Field) removePlayer(pp *Player) {
-	ps := f.Players
-	for i, p := range ps {
-		if p == pp {
-			last := len(ps) - 1
-			ps[i] = ps[last]
-			f.Players = ps[:last]
-			f.Notifier.EliminatePlayer <- pp
-			f.checkDominationVictory()
-		}
-	}
-}
-
 func (f *Field) removeCollisions(m *Movement) {
-	ops := f.Ops
-	ops.Lock()
-	defer ops.Unlock()
-	for i, e := range ops.Entries {
-		collision, ok := e.Key.(Collision)
-		if ok && MovementInCollision(m, collision) {
-			ops.Remove(i)
+	for c, stop := range f.Collisions {
+		if c.A == m || c.B == m {
+			delete(f.Collisions, c)
+			stop()
 		}
 	}
 }
 
 func (f *Field) removeMovement(m *Movement) {
-	movements := <-f.Movements
-	for i, mv := range movements {
-		if mv == m {
-			// delete the movement
-			movements = append(movements[:i], movements[i+1:]...)
-			break
-		}
-	}
-	f.Movements <- movements
+	stop := f.Movements[m]
+	delete(f.Movements, m)
+	stop()
 }
 
 func (f *Field) updateCollisions(m *Movement) {
@@ -121,7 +100,6 @@ func (f *Field) updateVires(m *Movement, n Vires) {
 	f.removeMovement(m)
 	f.removeCollisions(m)
 }
-
 func (f *Field) mergeMovements(a, b *Movement) {
 	f.updateVires(b, 0)
 	f.updateVires(a, a.Moving+b.Moving)
@@ -206,10 +184,6 @@ type Collision struct {
 	B *Movement
 }
 
-func MovementInCollision(m *Movement, c Collision) bool {
-	return c.A == m || c.B == m
-}
-
 func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
 	// concept:
 	// we treat one movement relative to the other movement
@@ -247,93 +221,72 @@ func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
 }
 
 func (f *Field) findCollisions(m *Movement) {
-	mov := <-f.Movements
-	for _, mv := range mov {
+	for mv := range f.Movements {
 		// movements where the owner is the same
 		// but the target isn't don't collide;
 		// the movements just pass each other
 		if !(m.Owner == mv.Owner && m.Target != mv.Target) {
 			dt, collides := CollisionTime(mv, m)
 			if collides {
-				// t_d = t_0 + dt - t_n
-				// t_d = time to delay by
-				// t_0 = time the movement started at
-				// dt = time of the collision - t_0
-				// t_n = current time
-				delay := m.Start.Add(time.Duration(int64(dt * float64(time.Second)))).Sub(time.Now())
+				collideAt := m.Start.Add(time.Duration(dt * float64(time.Second)))
 				c := Collision{mv, m}
-				f.Ops.Lock()
-				f.Ops.Start(c, delay, func() {
-					// collisions are treated immutably,
-					// there is no need to lock c
-					// because it is never mutated
+				f.Collisions[c] = f.Ops.Start(collideAt, func(time.Time) {
 					f.collide(c)
 				})
-				f.Ops.Unlock()
 			}
 		}
 	}
-	f.Movements <- mov
 }
 
-func (f *Field) conflict(cc CellConflict) {
-	atk := cc.Attacker
-	tgt := cc.Target
-	atkowner := atk.Owner
+func (f *Field) conflict(mv *Movement) {
+	tgt := mv.Target
+	atkowner := mv.Owner
 	tgtowner := tgt.Owner
 	// same player, friendly units are merged into the cell
 	if atkowner == tgtowner {
-		tgt.Stationed += atk.Moving
+		tgt.Stationed += mv.Moving
 	} else {
-		cellVires := tgt.Stationed - atk.Moving
+		cellVires := tgt.Stationed - mv.Moving
 		// cell died, change owner
 		if cellVires < 0 {
 			tgtowner.Cells -= 1
 			atkowner.Cells += 1
 			// target has no cells left, eliminate owner from game
 			if tgtowner.Cells == 0 {
-				f.removePlayer(tgtowner)
+				delete(f.Players, tgtowner)
 			}
 			tgt.Owner = atkowner
 		}
 	}
-	f.updateVires(cc.Attacker, 0)
-	f.Notifier.CellConflicts <- cc
+	f.updateVires(mv, 0)
+	f.Notifier.Conflicts <- mv
 }
 
-func (f *Field) findCellConflict(attacker *Movement, target *Cell) {
+func (f *Field) addCellConflict(attacker *Movement) {
+	target := attacker.Target
 	speed := Abs(attacker.Direction)
 	dist := Abs(SubVec(target.Body.Location, attacker.Body.Location))
 	delay := dist / speed
-	cc := CellConflict{target, attacker}
-	f.Ops.Lock()
-	defer f.Ops.Unlock()
-	f.Ops.Start(cc, time.Duration(delay)*time.Second, func() {
-		f.conflict(cc)
+	conflictAt := time.Now().Add(time.Duration(delay * float64(time.Second)))
+	f.Movements[attacker] = f.Ops.Start(conflictAt, func(time.Time) {
+		f.conflict(attacker)
 	})
 }
 
 func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
-	id := <-f.MovementID
-	mov := &Movement{
-		ID:        id,
-		Owner:     owner,
-		Moving:    n,
-		Target:    target,
-		Body:      Circle{start, Radius(n)},
-		Direction: Scale(SubVec(target.Body.Location, start), Speed(n)),
-		Start:     time.Now(),
-	}
-	id++
-	f.MovementID <- id
-	f.findCollisions(mov)
-	f.findCellConflict(mov, target)
-	movements := <-f.Movements
-	movements = append(movements, mov)
-	f.Movements <- movements
-}
+	f.Ops.Start(time.Now(), func(time.Time) {
+		mov := &Movement{
+			ID:        f.MovementID,
+			Owner:     owner,
+			Moving:    n,
+			Target:    target,
+			Body:      Circle{start, Radius(n)},
+			Direction: Scale(SubVec(target.Body.Location, start), Speed(n)),
+			Start:     time.Now(),
+		}
+		f.MovementID++
+		f.findCollisions(mov)
+		f.addCellConflict(mov)
+	})
 
-type CellAttack struct {
-	Mov  *Movement
-	Cell *Cell
 }

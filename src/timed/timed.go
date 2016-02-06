@@ -1,86 +1,10 @@
 package timed
 
 import (
-	"sync"
+	"container/heap"
 	"time"
 )
 
-type Entry struct {
-	Key   interface{}
-	Timer *time.Timer
-}
-
-type Timed struct {
-	sync.Mutex
-	Entries []Entry
-	actions chan func()
-	quit    chan struct{}
-}
-
-func (t Timed) runActions() {
-	for {
-		select {
-		case a := <-t.actions:
-			a()
-		case <-t.quit:
-			return
-		}
-	}
-}
-
-func New() Timed {
-	t := Timed{
-		Entries: []Entry{},
-		actions: make(chan func(), 1024),
-		quit:    make(chan struct{}, 1),
-	}
-	go t.runActions()
-	return t
-}
-
-func (t *Timed) add(key interface{}, timer *time.Timer) {
-	t.Entries = append(t.Entries, Entry{key, timer})
-}
-
-func (t *Timed) At(key interface{}) (i int, ok bool) {
-	for i, e := range t.Entries {
-		if e.Key == key {
-			return i, true
-		}
-	}
-	return -1, false
-}
-
-func (t *Timed) Start(key interface{}, after time.Duration, action func()) {
-	t.add(key, time.AfterFunc(after, func() {
-		t.actions <- func() {
-			action()
-			t.Lock()
-			defer t.Unlock()
-			i, _ := t.At(key)
-			t.Remove(i)
-		}
-	}))
-}
-
-func (t *Timed) Remove(i int) {
-	es := t.Entries
-	n := len(es)
-	removed := es[i]
-	// remove without preserving order
-	es[i] = es[n-1]
-	t.Entries = es[:n-1]
-	removed.Timer.Stop()
-}
-
-func (t *Timed) Close() {
-	for _, e := range t.Entries {
-		e.Timer.Stop()
-	}
-	close(t.quit)
-}
-
-/*
 type timer struct {
 	at     time.Time
 	action func(actual time.Time)
@@ -118,6 +42,7 @@ type Timed struct {
 	timers     chan timed
 	newFirst   chan *timer
 	removeLast chan struct{}
+	quit       chan struct{}
 }
 
 func (t *Timed) takeFirst() *timer {
@@ -160,35 +85,34 @@ func (t *Timed) schedule() {
 			timers.Remove(first)
 			t.timers <- timers
 			first = t.takeFirst()
+		case <-t.quit:
+			timer.Stop()
+			return
 		}
 	}
 }
 
 func (t *Timed) stop(tim *timer) bool {
 	timers := <-t.timers
+	defer func() { t.timers <- timers }()
 	i, ok := timers.Remove(tim)
-	if !ok {
-		t.timers <- timers
+	switch {
+	case !ok:
 		return false
-	}
+	// we removed the first and the first was the last one remaining
+	case i == 0 && len(timers) == 0:
+		t.removeLast <- struct{}{}
+		return true
 	// we removed the first
-	if i == 0 {
-		// we removed the last one remaining
-		if len(timers) == 0 {
-			t.timers <- timers
-			t.removeLast <- struct{}{}
-			return true
-		}
+	case i == 0:
 		first := timers[0]
-		t.timers <- timers
 		t.newFirst <- first
 		return true
 	}
-	t.timers <- timers
 	return true
 }
 
-func NewTimed() *Timed {
+func New() *Timed {
 	timed := make(chan timed, 1)
 	timed <- []*timer{}
 	// small buffer size for both transmission channels
@@ -205,7 +129,7 @@ func NewTimed() *Timed {
 	// is up to the caller (downside: request spam in some context might
 	// kill the GC through too many goroutines being spawned
 	// while a limit of 10 would just block the spam if it's too much)
-	t := &Timed{timed, make(chan *timer, 10), make(chan struct{}, 10)}
+	t := &Timed{timed, make(chan *timer, 10), make(chan struct{}, 10), make(chan struct{})}
 	go t.schedule()
 	return t
 }
@@ -230,5 +154,88 @@ func (t *Timed) Start(at time.Time, action func(actual time.Time)) (stop func() 
 	heap.Push(&timers, tim)
 	t.timers <- timers
 	return func() bool { return t.stop(tim) }
+}
+
+func (t *Timed) Close() {
+	t.quit <- struct{}{}
+}
+
+// alternative scheduler impl using the go scheduler
+/*
+type Entry struct {
+	Key   interface{}
+	Timer *time.Timer
+}
+
+type Timed struct {
+	sync.Mutex
+	Entries []Entry
+	actions chan func()
+	quit    chan struct{}
+}
+
+func (t Timed) runActions() {
+	for {
+		select {
+		case a := <-t.actions:
+			a()
+		case <-t.quit:
+			return
+		}
+	}
+}
+
+func New() Timed {
+	t := Timed{
+		Entries: []Entry{},
+		actions: make(chan func(), 1024),
+		quit:    make(chan struct{}, 1),
+	}
+	go t.runActions()
+	return t
+}
+
+func (t *Timed) add(key interface{}, timer *time.Timer) {
+	t.Entries = append(t.Entries, Entry{key, timer})
+}
+
+func (t *Timed) Index(key interface{}) (i int, ok bool) {
+	for i, e := range t.Entries {
+		if e.Key == key {
+			return i, true
+		}
+	}
+	return -1, false
+}
+
+func (t *Timed) Start(key interface{}, after time.Duration, action func()) {
+	t.add(key, time.AfterFunc(after, func() {
+		t.actions <- func() {
+			action()
+			t.Lock()
+			defer t.Unlock()
+			i, _ := t.Index(key)
+			t.Remove(i)
+		}
+	}))
+}
+
+func (t *Timed) Remove(i int) {
+	es := t.Entries
+	n := len(es)
+	removed := es[i]
+	// remove without preserving order
+	es[i] = es[n-1]
+	t.Entries = es[:n-1]
+	removed.Timer.Stop()
+}
+
+func (t *Timed) Close() {
+	t.Lock()
+	defer t.Unlock()
+	for _, e := range t.Entries {
+		e.Timer.Stop()
+	}
+	close(t.quit)
 }
 */
