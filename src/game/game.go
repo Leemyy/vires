@@ -10,18 +10,18 @@ import (
 )
 
 const (
-	ReplicationInterval = 1 * time.Second
+	replicationInterval = 1 * time.Second
 )
 
 type Field struct {
-	Players         map[ent.ID]ent.Player
-	Cells           map[ent.ID]*ent.Cell
-	Movements       map[ent.ID]*ent.Movement
-	MovementID      ent.ID
-	Ops             *timed.Timed
-	StopReplication func() bool
-	Transmitter     transm.Transmitter
-	Size            vec.V
+	players         map[ent.ID]ent.Player
+	cells           map[ent.ID]*ent.Cell
+	movements       map[ent.ID]*ent.Movement
+	movementID      ent.ID
+	ops             *timed.Timed
+	stopReplication func() bool
+	transmitter     transm.Transmitter
+	size            vec.V
 }
 
 func NewField(players []string, t transm.Transmitter) *Field {
@@ -33,15 +33,15 @@ func NewField(players []string, t transm.Transmitter) *Field {
 		ps[id] = ent.NewPlayer(id, p)
 	}
 	f := &Field{
-		Players: ps,
+		players: ps,
 		// change to cells from mapgen algorithm later!
-		Cells:       map[ent.ID]*ent.Cell{},
-		Movements:   map[ent.ID]*ent.Movement{},
-		MovementID:  0,
-		Ops:         timed.New(),
-		Transmitter: t,
+		cells:       map[ent.ID]*ent.Cell{},
+		movements:   map[ent.ID]*ent.Movement{},
+		movementID:  0,
+		ops:         timed.New(),
+		transmitter: t,
 		// change to size from mapgen algorithm later!
-		Size: vec.V{},
+		size: vec.V{},
 	}
 	f.startReplication()
 	return f
@@ -49,9 +49,9 @@ func NewField(players []string, t transm.Transmitter) *Field {
 
 func (f *Field) startReplication() {
 	var replicate func(time.Time)
-	start := func() { f.StopReplication = f.Ops.Start(time.Now().Add(ReplicationInterval), replicate) }
+	start := func() { f.stopReplication = f.ops.Start(time.Now().Add(replicationInterval), replicate) }
 	replicate = func(time.Time) {
-		for _, c := range f.Cells {
+		for _, c := range f.cells {
 			c.Replicate()
 		}
 		start()
@@ -60,26 +60,26 @@ func (f *Field) startReplication() {
 }
 
 func (f *Field) Close() {
-	f.Ops.Close()
-	f.StopReplication()
+	f.ops.Close()
+	f.stopReplication()
 }
 
 func (f *Field) checkDominationVictory() {
-	if len(f.Players) > 1 {
+	if len(f.players) > 1 {
 		return
 	}
 	var winner ent.Player
 	// get first winner
-	for _, winner = range f.Players {
+	for _, winner = range f.players {
 		break
 	}
-	f.Transmitter.Win(winner)
+	f.transmitter.Win(winner)
 }
 
 func (f *Field) removeMovement(m *ent.Movement) {
 	m.Stop()
 	id := m.ID()
-	delete(f.Movements, id)
+	delete(f.movements, id)
 }
 
 func (f *Field) viresChanged(m *ent.Movement) {
@@ -93,18 +93,18 @@ func (f *Field) viresChanged(m *ent.Movement) {
 
 func (f *Field) collide(m, m2 *ent.Movement) {
 	m.Collide(m2)
-	f.Transmitter.Collide(m, m2)
+	f.transmitter.Collide(m, m2)
 	f.viresChanged(m)
 	f.viresChanged(m2)
 }
 
 func (f *Field) findCollisions(m *ent.Movement) {
-	for _, m2 := range f.Movements {
+	for _, m2 := range f.movements {
 		collideAt, collides := m.CollidesWith(m2)
 		if !collides {
 			continue
 		}
-		stopCollision := f.Ops.Start(collideAt, func(time.Time) {
+		stopCollision := f.ops.Start(collideAt, func(time.Time) {
 			f.collide(m, m2)
 		})
 		m.AddCollision(m2, stopCollision)
@@ -117,25 +117,25 @@ func (f *Field) conflict(mv *ent.Movement) {
 	defender := target.Owner()
 	mv.Conflict()
 	f.removeMovement(mv)
-	f.Transmitter.Conflict(mv, target)
+	f.transmitter.Conflict(mv, target)
 	if defender.IsDead() {
 		defid := defender.ID()
-		delete(f.Players, defid)
-		f.Transmitter.Eliminate(defender)
+		delete(f.players, defid)
+		f.transmitter.Eliminate(defender)
 		f.checkDominationVictory()
 	}
 }
 
 func (f *Field) Move(src, tgt *ent.Cell) {
-	f.Ops.Start(time.Now(), func(time.Time) {
-		mid := f.MovementID
+	f.ops.Start(time.Now(), func(time.Time) {
+		mid := f.movementID
 		mov := src.Move(mid, tgt)
 		at := ent.ConflictAt(mov)
-		mov.Stop = f.Ops.Start(at, func(time.Time) {
+		mov.Stop = f.ops.Start(at, func(time.Time) {
 			f.conflict(mov)
 		})
-		f.Movements[mid] = mov
-		f.MovementID++
+		f.movements[mid] = mov
+		f.movementID++
 		f.findCollisions(mov)
 	})
 }
