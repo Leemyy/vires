@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mhuisi/vires/src/timed"
+	"github.com/mhuisi/vires/src/vec"
 )
 
 const (
@@ -22,7 +23,7 @@ type Field struct {
 	Ops             *timed.Timed
 	StopReplication func() bool
 	Notifier        StateNotifier
-	Size            Vec
+	Size            vec.V
 }
 
 type StateNotifier struct {
@@ -53,7 +54,7 @@ func NewField(players []string, notifier StateNotifier) *Field {
 		Ops:        timed.New(),
 		Notifier:   notifier,
 		// change to size from mapgen algorithm later!
-		Size: Vec{},
+		Size: vec.V{},
 	}
 	f.startReplication()
 	return f
@@ -147,7 +148,7 @@ func (f *Field) collide(c Collision) {
 }
 
 type Circle struct {
-	Location Vec
+	Location vec.V
 	Radius   float64
 }
 
@@ -176,7 +177,7 @@ func CellRadius(force float64) float64 {
 	return force
 }
 
-func NewCell(id int, force float64, owner *Player, loc Vec) *Cell {
+func NewCell(id int, force float64, owner *Player, loc vec.V) *Cell {
 	return &Cell{
 		ID:          id,
 		Capacity:    Capacity(force),
@@ -211,7 +212,7 @@ type Movement struct {
 	Target *Cell
 	Body   Circle
 	// |Direction| = v, [v] = points/s
-	Direction Vec
+	Direction vec.V
 	// Time the movement was started at
 	Start time.Time
 }
@@ -231,13 +232,17 @@ func Speed(n Vires) float64 {
 
 func (m *Movement) UpdateVires(n Vires) {
 	m.Moving = n
-	m.Direction = Scale(m.Direction, Speed(n))
+	m.Direction = vec.Scale(m.Direction, Speed(n))
 	m.Body.Radius = Radius(n)
 }
 
 type Collision struct {
 	A *Movement
 	B *Movement
+}
+
+func sq(v float64) float64 {
+	return v * v
 }
 
 func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
@@ -249,12 +254,12 @@ func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
 	// the center of the larger movement is at (0, 0).
 	b1 := m1.Body
 	b2 := m2.Body
-	p := SubVec(b1.Location, b2.Location)
-	v := SubVec(m1.Direction, m2.Direction)
+	p := vec.SubV(b1.Location, b2.Location)
+	v := vec.SubV(m1.Direction, m2.Direction)
 	r := math.Max(b1.Radius, b2.Radius)
-	d := Unit(v)
-	tempP := Dot(p, d)
-	tempR := Sq(tempP) - Sq(p.X) - Sq(p.Y) + Sq(r)
+	d := vec.Unit(v)
+	tempP := vec.Dot(p, d)
+	tempR := sq(tempP) - sq(p.X) - sq(p.Y) + sq(r)
 	if tempR < 0 {
 		// no collision
 		return math.NaN(), false
@@ -265,7 +270,7 @@ func CollisionTime(m1 *Movement, m2 *Movement) (float64, bool) {
 	switch {
 	case t1 > 0 && t2 > 0:
 		// collision is at t
-		t := math.Min(t1, t2) / Abs(v)
+		t := math.Min(t1, t2) / vec.Abs(v)
 		return t, true
 	case t1 <= 0 && t2 <= 0:
 		// no collision
@@ -322,8 +327,8 @@ func (f *Field) conflict(mv *Movement) {
 
 func (f *Field) addCellConflict(attacker *Movement) {
 	target := attacker.Target
-	speed := Abs(attacker.Direction)
-	dist := Abs(SubVec(target.Body.Location, attacker.Body.Location))
+	speed := vec.Abs(attacker.Direction)
+	dist := vec.Abs(vec.SubV(target.Body.Location, attacker.Body.Location))
 	delay := dist / speed
 	conflictAt := time.Now().Add(time.Duration(delay * float64(time.Second)))
 	f.Movements[attacker] = f.Ops.Start(conflictAt, func(time.Time) {
@@ -331,7 +336,7 @@ func (f *Field) addCellConflict(attacker *Movement) {
 	})
 }
 
-func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
+func (f *Field) Move(owner *Player, n Vires, start vec.V, target *Cell) {
 	f.Ops.Start(time.Now(), func(time.Time) {
 		mov := &Movement{
 			ID:        f.MovementID,
@@ -339,7 +344,7 @@ func (f *Field) Move(owner *Player, n Vires, start Vec, target *Cell) {
 			Moving:    n,
 			Target:    target,
 			Body:      Circle{start, Radius(n)},
-			Direction: Scale(SubVec(target.Body.Location, start), Speed(n)),
+			Direction: vec.Scale(vec.SubV(target.Body.Location, start), Speed(n)),
 			Start:     time.Now(),
 		}
 		f.MovementID++
