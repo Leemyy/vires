@@ -146,13 +146,13 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 	moving := src.stationed / 2
 	start := src.body.Location
 	mov := &Movement{
-		id:        mvid,
-		owner:     src.owner,
-		moving:    moving,
-		target:    tgt,
-		body:      Circle{start, radius(moving)},
-		direction: vec.Scale(vec.SubV(tgt.body.Location, start), speed(moving)),
-		started:   time.Now(),
+		id:         mvid,
+		owner:      src.owner,
+		moving:     moving,
+		target:     tgt,
+		body:       Circle{start, radius(moving)},
+		direction:  vec.Scale(vec.SubV(tgt.body.Location, start), speed(moving)),
+		collisions: map[*Movement]func() bool{},
 	}
 	src.Merge(-moving)
 	return mov
@@ -165,10 +165,9 @@ type Movement struct {
 	target *Cell
 	body   Circle
 	// |Direction| = v, [v] = points/s
-	direction vec.V
-	// Time the movement was started at
-	started time.Time
-	Stop    func() bool
+	direction  vec.V
+	collisions map[*Movement]func() bool
+	Stop       func() bool
 }
 
 func (m *Movement) ID() ID {
@@ -196,8 +195,21 @@ func (m *Movement) Direction() vec.V {
 	return m.direction
 }
 
-func (m *Movement) Started() time.Time {
-	return m.started
+// return value should not be mutated.
+func (m *Movement) Collisions() map[*Movement]func() bool {
+	return m.collisions
+}
+
+func (m *Movement) AddCollision(m2 *Movement, stopCollision func() bool) {
+	m.collisions[m2] = stopCollision
+}
+
+func (m *Movement) ClearCollisions() {
+	for m2, stop := range m.collisions {
+		stop()
+		delete(m.collisions, m2)
+		delete(m2.collisions, m)
+	}
 }
 
 func (m *Movement) Merge(n Vires) {
@@ -314,11 +326,4 @@ func ConflictAt(m *Movement) time.Time {
 	dist := vec.Abs(vec.SubV(defender.body.Location, m.body.Location))
 	delay := dist / speed
 	return at(delay)
-}
-
-type Collision struct {
-	ID   ID
-	A    *Movement
-	B    *Movement
-	Stop func() bool
 }

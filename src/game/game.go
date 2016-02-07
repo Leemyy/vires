@@ -5,6 +5,7 @@ import (
 
 	"github.com/mhuisi/vires/src/game/ent"
 	"github.com/mhuisi/vires/src/timed"
+	"github.com/mhuisi/vires/src/transm"
 	"github.com/mhuisi/vires/src/vec"
 )
 
@@ -17,22 +18,13 @@ type Field struct {
 	Cells           map[ent.ID]*ent.Cell
 	Movements       map[ent.ID]*ent.Movement
 	MovementID      ent.ID
-	Collisions      map[ent.ID]ent.Collision
-	CollisionID     ent.ID
 	Ops             *timed.Timed
 	StopReplication func() bool
-	Notifier        StateNotifier
+	Transmitter     transm.Transmitter
 	Size            vec.V
 }
 
-type StateNotifier struct {
-	Collisions      chan<- ent.Collision
-	Conflicts       chan<- *ent.Movement
-	EliminatePlayer chan<- ent.Player
-	Victory         chan<- ent.Player
-}
-
-func NewField(players []string, notifier StateNotifier) *Field {
+func NewField(players []string, t transm.Transmitter) *Field {
 	// mapgen algorithm here ...
 
 	ps := make(map[ent.ID]ent.Player, len(players))
@@ -46,10 +38,8 @@ func NewField(players []string, notifier StateNotifier) *Field {
 		Cells:       map[ent.ID]*ent.Cell{},
 		Movements:   map[ent.ID]*ent.Movement{},
 		MovementID:  0,
-		Collisions:  map[ent.ID]ent.Collision{},
-		CollisionID: 0,
 		Ops:         timed.New(),
-		Notifier:    notifier,
+		Transmitter: t,
 		// change to size from mapgen algorithm later!
 		Size: vec.V{},
 	}
@@ -83,27 +73,17 @@ func (f *Field) checkDominationVictory() {
 	for _, winner = range f.Players {
 		break
 	}
-	f.Notifier.Victory <- winner
-	f.Close()
-}
-
-func (f *Field) removeCollisions(m *ent.Movement) {
-	for id, c := range f.Collisions {
-		if c.A == m || c.B == m {
-			delete(f.Collisions, id)
-			c.Stop()
-		}
-	}
+	f.Transmitter.Win(winner)
 }
 
 func (f *Field) removeMovement(m *ent.Movement) {
+	m.Stop()
 	id := m.ID()
 	delete(f.Movements, id)
-	m.Stop()
 }
 
 func (f *Field) viresChanged(m *ent.Movement) {
-	f.removeCollisions(m)
+	m.ClearCollisions()
 	if m.IsDead() {
 		f.removeMovement(m)
 	} else {
@@ -111,42 +91,39 @@ func (f *Field) viresChanged(m *ent.Movement) {
 	}
 }
 
-func (f *Field) collide(c ent.Collision) {
-	c.A.Collide(c.B)
-	f.viresChanged(c.A)
-	f.viresChanged(c.B)
+func (f *Field) collide(m, m2 *ent.Movement) {
+	m.Collide(m2)
+	f.Transmitter.Collide(m, m2)
+	f.viresChanged(m)
+	f.viresChanged(m2)
 }
 
 func (f *Field) findCollisions(m *ent.Movement) {
-	for _, mv := range f.Movements {
-		collideAt, collides := m.CollidesWith(mv)
+	for _, m2 := range f.Movements {
+		collideAt, collides := m.CollidesWith(m2)
 		if !collides {
 			continue
 		}
-		var c ent.Collision
 		stopCollision := f.Ops.Start(collideAt, func(time.Time) {
-			f.collide(c)
+			f.collide(m, m2)
 		})
-		c = ent.Collision{
-			ID:   f.CollisionID,
-			A:    mv,
-			B:    m,
-			Stop: stopCollision,
-		}
-		f.Collisions[c.ID] = c
-		f.CollisionID++
+		m.AddCollision(m2, stopCollision)
+		m2.AddCollision(m, stopCollision)
 	}
 }
 
 func (f *Field) conflict(mv *ent.Movement) {
-	defender := mv.Target().Owner()
+	target := mv.Target()
+	defender := target.Owner()
 	mv.Conflict()
+	f.removeMovement(mv)
+	f.Transmitter.Conflict(mv, target)
 	if defender.IsDead() {
-		delete(f.Players, defender.ID())
+		defid := defender.ID()
+		delete(f.Players, defid)
+		f.Transmitter.Eliminate(defender)
 		f.checkDominationVictory()
 	}
-	f.removeMovement(mv)
-	f.Notifier.Conflicts <- mv
 }
 
 func (f *Field) Move(src, tgt *ent.Cell) {
@@ -161,5 +138,4 @@ func (f *Field) Move(src, tgt *ent.Cell) {
 		f.MovementID++
 		f.findCollisions(mov)
 	})
-
 }
