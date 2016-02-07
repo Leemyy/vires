@@ -1,0 +1,324 @@
+package ent
+
+import (
+	"math"
+	"time"
+
+	"github.com/mhuisi/vires/src/vec"
+)
+
+type (
+	Vires int
+	ID    int
+)
+
+type Player struct {
+	id    ID
+	name  string
+	cells int
+}
+
+func NewPlayer(id ID, name string) Player {
+	return Player{id, name, 1}
+}
+
+func (p Player) ID() ID {
+	return p.id
+}
+
+func (p Player) Name() string {
+	return p.Name()
+}
+
+func (p Player) Cells() int {
+	return p.cells
+}
+
+func (p Player) IsDead() bool {
+	return p.cells <= 0
+}
+
+type Circle struct {
+	Location vec.V
+	Radius   float64
+}
+
+type Cell struct {
+	id       ID
+	capacity Vires
+	// [Replication] = vires/cycle
+	replication Vires
+	stationed   Vires
+	owner       Player
+	body        Circle
+}
+
+func NewCell(id ID, force float64, owner Player, loc vec.V) *Cell {
+	return &Cell{
+		id:          id,
+		capacity:    capacity(force),
+		replication: replication(force),
+		stationed:   0,
+		owner:       owner,
+		body:        Circle{loc, cellRadius(force)},
+	}
+}
+
+func (c *Cell) ID() ID {
+	return c.id
+}
+
+func (c *Cell) Capacity() Vires {
+	return c.capacity
+}
+
+func (c *Cell) Replication() Vires {
+	return c.replication
+}
+
+func (c *Cell) Stationed() Vires {
+	return c.stationed
+}
+
+func (c *Cell) Owner() Player {
+	return c.owner
+}
+
+func (c *Cell) Body() Circle {
+	return c.body
+}
+
+func capacity(force float64) Vires {
+	// placeholder, needs testing
+	return Vires(10 * force)
+}
+
+func replication(force float64) Vires {
+	// placeholder, needs testing
+	return Vires(force)
+}
+
+func cellRadius(force float64) float64 {
+	// placeholder, needs testing
+	return force
+}
+
+func (c *Cell) Merge(n Vires) {
+	newStationed := c.stationed + n
+	switch {
+	case newStationed < 0:
+		c.stationed = 0
+	case newStationed > c.capacity:
+		c.stationed = c.capacity
+	default:
+		c.stationed = newStationed
+	}
+}
+
+func (c *Cell) Replicate() {
+	c.Merge(c.replication)
+}
+
+func (c *Cell) IsDead() bool {
+	return c.stationed <= 0
+}
+
+func (c *Cell) SetOwner(o Player) {
+	c.owner.cells--
+	o.cells++
+	c.owner = o
+}
+
+func radius(n Vires) float64 {
+	// placeholder, needs testing
+	return float64(n)
+}
+
+func speed(n Vires) float64 {
+	// placeholder, needs testing
+	if n == 0 {
+		return 0
+	}
+	return 100 / float64(n)
+}
+
+func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
+	moving := src.stationed / 2
+	start := src.body.Location
+	mov := &Movement{
+		id:        mvid,
+		owner:     src.owner,
+		moving:    moving,
+		target:    tgt,
+		body:      Circle{start, radius(moving)},
+		direction: vec.Scale(vec.SubV(tgt.body.Location, start), speed(moving)),
+		started:   time.Now(),
+	}
+	src.Merge(-moving)
+	return mov
+}
+
+type Movement struct {
+	id     ID
+	owner  Player
+	moving Vires
+	target *Cell
+	body   Circle
+	// |Direction| = v, [v] = points/s
+	direction vec.V
+	// Time the movement was started at
+	started time.Time
+	Stop    func() bool
+}
+
+func (m *Movement) ID() ID {
+	return m.id
+}
+
+func (m *Movement) Owner() Player {
+	return m.owner
+}
+
+func (m *Movement) Moving() Vires {
+	return m.moving
+}
+
+// return value should not be mutated.
+func (m *Movement) Target() *Cell {
+	return m.target
+}
+
+func (m *Movement) Body() Circle {
+	return m.body
+}
+
+func (m *Movement) Direction() vec.V {
+	return m.direction
+}
+
+func (m *Movement) Started() time.Time {
+	return m.started
+}
+
+func (m *Movement) Merge(n Vires) {
+	newMoving := m.moving + n
+	if newMoving < 0 {
+		newMoving = 0
+	}
+	m.moving = newMoving
+	m.direction = vec.Scale(m.direction, speed(newMoving))
+	m.body.Radius = radius(newMoving)
+}
+
+func (m *Movement) Kill() {
+	m.Merge(-m.moving)
+}
+
+func (m *Movement) Conflict() {
+	// after conflict, set moving to 0
+	defer m.Kill()
+	tgt := m.target
+	attacker := m.owner
+	defender := tgt.Owner()
+	// same player, friendly units are merged into the cell
+	if attacker.ID() == defender.ID() {
+		tgt.Merge(m.moving)
+	} else {
+		tgt.Merge(-m.moving)
+		// cell died, change owner
+		if tgt.IsDead() {
+			tgt.SetOwner(attacker)
+		}
+	}
+}
+
+func (m *Movement) Collide(m2 *Movement) {
+	// merge movements if two movements with the same owner and the same target collide
+	if m.owner.ID() == m2.owner.ID() {
+		if m.target == m2.target {
+			// collision with friendly movement
+			m.Merge(m2.moving)
+			m2.Kill()
+			return
+		}
+		// no collision, friendly movements cross each other
+		return
+	}
+	// standard collision
+	m.Merge(-m2.moving)
+	m2.Merge(-m.moving)
+}
+
+func (m *Movement) IsDead() bool {
+	return m.moving <= 0
+}
+
+func sq(v float64) float64 {
+	return v * v
+}
+
+func collideIn(m1 *Movement, m2 *Movement) (float64, bool) {
+	// concept:
+	// we treat one movement relative to the other movement
+	// and then calculate the times at which the path of the smaller
+	// movement intersects the circle bounds of the larger movement.
+	// because we treat both movements relative to each other,
+	// the center of the larger movement is at (0, 0).
+	b1 := m1.body
+	b2 := m2.body
+	p := vec.SubV(b1.Location, b2.Location)
+	v := vec.SubV(m1.direction, m2.direction)
+	r := math.Max(b1.Radius, b2.Radius)
+	d := vec.Unit(v)
+	tempP := vec.Dot(p, d)
+	tempR := sq(tempP) - sq(p.X) - sq(p.Y) + sq(r)
+	if tempR < 0 {
+		// no collision
+		return math.NaN(), false
+	}
+	tr := math.Sqrt(tempR)
+	t1 := tr - tempP
+	t2 := -tr - tempP
+	switch {
+	case t1 > 0 && t2 > 0:
+		// collision is at t
+		t := math.Min(t1, t2) / vec.Abs(v)
+		return t, true
+	case t1 <= 0 && t2 <= 0:
+		// no collision
+		return math.NaN(), false
+	default:
+		// collision is now
+		return 0, true
+	}
+}
+
+func at(in float64) time.Time {
+	return time.Now().Add(time.Duration(in * float64(time.Second)))
+}
+
+func (m *Movement) CollidesWith(m2 *Movement) (collideAt time.Time, collides bool) {
+	// movements where the owner is the same
+	// but the target isn't don't collide;
+	// the movements just pass each other
+	if !(m.owner == m2.owner && m.target != m2.target) {
+		in, collides := collideIn(m, m2)
+		return at(in), collides
+	}
+	return time.Now(), false
+}
+
+func ConflictAt(m *Movement) time.Time {
+	defender := m.target
+	speed := vec.Abs(m.direction)
+	dist := vec.Abs(vec.SubV(defender.body.Location, m.body.Location))
+	delay := dist / speed
+	return at(delay)
+}
+
+type Collision struct {
+	ID   ID
+	A    *Movement
+	B    *Movement
+	Stop func() bool
+}
