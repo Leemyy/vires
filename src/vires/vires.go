@@ -20,6 +20,7 @@ const (
 var (
 	upgrader = websocket.Upgrader{}
 	roomTmpl = template.Must(template.ParseFiles(tmplDir + "room.html"))
+	rooms    = map[string]*room.Room{}
 )
 
 func onMainPage(w http.ResponseWriter, req *http.Request) {
@@ -28,8 +29,12 @@ func onMainPage(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, staticDir+"main.html")
 }
 
+func roomID(r *http.Request) string {
+	return mux.Vars(r)["roomid"]
+}
+
 func onRoom(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["roomid"]
+	id := roomID(r)
 	fmt.Println("Connected to room id:", id)
 	roomTmpl.Execute(w, id)
 }
@@ -37,11 +42,31 @@ func onRoom(w http.ResponseWriter, r *http.Request) {
 func connectToRoom(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		// Updade already transmits an http error on error
+		// Upgrade already transmits an http error on error
 		return
 	}
-	ro := room.NewRoom()
+	id := roomID(r)
+	ro, ok := rooms[id]
+	if !ok {
+		ro = room.NewRoom()
+		rooms[id] = ro
+	}
 	ro.Connect(ws)
+}
+
+func startMatch(w http.ResponseWriter, r *http.Request) {
+	id := roomID(r)
+	ro, ok := rooms[id]
+	if !ok {
+		http.Error(w, "No room with this ID exists.", 400)
+		return
+	}
+	started := ro.StartMatch()
+	if !started {
+		http.Error(w, "Match already started.", 400)
+		return
+	}
+	fmt.Fprintf(w, "Match started.")
 }
 
 func main() {
@@ -52,6 +77,7 @@ func main() {
 	// Rooms
 	r.HandleFunc(fmt.Sprintf("/%s", roomIDPattern), onRoom).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/c", roomIDPattern), connectToRoom)
+	r.HandleFunc(fmt.Sprintf("/%s/s", roomIDPattern), startMatch)
 	http.Handle("/", r)
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {

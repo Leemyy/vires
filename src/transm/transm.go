@@ -41,52 +41,56 @@ type Transmitter struct {
 	winner            chan *Winner
 }
 
-func New() Transmitter {
-	return Transmitter{
-		make(chan *Collision, 1024),
-		make(chan *Conflict, 512),
-		make(chan *EliminatedPlayer, 16),
-		make(chan *Winner),
-	}
+func (t *Transmitter) Open() {
+	t.collisions = make(chan *Collision, 1024)
+	t.conflicts = make(chan *Conflict, 512)
+	t.eliminatedPlayers = make(chan *EliminatedPlayer, 16)
+	t.winner = make(chan *Winner)
+
 }
 
-func (t Transmitter) Close() {
-	close(t.collisions)
-	close(t.conflicts)
-	close(t.eliminatedPlayers)
-	close(t.winner)
+func (t *Transmitter) Disable() {
+	t.collisions = nil
+	t.conflicts = nil
+	t.eliminatedPlayers = nil
+	t.winner = nil
 }
 
-func (t Transmitter) Collide(a, b *ent.Movement) {
+func (t *Transmitter) Collide(a, b *ent.Movement) {
 	t.collisions <- &Collision{makeCollMov(a), makeCollMov(b)}
 }
 
-func (t Transmitter) Conflict(m *ent.Movement, c *ent.Cell) {
+func (t *Transmitter) Conflict(m *ent.Movement, c *ent.Cell) {
 	t.conflicts <- &Conflict{m.ID(), makeConflCell(c)}
 }
 
-func (t Transmitter) Eliminate(p ent.Player) {
+func (t *Transmitter) Eliminate(p ent.Player) {
 	e := EliminatedPlayer(p.ID())
 	t.eliminatedPlayers <- &e
 }
 
-func (t Transmitter) Win(p ent.Player) {
+func (t *Transmitter) Win(p ent.Player) {
 	w := Winner(p.ID())
 	t.winner <- &w
 }
 
-func (t Transmitter) Collisions() <-chan *Collision {
+func (t *Transmitter) Collisions() <-chan *Collision {
 	return t.collisions
 }
 
-func (t Transmitter) Conflicts() <-chan *Conflict {
+func (t *Transmitter) Conflicts() <-chan *Conflict {
 	return t.conflicts
 }
 
-func (t Transmitter) EliminatedPlayers() <-chan *EliminatedPlayer {
+func (t *Transmitter) EliminatedPlayers() <-chan *EliminatedPlayer {
 	return t.eliminatedPlayers
 }
 
 func (t *Transmitter) Winner() <-chan *Winner {
 	return t.winner
+}
+
+type Movement struct {
+	Source ent.ID
+	Dest   ent.ID
 }

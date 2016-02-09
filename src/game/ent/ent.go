@@ -14,20 +14,15 @@ type (
 
 type Player struct {
 	id    ID
-	name  string
 	cells int
 }
 
-func NewPlayer(id ID, name string) Player {
-	return Player{id, name, 1}
+func NewPlayer(id ID) Player {
+	return Player{id, 1}
 }
 
 func (p Player) ID() ID {
 	return p.id
-}
-
-func (p Player) Name() string {
-	return p.Name()
 }
 
 func (p Player) Cells() int {
@@ -49,11 +44,13 @@ type Cell struct {
 	// [Replication] = vires/cycle
 	replication Vires
 	stationed   Vires
-	owner       Player
-	body        Circle
+	// may be null
+	owner *Player
+	body  Circle
 }
 
-func NewCell(id ID, force float64, owner Player, loc vec.V) *Cell {
+// pass owner == nil for neutral cell
+func NewCell(id ID, force float64, owner *Player, loc vec.V) *Cell {
 	return &Cell{
 		id:          id,
 		capacity:    capacity(force),
@@ -80,7 +77,8 @@ func (c *Cell) Stationed() Vires {
 	return c.stationed
 }
 
-func (c *Cell) Owner() Player {
+// return value should not be mutated.
+func (c *Cell) Owner() *Player {
 	return c.owner
 }
 
@@ -123,10 +121,24 @@ func (c *Cell) IsDead() bool {
 	return c.stationed <= 0
 }
 
+func (c *Cell) IsNeutral() bool {
+	return c.owner == nil
+}
+
 func (c *Cell) SetOwner(o Player) {
-	c.owner.cells--
+	if !c.IsNeutral() {
+		c.owner.cells--
+	}
 	o.cells++
-	c.owner = o
+	c.owner = &o
+}
+
+func (c *Cell) Neutralize() {
+	if c.IsNeutral() {
+		return
+	}
+	c.owner.cells--
+	c.owner = nil
 }
 
 func radius(n Vires) float64 {
@@ -147,7 +159,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 	start := src.body.Location
 	mov := &Movement{
 		id:         mvid,
-		owner:      src.owner,
+		owner:      *src.owner,
 		moving:     moving,
 		target:     tgt,
 		body:       Circle{start, radius(moving)},
@@ -320,7 +332,7 @@ func (m *Movement) CollidesWith(m2 *Movement) (collideAt time.Time, collides boo
 	return time.Now(), false
 }
 
-func ConflictAt(m *Movement) time.Time {
+func (m *Movement) ConflictAt() time.Time {
 	defender := m.target
 	speed := vec.Abs(m.direction)
 	dist := vec.Abs(vec.SubV(defender.body.Location, m.body.Location))
