@@ -25,6 +25,7 @@ type RX struct {
 }
 
 type TX struct {
+	Sender  ent.ID
 	Type    string
 	Version string
 	Data    interface{}
@@ -87,10 +88,10 @@ func NewRoom() *Room {
 	return r
 }
 
-func (r *Room) broadcast(typ string, data interface{}) {
+func (r *Room) broadcast(sender ent.ID, typ string, data interface{}) {
 	for u := range r.users {
 		select {
-		case u.send <- TX{typ, Version, data}:
+		case u.send <- TX{sender, typ, Version, data}:
 		default:
 			// send channel is blocked, user is too slow: kill user
 			r.kill <- u
@@ -110,8 +111,8 @@ func (r *Room) handleRX(p RX) (payload interface{}, ok bool) {
 		if r.field == nil {
 			return nil, false
 		}
-		m := &transm.Movement{}
-		err := unmarshal(m)
+		m := transm.ReceivedMovement{}
+		err := unmarshal(&m)
 		if err != nil {
 			return nil, false
 		}
@@ -119,7 +120,8 @@ func (r *Room) handleRX(p RX) (payload interface{}, ok bool) {
 		if !validMovement {
 			return nil, false
 		}
-		return m, true
+		bm := &transm.BroadcastedMovement{p.sender, m}
+		return bm, true
 	}
 	return nil, false
 }
@@ -147,20 +149,20 @@ func (r *Room) handler() {
 		case m := <-read:
 			payload, validPacket := r.handleRX(m)
 			if validPacket {
-				r.broadcast(m.Type, payload)
+				r.broadcast(m.sender, m.Type, payload)
 			}
 		case c := <-collisions:
-			r.broadcast("Collision", c)
+			r.broadcast(0, "Collision", c)
 		case c := <-conflicts:
-			r.broadcast("Conflict", c)
+			r.broadcast(0, "Conflict", c)
 		case e := <-eliminated:
-			r.broadcast("EliminatedPlayer", e)
+			r.broadcast(0, "EliminatedPlayer", e)
 		case w := <-winner:
 			r.field.Close()
 			// set nil to block future movements
 			r.field = nil
 			r.gameMsgs.Disable()
-			r.broadcast("Winner", w)
+			r.broadcast(0, "Winner", w)
 		case started := <-r.startMatch:
 			if r.field != nil {
 				started <- false

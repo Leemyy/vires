@@ -1,14 +1,23 @@
 package transm
 
-import "github.com/mhuisi/vires/src/game/ent"
+import (
+	"bytes"
+	"encoding/json"
+	"io"
+
+	"github.com/mhuisi/vires/src/game/ent"
+	"github.com/mhuisi/vires/src/vec"
+)
 
 type CollisionMovement struct {
-	ID     ent.ID
-	Moving ent.Vires
+	ID        ent.ID
+	Moving    ent.Vires
+	Body      ent.Circle
+	Direction vec.V
 }
 
 func makeCollMov(m *ent.Movement) CollisionMovement {
-	return CollisionMovement{m.ID(), m.Moving()}
+	return CollisionMovement{m.ID(), m.Moving(), m.Body(), m.Direction()}
 }
 
 type Collision struct {
@@ -90,7 +99,50 @@ func (t *Transmitter) Winner() <-chan *Winner {
 	return t.winner
 }
 
-type Movement struct {
+type ReceivedMovement struct {
 	Source ent.ID
 	Dest   ent.ID
+}
+
+type BroadcastedMovement struct {
+	Owner    ent.ID
+	Received ReceivedMovement
+}
+
+func protocolExample() io.Reader {
+	v := vec.V{2.0, 3.0}
+	c := ent.Circle{v, 5.0}
+	cm := CollisionMovement{1, 10, c, v}
+	rm := ReceivedMovement{1, 2}
+	ex := []interface{}{
+		"\nCollision (sent by the server when a collision occurs):",
+		&Collision{cm, cm},
+		"\nConflict (sent by the server when a conflict occurs):",
+		&Conflict{
+			5,
+			ConflictCell{
+				1,
+				2,
+				10,
+			},
+		},
+		"\nEliminatedPlayer (sent by the server when a player dies):",
+		1,
+		"\nWinner (sent by the server when a player wins the game):",
+		1,
+		"\nReceivedMovement (sent by the client when moving vires):",
+		&rm,
+		"\nBroadcastedMovement (sent by the server when a player moved vires):",
+		&BroadcastedMovement{
+			1,
+			rm,
+		},
+	}
+	var b bytes.Buffer
+	for _, v := range ex {
+		m, _ := json.MarshalIndent(v, "", "\t")
+		b.Write(m)
+		b.WriteByte('\n')
+	}
+	return &b
 }
