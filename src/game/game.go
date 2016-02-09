@@ -144,17 +144,20 @@ func (f *Field) isValidMovement(attacker, src, dst ent.ID) bool {
 	return srcCell.Owner().ID() == attacker
 }
 
-func (f *Field) Move(attacker, srcid, tgtid ent.ID) bool {
+func (f *Field) Move(attacker, srcid, tgtid ent.ID) (ent.ID, bool) {
+	id := make(chan ent.ID)
 	valid := make(chan bool)
 	f.ops.Start(time.Now(), func(time.Time) {
 		if !f.isValidMovement(attacker, srcid, tgtid) {
+			id <- 0
 			valid <- false
 			return
 		}
+		mid := f.movementID
+		id <- mid
 		valid <- true
 		src := f.cells[srcid]
 		tgt := f.cells[tgtid]
-		mid := f.movementID
 		mov := src.Move(mid, tgt)
 		at := mov.ConflictAt()
 		mov.Stop = f.ops.Start(at, func(time.Time) {
@@ -164,7 +167,7 @@ func (f *Field) Move(attacker, srcid, tgtid ent.ID) bool {
 		f.movementID++
 		f.findCollisions(mov)
 	})
-	return <-valid
+	return <-id, <-valid
 }
 
 func (f *Field) DisconnectPlayer(id ent.ID) {

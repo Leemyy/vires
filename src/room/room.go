@@ -116,11 +116,11 @@ func (r *Room) handleRX(p RX) (payload interface{}, ok bool) {
 		if err != nil {
 			return nil, false
 		}
-		validMovement := r.field.Move(p.sender, m.Source, m.Dest)
+		mvid, validMovement := r.field.Move(p.sender, m.Source, m.Dest)
 		if !validMovement {
 			return nil, false
 		}
-		bm := &transm.BroadcastedMovement{p.sender, m}
+		bm := &transm.BroadcastedMovement{mvid, p.sender, m}
 		return bm, true
 	}
 	return nil, false

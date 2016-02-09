@@ -105,6 +105,7 @@ type ReceivedMovement struct {
 }
 
 type BroadcastedMovement struct {
+	ID       ent.ID
 	Owner    ent.ID
 	Received ReceivedMovement
 }
@@ -134,6 +135,7 @@ func protocolExample() io.Reader {
 		&rm,
 		"\nBroadcastedMovement (sent by the server when a player moved vires):",
 		&BroadcastedMovement{
+			1,
 			1,
 			rm,
 		},
