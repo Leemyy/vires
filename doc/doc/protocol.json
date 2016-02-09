@@ -1,0 +1,81 @@
+"RX (packets sent to the server):"
+{
+	"Type": "Move",
+	"Version": "0.1",
+	"Data": "some payload, may be any json type, see below"
+}
+
+"TX (packets sent by the server):"
+{
+	"Sender": 1,
+	"Type": "Collision",
+	"Version": "0.1",
+	"Data": "some payload, may be any json type, see below"
+}
+
+"Payloads (wrapped in RX):"
+
+"Collision (sent by the server when a collision occurs):"
+{
+        "A": {
+                "ID": 1,
+                "Moving": 10,
+                "Body": {
+                        "Location": {
+                                "X": 2,
+                                "Y": 3
+                        },
+                        "Radius": 5
+                },
+                "Direction": {
+                        "X": 2,
+                        "Y": 3
+                }
+        },
+        "B": {
+                "ID": 1,
+                "Moving": 10,
+                "Body": {
+                        "Location": {
+                                "X": 2,
+                                "Y": 3
+                        },
+                        "Radius": 5
+                },
+                "Direction": {
+                        "X": 2,
+                        "Y": 3
+                }
+        }
+}
+
+"Conflict (sent by the server when a conflict occurs):"
+{
+        "Movement": 5,
+        "Cell": {
+                "ID": 1,
+                "Stationed": 2,
+                "Owner": 10
+        }
+}
+
+"EliminatedPlayer (sent by the server when a player dies):"
+1
+
+"Winner (sent by the server when a player wins the game):"
+1
+
+"Move (sent by the client when moving vires):"
+{
+        "Source": 1,
+        "Dest": 2
+}
+
+"Move (sent by the server when a player moved vires):"
+{
+        "Owner": 1,
+        "Received": {
+                "Source": 1,
+                "Dest": 2
+        }
+}
