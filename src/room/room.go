@@ -31,6 +31,10 @@ type TX struct {
 	Data    interface{}
 }
 
+func newTX(sender ent.ID, typ string, data interface{}) TX {
+	return TX{sender, typ, Version, data}
+}
+
 type user struct {
 	id   ent.ID
 	conn *websocket.Conn
@@ -91,7 +95,7 @@ func NewRoom() *Room {
 func (r *Room) broadcast(sender ent.ID, typ string, data interface{}) {
 	for u := range r.users {
 		select {
-		case u.send <- TX{sender, typ, Version, data}:
+		case u.send <- newTX(sender, typ, data):
 		default:
 			// send channel is blocked, user is too slow: kill user
 			r.kill <- u
@@ -141,6 +145,7 @@ func (r *Room) handler() {
 			u.id = r.uid
 			r.uid++
 			r.users[u] = struct{}{}
+			u.send <- newTX(0, "Join", &transm.UserJoined{u.id})
 		case u := <-kill:
 			delete(r.users, u)
 			// close send channel -> closes conn in writer -> results in error in reader

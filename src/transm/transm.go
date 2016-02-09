@@ -99,6 +99,10 @@ func (t *Transmitter) Winner() <-chan *Winner {
 	return t.winner
 }
 
+type UserJoined struct {
+	ID ent.ID
+}
+
 type ReceivedMovement struct {
 	Source ent.ID
 	Dest   ent.ID
@@ -131,9 +135,11 @@ func protocolExample() io.Reader {
 		1,
 		"\nWinner (sent by the server when a player wins the game):",
 		1,
-		"\nReceivedMovement (sent by the client when moving vires):",
+		"\nJoined (sent by the server when a user joins the room",
+		&UserJoined{1},
+		"\nMove (sent by the client when moving vires):",
 		&rm,
-		"\nBroadcastedMovement (sent by the server when a player moved vires):",
+		"\nMove (sent by the server when a player moved vires):",
 		&BroadcastedMovement{
 			1,
 			1,
