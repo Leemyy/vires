@@ -164,6 +164,8 @@ func (r *Room) handler() {
 			r.field = nil
 			r.gameMsgs.Disable()
 			r.broadcast(0, "Winner", w)
+		case rep := <-gameMsgs.Replications():
+			r.broadcast(0, "Replication", rep)
 		case f := <-gameMsgs.GeneratedField():
 			r.broadcast(0, "Field", f)
 		case started := <-r.startMatch:

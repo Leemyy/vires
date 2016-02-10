@@ -56,6 +56,7 @@ func (f *Field) startReplication() {
 		for _, c := range f.cells {
 			c.Replicate()
 		}
+		f.transmitter.Replicate(f.cells)
 		start()
 	}
 	start()

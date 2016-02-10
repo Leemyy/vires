@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"os"
 
 	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/vec"
@@ -43,6 +44,17 @@ type EliminatedPlayer ent.ID
 
 type Winner ent.ID
 
+type CellVires struct {
+	ID        ent.ID
+	Stationed ent.Vires
+}
+
+func makeCellVires(c *ent.Cell) CellVires {
+	return CellVires{c.ID(), c.Stationed()}
+}
+
+type Replication []CellVires
+
 type GeneratedCell struct {
 	ID   ent.ID
 	Body ent.Circle
@@ -70,6 +82,7 @@ type Transmitter struct {
 	collisions        chan *Collision
 	conflicts         chan *Conflict
 	eliminatedPlayers chan *EliminatedPlayer
+	replications      chan Replication
 	winner            chan *Winner
 	field             chan *Field
 }
@@ -78,6 +91,7 @@ func (t *Transmitter) Open() {
 	t.collisions = make(chan *Collision, 1024)
 	t.conflicts = make(chan *Conflict, 512)
 	t.eliminatedPlayers = make(chan *EliminatedPlayer, 16)
+	t.replications = make(chan Replication, 512)
 	t.winner = make(chan *Winner)
 	t.field = make(chan *Field)
 
@@ -87,6 +101,7 @@ func (t *Transmitter) Disable() {
 	t.collisions = nil
 	t.conflicts = nil
 	t.eliminatedPlayers = nil
+	t.replications = nil
 	t.winner = nil
 	t.field = nil
 }
@@ -107,6 +122,16 @@ func (t *Transmitter) Eliminate(p ent.Player) {
 func (t *Transmitter) Win(p ent.Player) {
 	w := Winner(p.ID())
 	t.winner <- &w
+}
+
+func (t *Transmitter) Replicate(field map[ent.ID]*ent.Cell) {
+	cvs := make([]CellVires, len(field))
+	i := 0
+	for _, c := range field {
+		cvs[i] = makeCellVires(c)
+		i++
+	}
+	t.replications <- cvs
 }
 
 func (t *Transmitter) GenerateField(field map[ent.ID]*ent.Cell) {
@@ -139,6 +164,10 @@ func (t *Transmitter) Winner() <-chan *Winner {
 	return t.winner
 }
 
+func (t *Transmitter) Replications() <-chan Replication {
+	return t.replications
+}
+
 func (t *Transmitter) GeneratedField() <-chan *Field {
 	return t.field
 }
@@ -158,12 +187,13 @@ type BroadcastedMovement struct {
 	Received ReceivedMovement
 }
 
-func protocolExample() io.Reader {
+func protocolExample() {
 	v := vec.V{2.0, 3.0}
 	c := ent.Circle{v, 5.0}
 	cm := CollisionMovement{1, 10, c, v}
 	cell := GeneratedCell{1, c}
 	startCell := StartCell{1, 2}
+	cv := CellVires{1, 20}
 	rm := ReceivedMovement{1, 2}
 	ex := []interface{}{
 		"Collision (sent by the server when a collision occurs):",
@@ -181,13 +211,15 @@ func protocolExample() io.Reader {
 		1,
 		"Winner (sent by the server when a player wins the game):",
 		1,
-		"Joined (sent by the server when a user joins the room)",
-		&UserJoined{1},
+		"Replication (sent by the server when all cells replicate)",
+		Replication([]CellVires{cv, cv, cv}),
 		"Field (sent by the server when the field is generated)",
 		&Field{
 			[]GeneratedCell{cell, cell, cell, cell, cell},
 			[]StartCell{startCell, startCell},
 		},
+		"Joined (sent by the server when a user joins the room)",
+		&UserJoined{1},
 		"Move (sent by the client when moving vires):",
 		&rm,
 		"Move (sent by the server when a player moved vires):",
@@ -203,5 +235,9 @@ func protocolExample() io.Reader {
 		b.Write(m)
 		b.WriteByte('\n')
 	}
-	return &b
+	io.Copy(os.Stdout, &b)
+}
+
+func main() {
+	protocolExample()
 }
