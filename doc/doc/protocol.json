@@ -70,6 +70,72 @@
 	"ID": 1
 }
 
+"Field (sent by the server when the field is generated)"
+{
+        "Cells": [
+                {
+                        "ID": 1,
+                        "Body": {
+                                "Location": {
+                                        "X": 2,
+                                        "Y": 3
+                                },
+                                "Radius": 5
+                        }
+                },
+                {
+                        "ID": 1,
+                        "Body": {
+                                "Location": {
+                                        "X": 2,
+                                        "Y": 3
+                                },
+                                "Radius": 5
+                        }
+                },
+                {
+                        "ID": 1,
+                        "Body": {
+                                "Location": {
+                                        "X": 2,
+                                        "Y": 3
+                                },
+                                "Radius": 5
+                        }
+                },
+                {
+                        "ID": 1,
+                        "Body": {
+                                "Location": {
+                                        "X": 2,
+                                        "Y": 3
+                                },
+                                "Radius": 5
+                        }
+                },
+                {
+                        "ID": 1,
+                        "Body": {
+                                "Location": {
+                                        "X": 2,
+                                        "Y": 3
+                                },
+                                "Radius": 5
+                        }
+                }
+        ],
+        "StartCells": [
+                {
+                        "Owner": 1,
+                        "Cell": 2
+                },
+                {
+                        "Owner": 1,
+                        "Cell": 2
+                }
+        ]
+}
+
 "Move (sent by the client when moving vires):"
 {
         "Source": 1,

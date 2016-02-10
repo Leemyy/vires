@@ -3,7 +3,7 @@ package game
 import (
 	"time"
 
-	"github.com/mhuisi/vires/src/game/ent"
+	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/timed"
 	"github.com/mhuisi/vires/src/transm"
 	"github.com/mhuisi/vires/src/vec"
@@ -42,6 +42,9 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 		// change to size from mapgen algorithm later!
 		size: vec.V{},
 	}
+	// handle this here instead of in the caller to avoid the caller trying to read the cells
+	// while we're running our game loop
+	t.GenerateField(f.cells)
 	f.startReplication()
 	return f
 }

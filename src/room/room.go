@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/websocket"
+	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/game"
-	"github.com/mhuisi/vires/src/game/ent"
 	"github.com/mhuisi/vires/src/transm"
 )
 
@@ -135,10 +135,6 @@ func (r *Room) handler() {
 	kill := r.kill
 	read := r.read
 	gameMsgs := r.gameMsgs
-	collisions := gameMsgs.Collisions()
-	conflicts := gameMsgs.Conflicts()
-	eliminated := gameMsgs.EliminatedPlayers()
-	winner := gameMsgs.Winner()
 	for {
 		select {
 		case u := <-join:
@@ -156,18 +152,20 @@ func (r *Room) handler() {
 			if validPacket {
 				r.broadcast(m.sender, m.Type, payload)
 			}
-		case c := <-collisions:
+		case c := <-gameMsgs.Collisions():
 			r.broadcast(0, "Collision", c)
-		case c := <-conflicts:
+		case c := <-gameMsgs.Conflicts():
 			r.broadcast(0, "Conflict", c)
-		case e := <-eliminated:
+		case e := <-gameMsgs.EliminatedPlayers():
 			r.broadcast(0, "EliminatedPlayer", e)
-		case w := <-winner:
+		case w := <-gameMsgs.Winner():
 			r.field.Close()
 			// set nil to block future movements
 			r.field = nil
 			r.gameMsgs.Disable()
 			r.broadcast(0, "Winner", w)
+		case f := <-gameMsgs.GeneratedField():
+			r.broadcast(0, "Field", f)
 		case started := <-r.startMatch:
 			if r.field != nil {
 				started <- false

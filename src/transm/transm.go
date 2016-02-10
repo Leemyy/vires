@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/mhuisi/vires/src/game/ent"
+	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/vec"
 )
 
@@ -43,11 +43,35 @@ type EliminatedPlayer ent.ID
 
 type Winner ent.ID
 
+type GeneratedCell struct {
+	ID   ent.ID
+	Body ent.Circle
+}
+
+func makeGenCell(c *ent.Cell) GeneratedCell {
+	return GeneratedCell{c.ID(), c.Body()}
+}
+
+type StartCell struct {
+	Owner ent.ID
+	Cell  ent.ID
+}
+
+func makeStartCell(c *ent.Cell) StartCell {
+	return StartCell{c.ID(), c.Owner().ID()}
+}
+
+type Field struct {
+	Cells      []GeneratedCell
+	StartCells []StartCell
+}
+
 type Transmitter struct {
 	collisions        chan *Collision
 	conflicts         chan *Conflict
 	eliminatedPlayers chan *EliminatedPlayer
 	winner            chan *Winner
+	field             chan *Field
 }
 
 func (t *Transmitter) Open() {
@@ -55,6 +79,7 @@ func (t *Transmitter) Open() {
 	t.conflicts = make(chan *Conflict, 512)
 	t.eliminatedPlayers = make(chan *EliminatedPlayer, 16)
 	t.winner = make(chan *Winner)
+	t.field = make(chan *Field)
 
 }
 
@@ -63,6 +88,7 @@ func (t *Transmitter) Disable() {
 	t.conflicts = nil
 	t.eliminatedPlayers = nil
 	t.winner = nil
+	t.field = nil
 }
 
 func (t *Transmitter) Collide(a, b *ent.Movement) {
@@ -83,6 +109,20 @@ func (t *Transmitter) Win(p ent.Player) {
 	t.winner <- &w
 }
 
+func (t *Transmitter) GenerateField(field map[ent.ID]*ent.Cell) {
+	cells := make([]GeneratedCell, len(field))
+	startCells := []StartCell{}
+	i := 0
+	for _, c := range field {
+		cells[i] = makeGenCell(c)
+		if c.Owner() != nil {
+			startCells = append(startCells, makeStartCell(c))
+		}
+		i++
+	}
+	t.field <- &Field{cells, startCells}
+}
+
 func (t *Transmitter) Collisions() <-chan *Collision {
 	return t.collisions
 }
@@ -97,6 +137,10 @@ func (t *Transmitter) EliminatedPlayers() <-chan *EliminatedPlayer {
 
 func (t *Transmitter) Winner() <-chan *Winner {
 	return t.winner
+}
+
+func (t *Transmitter) GeneratedField() <-chan *Field {
+	return t.field
 }
 
 type UserJoined struct {
@@ -118,11 +162,13 @@ func protocolExample() io.Reader {
 	v := vec.V{2.0, 3.0}
 	c := ent.Circle{v, 5.0}
 	cm := CollisionMovement{1, 10, c, v}
+	cell := GeneratedCell{1, c}
+	startCell := StartCell{1, 2}
 	rm := ReceivedMovement{1, 2}
 	ex := []interface{}{
-		"\nCollision (sent by the server when a collision occurs):",
+		"Collision (sent by the server when a collision occurs):",
 		&Collision{cm, cm},
-		"\nConflict (sent by the server when a conflict occurs):",
+		"Conflict (sent by the server when a conflict occurs):",
 		&Conflict{
 			5,
 			ConflictCell{
@@ -131,15 +177,20 @@ func protocolExample() io.Reader {
 				10,
 			},
 		},
-		"\nEliminatedPlayer (sent by the server when a player dies):",
+		"EliminatedPlayer (sent by the server when a player dies):",
 		1,
-		"\nWinner (sent by the server when a player wins the game):",
+		"Winner (sent by the server when a player wins the game):",
 		1,
-		"\nJoined (sent by the server when a user joins the room",
+		"Joined (sent by the server when a user joins the room)",
 		&UserJoined{1},
-		"\nMove (sent by the client when moving vires):",
+		"Field (sent by the server when the field is generated)",
+		&Field{
+			[]GeneratedCell{cell, cell, cell, cell, cell},
+			[]StartCell{startCell, startCell},
+		},
+		"Move (sent by the client when moving vires):",
 		&rm,
-		"\nMove (sent by the server when a player moved vires):",
+		"Move (sent by the server when a player moved vires):",
 		&BroadcastedMovement{
 			1,
 			1,
