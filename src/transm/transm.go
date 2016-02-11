@@ -93,7 +93,7 @@ func (t *Transmitter) Open() {
 	t.eliminatedPlayers = make(chan *EliminatedPlayer, 16)
 	t.replications = make(chan Replication, 512)
 	t.winner = make(chan *Winner)
-	t.field = make(chan *Field)
+	t.field = make(chan *Field, 1)
 
 }
 
