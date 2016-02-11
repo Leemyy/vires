@@ -1,3 +1,4 @@
+// vires is a simple multiplayer RTS game.
 package main
 
 import (
@@ -29,6 +30,7 @@ func onMainPage(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, staticDir+"main.html")
 }
 
+// roomID gets the id of the current room from the url of an http request.
 func roomID(r *http.Request) string {
 	return mux.Vars(r)["roomid"]
 }

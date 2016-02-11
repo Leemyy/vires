@@ -1,3 +1,4 @@
+// Package room maintains the game field of vires.
 package room
 
 import (
@@ -9,14 +10,10 @@ import (
 	"github.com/mhuisi/vires/src/transm"
 )
 
-const (
-	Version     = "0.1"
-	joinBufSize = 16
-	killBufSize = 16
-	rxBufSize   = 512
-	txBufSize   = 32
-)
-
+// RX is a packet received
+// by the client and used for
+// pre-parsing the type and the
+// version of the packet.
 type RX struct {
 	sender  ent.ID
 	Type    string
@@ -24,6 +21,7 @@ type RX struct {
 	Data    json.RawMessage
 }
 
+// TX is a packet sent to the client.
 type TX struct {
 	Sender  ent.ID
 	Type    string
@@ -32,59 +30,43 @@ type TX struct {
 }
 
 func newTX(sender ent.ID, typ string, data interface{}) TX {
-	return TX{sender, typ, Version, data}
+	return TX{sender, typ, transm.Version, data}
 }
 
-type user struct {
+type userConn struct {
 	id   ent.ID
 	conn *websocket.Conn
 	send chan TX
-	read chan RX
 }
 
-func (u *user) writer() {
-	conn := u.conn
-	for tx := range u.send {
-		err := conn.WriteJSON(tx)
-		if err != nil {
-			break
-		}
-	}
-	u.conn.Close()
-}
-
-func (u *user) reader() {
-	uid := u.id
-	conn := u.conn
-	for {
-		p := RX{sender: uid}
-		err := conn.ReadJSON(&p)
-		if err != nil {
-			u.conn.Close()
-			return
-		}
-		u.read <- p
-	}
-}
-
+// Room represents a single entity
+// that hosts a match.
 type Room struct {
-	users      map[*user]struct{}
-	uid        ent.ID
-	join       chan *user
-	kill       chan *user
-	read       chan RX
-	gameMsgs   *transm.Transmitter
+	users map[*websocket.Conn]userConn
+	// current userid
+	uid ent.ID
+	// joining users
+	join chan *websocket.Conn
+	// users to disconnect
+	kill chan userConn
+	// channel to process packets from users
+	read     chan RX
+	gameMsgs *transm.Transmitter
+	// starts a match and echos back if it was started
 	startMatch chan chan<- bool
 	field      *game.Field
 }
 
+// NewRoom creates a new room and launches
+// the handler for inbound connections
+// and starting the match.
 func NewRoom() *Room {
 	r := &Room{
-		users:      map[*user]struct{}{},
+		users:      map[*websocket.Conn]userConn{},
 		uid:        1,
-		join:       make(chan *user, joinBufSize),
-		kill:       make(chan *user, killBufSize),
-		read:       make(chan RX, rxBufSize),
+		join:       make(chan *websocket.Conn, 16),
+		kill:       make(chan userConn, 16),
+		read:       make(chan RX, 512),
 		gameMsgs:   &transm.Transmitter{},
 		startMatch: make(chan chan<- bool),
 	}
@@ -92,19 +74,75 @@ func NewRoom() *Room {
 	return r
 }
 
-func (r *Room) broadcast(sender ent.ID, typ string, data interface{}) {
-	for u := range r.users {
-		select {
-		case u.send <- newTX(sender, typ, data):
-		default:
-			// send channel is blocked, user is too slow: kill user
-			r.kill <- u
+// userWriter writes all packets from
+// send to conn as JSON.
+//
+// when an error occurs, the user with the specified
+// userid is killed.
+func (r *Room) userWriter(c userConn) {
+	for tx := range c.send {
+		err := c.conn.WriteJSON(tx)
+		if err != nil {
+			r.kill <- c
+			return
 		}
 	}
 }
 
+// userReader reads all packets from
+// userConn.conn, pre-parses them
+// as RX and sends the packet
+// over Room.read.
+//
+// when an error occurs, the user with the specified
+// userid is killed.
+func (r *Room) userReader(c userConn) {
+	for {
+		p := RX{sender: c.id}
+		err := c.conn.ReadJSON(&p)
+		if err != nil {
+			r.kill <- c
+			return
+		}
+		r.read <- p
+	}
+}
+
+// killUser disconnects a user completly,
+// cleaning up all of his resources.
+func (r *Room) killUser(c userConn) {
+	if _, ok := r.users[c.conn]; !ok {
+		return
+	}
+	delete(r.users, c.conn)
+	// causes error in userReader and userWriter, terminating both
+	// (a duplicate disconnect msg is sent but this is handled
+	// at the start of this function and not very expensive)
+	c.conn.Close()
+	if r.field != nil {
+		r.field.DisconnectPlayer(c.id)
+	}
+}
+
+// broadcast sends a message with the specified type and
+// the specified payload as data by the specified sender
+// to everyone in the room.
+func (r *Room) broadcast(sender ent.ID, typ string, data interface{}) {
+	for _, userConn := range r.users {
+		select {
+		case userConn.send <- newTX(sender, typ, data):
+		default:
+			// send channel is blocked, user is too slow: kill user
+			r.killUser(userConn)
+		}
+	}
+}
+
+// handleRX parses the actual packet, checks it for validity
+// in the context, notifies the game when necessary and returns
+// the payload of the packet and if the packet was accepted.
 func (r *Room) handleRX(p RX) (payload interface{}, ok bool) {
-	if p.Version != Version {
+	if p.Version != transm.Version {
 		return nil, false
 	}
 	unmarshal := func(v interface{}) error {
@@ -130,23 +168,32 @@ func (r *Room) handleRX(p RX) (payload interface{}, ok bool) {
 	return nil, false
 }
 
+// handler is a monitor goroutine
+// that manages anything that happens inside
+// of the room, like managing users,
+// remoting packets from the game to the clients,
+// receiving packets and starting/stopping the game.
 func (r *Room) handler() {
 	join := r.join
 	kill := r.kill
 	read := r.read
 	gameMsgs := r.gameMsgs
+	// gameMsgs members are not cached
+	// because they can become nil
+	// to block the respective cases
 	for {
 		select {
-		case u := <-join:
-			u.id = r.uid
+		case conn := <-join:
+			id := r.uid
+			send := make(chan TX, 64)
+			uconn := userConn{id, conn, send}
+			go r.userReader(uconn)
+			go r.userWriter(uconn)
 			r.uid++
-			r.users[u] = struct{}{}
-			u.send <- newTX(0, "Join", &transm.UserJoined{u.id})
+			r.users[conn] = uconn
+			r.broadcast(0, "Join", &transm.UserJoined{id})
 		case u := <-kill:
-			delete(r.users, u)
-			// close send channel -> closes conn in writer -> results in error in reader
-			// -> both writer and reader are terminated
-			close(u.send)
+			r.killUser(u)
 		case m := <-read:
 			payload, validPacket := r.handleRX(m)
 			if validPacket {
@@ -176,8 +223,8 @@ func (r *Room) handler() {
 			started <- true
 			uids := make([]ent.ID, len(r.users))
 			i := 0
-			for u := range r.users {
-				uids[i] = u.id
+			for _, userConn := range r.users {
+				uids[i] = userConn.id
 				i++
 			}
 			r.gameMsgs.Open()
@@ -186,19 +233,15 @@ func (r *Room) handler() {
 	}
 }
 
+// StartMatch starts the match and returns whether
+// the match was started or if it was already running.
 func (r *Room) StartMatch() bool {
 	started := make(chan bool)
 	r.startMatch <- started
 	return <-started
 }
 
+// Connect connects a user with the specified connection to the room.
 func (r *Room) Connect(c *websocket.Conn) {
-	u := &user{
-		conn: c,
-		send: make(chan TX, txBufSize),
-		read: r.read,
-	}
-	go u.reader()
-	go u.writer()
-	r.join <- u
+	r.join <- c
 }

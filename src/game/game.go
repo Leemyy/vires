@@ -182,6 +182,5 @@ func (f *Field) DisconnectPlayer(id ent.ID) {
 			}
 		}
 		f.removePlayer(id)
-
 	})
 }
