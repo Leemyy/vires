@@ -5,15 +5,24 @@ package mapgen
 //channels = append(channels, Channel{name:"some channel name"})
 //channels = append(channels, Channel{name:"some other name"})
 
+import (
+	"math"
+	"math/rand"
+)
+
 const (
-	CellMinimumSize = 4
-	CellMaximumSize = 24
+	CellMinimumSize  = 4
+	CellMaximumSize  = 24
+	MaximumXPosition = 800
+	MaximumYPosition = 800
+	NumberOfCells    = 50
+	DistanceFactor   = 1
 )
 
 type Cell struct {
-	xPosition uint32
-	yPosition uint32
-	size      uint32
+	xPosition int32
+	yPosition int32
+	size      int32
 }
 
 type Map struct {
@@ -28,11 +37,11 @@ var currentSecondBestFitness Map
 func setFitnesses() {
 	for _, currMap := range maps {
 
-		if currentLowestFitness == nil {
+		if currentLowestFitness.cells == nil {
 			currentLowestFitness = currMap
-		} else if currentSecondBestFitness == nil && currMap.fitness > currentLowestFitness.fitness {
+		} else if currentSecondBestFitness.cells == nil && currMap.fitness > currentLowestFitness.fitness {
 			currentSecondBestFitness = currMap
-		} else if currentSecondBestFitness == nil && currMap.fitness <= currentLowestFitness.fitness {
+		} else if currentSecondBestFitness.cells == nil && currMap.fitness <= currentLowestFitness.fitness {
 			currentSecondBestFitness = currentLowestFitness
 			currentLowestFitness = currMap
 		} else if currMap.fitness < currentLowestFitness.fitness {
@@ -44,15 +53,32 @@ func setFitnesses() {
 	}
 }
 
-func generateMap() Map {
-	var bool generationSuccessful = false
+func generateMap() {
+	//generationSuccessful := false
 
 	// TODO: return generated map here
-	return nil
 }
 
 func calculateFitnesses(cells []Cell) float64 {
+	for _, currCellOne := range cells {
+		for _, currCellTwo := range cells {
+			if currCellOne != currCellTwo {
+				deltaX := currCellOne.xPosition - currCellTwo.xPosition
+				deltaY := currCellOne.yPosition - currCellTwo.yPosition
+				currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
+				if currentDistance < CellMaximumSize*DistanceFactor {
+					return 100
+				}
+			}
+		}
+	}
+	return 0
+}
 
-	// TODO: return Mapfitness here
-	return nil
+func generateCellList() []Cell {
+	var cells []Cell
+	for i := 0; i < NumberOfCells; i++ {
+		cells = append(cells, Cell{rand.Int31n(MaximumXPosition), rand.Int31n(MaximumYPosition), rand.Int31n(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
+	}
+	return cells
 }
