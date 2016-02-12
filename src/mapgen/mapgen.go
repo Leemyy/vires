@@ -54,7 +54,7 @@ func setFitnesses() {
 	}
 }
 
-func generateMap() {
+func generateMap() *Map {
 	generationSuccessful := false
 	for generationSuccessful == false {
 		maps = nil
@@ -97,7 +97,7 @@ func generateMap() {
 			}
 		}
 	}
-	// TODO: return generated map here
+	return currentLowestFitness
 }
 
 func calculateFitnesses(cells []Cell) float64 {
