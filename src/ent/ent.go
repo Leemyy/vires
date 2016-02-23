@@ -10,8 +10,10 @@ import (
 )
 
 type (
+	// Vires represents a game unit
 	Vires int
-	ID    int
+	// ID represents any kind of unique identifier value
+	ID int
 )
 
 // Player represents a player
