@@ -87,8 +87,8 @@ func (f *Field) removePlayer(p ent.ID) {
 	delete(f.players, p)
 	for _, m := range f.movements {
 		if m.Owner().ID() == p {
-			m.Stop()
 			m.ClearCollisions()
+			f.removeMovement(m)
 		}
 	}
 	for _, c := range f.cells {
@@ -101,8 +101,7 @@ func (f *Field) removePlayer(p ent.ID) {
 
 func (f *Field) removeMovement(m *ent.Movement) {
 	m.Stop()
-	id := m.ID()
-	delete(f.movements, id)
+	delete(f.movements, m.ID())
 }
 
 func (f *Field) viresChanged(m *ent.Movement) {
