@@ -13,17 +13,20 @@ const (
 	replicationInterval = 1 * time.Second
 )
 
+// Field represents a game instance of a field.
 type Field struct {
-	players         map[ent.ID]ent.Player
-	cells           map[ent.ID]*ent.Cell
-	movements       map[ent.ID]*ent.Movement
-	movementID      ent.ID
-	ops             *timed.Timed
-	stopReplication func() bool
-	transmitter     *transm.Transmitter
-	size            vec.V
+	players     map[ent.ID]ent.Player
+	cells       map[ent.ID]*ent.Cell
+	movements   map[ent.ID]*ent.Movement
+	movementID  ent.ID
+	ops         *timed.Timed
+	transmitter *transm.Transmitter
+	size        vec.V
 }
 
+// NewField generates a new Field for the specified players,
+// using the specified transmitter to notify the caller
+// about things that happen in the game.
 func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	// mapgen algorithm here ...
 
@@ -51,7 +54,7 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 
 func (f *Field) startReplication() {
 	var replicate func(time.Time)
-	start := func() { f.stopReplication = f.ops.Start(time.Now().Add(replicationInterval), replicate) }
+	start := func() { f.ops.Start(time.Now().Add(replicationInterval), replicate) }
 	replicate = func(time.Time) {
 		for _, c := range f.cells {
 			c.Replicate()
@@ -62,9 +65,10 @@ func (f *Field) startReplication() {
 	start()
 }
 
+// Close stops all operations on the field and blocks
+// until all operations have been stopped.
 func (f *Field) Close() {
 	f.ops.Close()
-	f.stopReplication()
 }
 
 func (f *Field) checkDominationVictory() {
@@ -81,13 +85,23 @@ func (f *Field) checkDominationVictory() {
 
 func (f *Field) removePlayer(p ent.ID) {
 	delete(f.players, p)
+	for _, m := range f.movements {
+		if m.Owner().ID() == p {
+			m.ClearCollisions()
+			f.removeMovement(m)
+		}
+	}
+	for _, c := range f.cells {
+		if c.Owner().ID() == p {
+			c.Neutralize()
+		}
+	}
 	f.checkDominationVictory()
 }
 
 func (f *Field) removeMovement(m *ent.Movement) {
 	m.Stop()
-	id := m.ID()
-	delete(f.movements, id)
+	delete(f.movements, m.ID())
 }
 
 func (f *Field) viresChanged(m *ent.Movement) {
@@ -148,6 +162,11 @@ func (f *Field) isValidMovement(attacker, src, dst ent.ID) bool {
 	return srcCell.Owner().ID() == attacker
 }
 
+// Move moves a movement by the specified attacker
+// from the specified source cell to the
+// specified target cell and returns
+// the ID of the movement and whether the
+// movement is valid.
 func (f *Field) Move(attacker, srcid, tgtid ent.ID) (ent.ID, bool) {
 	id := make(chan ent.ID)
 	valid := make(chan bool)
@@ -174,13 +193,11 @@ func (f *Field) Move(attacker, srcid, tgtid ent.ID) (ent.ID, bool) {
 	return <-id, <-valid
 }
 
+// DisconnectPlayer removes the player from
+// the field, stops all his actions and
+// neutralizes all his cells.
 func (f *Field) DisconnectPlayer(id ent.ID) {
 	f.ops.Start(time.Now(), func(time.Time) {
-		for _, c := range f.cells {
-			if c.Owner().ID() == id {
-				c.Neutralize()
-			}
-		}
 		f.removePlayer(id)
 	})
 }

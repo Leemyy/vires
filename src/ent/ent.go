@@ -1,3 +1,5 @@
+// Package ent contains game entities
+// present on a game field.
 package ent
 
 import (
@@ -8,48 +10,64 @@ import (
 )
 
 type (
+	// Vires represents a game unit
 	Vires int
-	ID    int
+	// ID represents any kind of unique identifier value
+	ID int
 )
 
+// Player represents a player
+// playing the game.
 type Player struct {
 	id    ID
 	cells int
 }
 
+// NewPlayer creates a new player
+// with the specified ID and
+// an amount of cells of 1.
 func NewPlayer(id ID) Player {
 	return Player{id, 1}
 }
 
+// ID gets the id of the player.
 func (p Player) ID() ID {
 	return p.id
 }
 
+// Cells gets the amount of cells of the player.
 func (p Player) Cells() int {
 	return p.cells
 }
 
+// IsDead returns whether the player has no cells left.
 func (p Player) IsDead() bool {
 	return p.cells <= 0
 }
 
+// Circle represents a 2D circle.
 type Circle struct {
 	Location vec.V
 	Radius   float64
 }
 
+// Cell represents a cell on the field.
 type Cell struct {
 	id       ID
 	capacity Vires
 	// [Replication] = vires/cycle
 	replication Vires
 	stationed   Vires
-	// may be null
+	// may be nil
 	owner *Player
 	body  Circle
 }
 
-// pass owner == nil for neutral cell
+// NewCell creates a new cell with the specified id,
+// the specified force, which determines its capacity, its
+// replication and its radius, the owner, which may be
+// nil if the cell is neutral, and loc, which is the
+// location of the cell.
 func NewCell(id ID, force float64, owner *Player, loc vec.V) *Cell {
 	return &Cell{
 		id:          id,
@@ -61,27 +79,42 @@ func NewCell(id ID, force float64, owner *Player, loc vec.V) *Cell {
 	}
 }
 
+// ID gets the id of the cell.
 func (c *Cell) ID() ID {
 	return c.id
 }
 
+// Capacity gets the limit for stationed vires
+// of this cell.
 func (c *Cell) Capacity() Vires {
 	return c.capacity
 }
 
+// Replication gets the rate at which
+// vires in this cell replicate, ie
+// how many vires are produced each cycle.
 func (c *Cell) Replication() Vires {
 	return c.replication
 }
 
+// Stationed gets the amount of vires
+// stationed in this cell.
 func (c *Cell) Stationed() Vires {
 	return c.stationed
 }
 
-// return value should not be mutated.
+// Owner gets the owner of this cell.
+// May be nil if the cell is neutral.
 func (c *Cell) Owner() *Player {
-	return c.owner
+	if c.owner == nil {
+		return nil
+	}
+	clone := *c.owner
+	return &clone
 }
 
+// Body gets the radius and the location
+// of the cell.
 func (c *Cell) Body() Circle {
 	return c.body
 }
@@ -101,6 +134,12 @@ func cellRadius(force float64) float64 {
 	return force
 }
 
+// Merge adds the specified amount
+// of vires into this cell
+// and limits the merge if
+// the new amount of stationed vires
+// is smaller than 0 or larger than the
+// capacity.
 func (c *Cell) Merge(n Vires) {
 	newStationed := c.stationed + n
 	switch {
@@ -113,18 +152,25 @@ func (c *Cell) Merge(n Vires) {
 	}
 }
 
+// Replicate runs a single replication
+// cycle.
 func (c *Cell) Replicate() {
 	c.Merge(c.replication)
 }
 
+// IsDead returns whether the cell is dead.
 func (c *Cell) IsDead() bool {
 	return c.stationed <= 0
 }
 
+// IsNeutral returns whether the cell has an owner.
 func (c *Cell) IsNeutral() bool {
 	return c.owner == nil
 }
 
+// SetOwner sets the owner of this cell,
+// removes the cell from the original owner
+// and adds the cell to the new owner.
 func (c *Cell) SetOwner(o Player) {
 	if !c.IsNeutral() {
 		c.owner.cells--
@@ -133,6 +179,8 @@ func (c *Cell) SetOwner(o Player) {
 	c.owner = &o
 }
 
+// Neutralize resets the owner of this cell
+// and removes the cell from its original owner.
 func (c *Cell) Neutralize() {
 	if c.IsNeutral() {
 		return
@@ -154,6 +202,9 @@ func speed(n Vires) float64 {
 	return 100 / float64(n)
 }
 
+// Move creates a movement which describes
+// a movement from this cell to the specified
+// target cell and uses the specified id.
 func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 	moving := src.stationed / 2
 	start := src.body.Location
@@ -170,6 +221,8 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 	return mov
 }
 
+// Movement represents vires that are
+// moving in between cells.
 type Movement struct {
 	id     ID
 	owner  Player
@@ -182,40 +235,63 @@ type Movement struct {
 	Stop       func() bool
 }
 
+// ID gets the id of the movement.
 func (m *Movement) ID() ID {
 	return m.id
 }
 
+// Owner gets the owner of the movement,
+// ie the player that sent the movement.
 func (m *Movement) Owner() Player {
 	return m.owner
 }
 
+// Moving gets the amount of vires present
+// in this movement.
 func (m *Movement) Moving() Vires {
 	return m.moving
 }
 
-// return value should not be mutated.
+// Target gets the cell towards which this
+// movement moves.
+// The return value should not be mutated.
 func (m *Movement) Target() *Cell {
 	return m.target
 }
 
+// Body gets the radius and the current location
+// of this movement.
 func (m *Movement) Body() Circle {
 	return m.body
 }
 
+// Direction gets the direction the
+// movement is moving in.
+// The abs() of the returned vector
+// is the speed of the movement in
+// points/s.
 func (m *Movement) Direction() vec.V {
 	return m.direction
 }
 
-// return value should not be mutated.
+// Collisions gets the movements this movement collides with.
+// The value of the returned map is a function to
+// stop the respective collision from happening.
+// The return value should not be mutated.
 func (m *Movement) Collisions() map[*Movement]func() bool {
 	return m.collisions
 }
 
+// AddCollision adds a movement this movement collides with
+// to the movement. stopCollision is called when
+// the movement is stopped.
 func (m *Movement) AddCollision(m2 *Movement, stopCollision func() bool) {
 	m.collisions[m2] = stopCollision
 }
 
+// ClearCollisions stops all collisions associated with this movement
+// and removes this movement from all the movements this movement
+// is colliding with.
 func (m *Movement) ClearCollisions() {
 	for m2, stop := range m.collisions {
 		stop()
@@ -224,6 +300,10 @@ func (m *Movement) ClearCollisions() {
 	}
 }
 
+// Merge adds the amount of specified vires
+// into this cell and rescales
+// its speed and its radius dependent
+// on the new amount of vires.
 func (m *Movement) Merge(n Vires) {
 	newMoving := m.moving + n
 	if newMoving < 0 {
@@ -234,10 +314,20 @@ func (m *Movement) Merge(n Vires) {
 	m.body.Radius = radius(newMoving)
 }
 
+// Kill sets the amount of vires of this movement to 0.
 func (m *Movement) Kill() {
 	m.Merge(-m.moving)
 }
 
+// Conflict executes a collision
+// with the target cell, merging
+// the vires into the target cell
+// if it is a friendly cell or
+// or removing the vires from the
+// target cell if it is an enemy cell.
+// Cell owners are transferred
+// if the movement is strong enough
+// to take over the cell.
 func (m *Movement) Conflict() {
 	// after conflict, set moving to 0
 	defer m.Kill()
@@ -256,6 +346,14 @@ func (m *Movement) Conflict() {
 	}
 }
 
+// Collide executes a collision with a
+// movement, merging the movements
+// if they have the same target and
+// the same owner or substracting vires
+// from each other when the owners are
+// different.
+// The set of collisions in a movement
+// is not modified by this method.
 func (m *Movement) Collide(m2 *Movement) {
 	// merge movements if two movements with the same owner and the same target collide
 	if m.owner.ID() == m2.owner.ID() {
@@ -273,6 +371,7 @@ func (m *Movement) Collide(m2 *Movement) {
 	m2.Merge(-m.moving)
 }
 
+// IsDead returns whether the movement is dead.
 func (m *Movement) IsDead() bool {
 	return m.moving <= 0
 }
@@ -321,6 +420,9 @@ func at(in float64) time.Time {
 	return time.Now().Add(time.Duration(in * float64(time.Second)))
 }
 
+// CollidesWith checks if a collision with the
+// specified movement occurs and returns
+// at what time it occurs.
 func (m *Movement) CollidesWith(m2 *Movement) (collideAt time.Time, collides bool) {
 	// movements where the owner is the same
 	// but the target isn't don't collide;
@@ -332,6 +434,8 @@ func (m *Movement) CollidesWith(m2 *Movement) (collideAt time.Time, collides boo
 	return time.Now(), false
 }
 
+// ConflictAt returns at what time a
+// collision with a cell occurs.
 func (m *Movement) ConflictAt() time.Time {
 	defender := m.target
 	speed := vec.Abs(m.direction)
