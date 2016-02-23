@@ -13,10 +13,11 @@ import (
 )
 
 const (
-	CellMinimumSize           = 4
-	CellMaximumSize           = 24
-	MaximumXPosition          = 800
-	MaximumYPosition          = 800
+	CellMinimumSize           = 40
+	PlayerCellDefaultSize     = 140
+	CellMaximumSize           = 240
+	MaximumXPosition          = 8000
+	MaximumYPosition          = 8000
 	NumberOfCells             = 50
 	DistanceFactor            = 1
 	NumberOfMapsPerGeneration = 8
@@ -102,16 +103,25 @@ func generateMap(numberOfPlayers int) ([]ent.Circle, []int) {
 				}
 			}
 			numberOfGenerations++
-			if numberOfGenerations < 10000 {
-				generationSuccessful = true
-			}
+		}
+		if numberOfGenerations < 10000 {
+			generationSuccessful = true
 		}
 	}
 	var circles []ent.Circle
 	for _, currentCell := range generation.currentLowestFitness.cells {
 		circles = append(circles, ent.Circle{vec.V{float64(currentCell.xPosition), float64(currentCell.yPosition)}, float64(currentCell.size)})
 	}
-	return circles, nil
+	var playerIndex []int
+	for i := 0; i < numberOfPlayers; i++ {
+		randomNumber := rand.Intn(len(circles) - 1)
+		for contains(playerIndex, randomNumber) {
+			randomNumber = rand.Intn(len(circles) - 1)
+		}
+		circles[randomNumber].Radius = PlayerCellDefaultSize
+		playerIndex = append(playerIndex, randomNumber)
+	}
+	return circles, playerIndex
 }
 
 func calculateFitnesses(cells []Cell) float64 {
@@ -136,4 +146,13 @@ func generateCellList() []Cell {
 		cells = append(cells, Cell{rand.Int31n(MaximumXPosition), rand.Int31n(MaximumYPosition), rand.Int31n(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
 	}
 	return cells
+}
+
+func contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
