@@ -4,11 +4,11 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/mhuisi/flog/weblog"
 	"github.com/mhuisi/vires/src/room"
 )
 
@@ -72,7 +72,6 @@ func startMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	weblog.Open(".", 1024)
 	r := mux.NewRouter()
 	// Main page
 	r.HandleFunc("/", onMainPage).Methods("GET")
@@ -83,6 +82,6 @@ func main() {
 	http.Handle("/", r)
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
-		weblog.Backend().Fatalf("Cannot start webserver: %s\n", err)
+		log.Fatalf("Cannot start webserver: %s\n", err)
 	}
 }
