@@ -7,10 +7,11 @@ package mapgen
 
 import (
 	//"fmt"
-	"github.com/mhuisi/vires/src/ent"
-	"github.com/mhuisi/vires/src/vec"
 	"math"
 	"math/rand"
+
+	"github.com/mhuisi/vires/src/ent"
+	"github.com/mhuisi/vires/src/vec"
 )
 
 const (
@@ -23,6 +24,12 @@ const (
 	DistanceFactor            = 1
 	NumberOfMapsPerGeneration = 8
 )
+
+type Field struct {
+	Size          ent.Vec
+	Cells         []ent.Circle
+	StartCellIdxs []int
+}
 
 type Cell struct {
 	xPosition int32
