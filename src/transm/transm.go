@@ -2,7 +2,7 @@
 // for the data transmission between client
 // and server as well as for the communication
 // between the game and the server.
-package transm
+package main
 
 import (
 	"bytes"
@@ -16,23 +16,24 @@ import (
 
 const Version = "0.1"
 
-// CollisionMovement represents a movement
-// in a collision.
-type CollisionMovement struct {
+// Movement represents a movement
+// transmitted to the client.
+type Movement struct {
 	ID        ent.ID
+	Owner     ent.ID
 	Moving    ent.Vires
 	Body      ent.Circle
 	Direction vec.V
 }
 
-func makeCollMov(m *ent.Movement) CollisionMovement {
-	return CollisionMovement{m.ID(), m.Moving(), m.Body(), m.Direction()}
+func newMov(m *ent.Movement) *Movement {
+	return &Movement{m.ID(), m.Owner().ID(), m.Moving(), m.Body(), m.Direction()}
 }
 
 // Collision is transmitted by the server
 // when a collision occurs.
 type Collision struct {
-	A, B CollisionMovement
+	A, B *Movement
 }
 
 // ConflictCell represents a cell
@@ -105,6 +106,7 @@ func makeStartCell(c *ent.Cell) StartCell {
 type Field struct {
 	Cells      []GeneratedCell
 	StartCells []StartCell
+	Size       vec.V
 }
 
 // Transmitter is a binding between
@@ -119,6 +121,7 @@ type Field struct {
 // Transmitter and relays the data
 // to clients.
 type Transmitter struct {
+	movements         chan *Movement
 	collisions        chan *Collision
 	conflicts         chan *Conflict
 	eliminatedPlayers chan *EliminatedPlayer
@@ -130,6 +133,7 @@ type Transmitter struct {
 // Open opens all the channels of Transmitter,
 // enabling communication.
 func (t *Transmitter) Open() {
+	t.movements = make(chan *Movement, 1024)
 	t.collisions = make(chan *Collision, 1024)
 	t.conflicts = make(chan *Conflict, 512)
 	t.eliminatedPlayers = make(chan *EliminatedPlayer, 16)
@@ -148,6 +152,7 @@ func (t *Transmitter) Open() {
 // so no left over data is transmitted
 // after the game ended.
 func (t *Transmitter) Disable() {
+	t.movements = nil
 	t.collisions = nil
 	t.conflicts = nil
 	t.eliminatedPlayers = nil
@@ -156,9 +161,13 @@ func (t *Transmitter) Disable() {
 	t.field = nil
 }
 
+func (t *Transmitter) Move(m *ent.Movement) {
+	t.movements <- newMov(m)
+}
+
 // Collide transmits a collision packet.
 func (t *Transmitter) Collide(a, b *ent.Movement) {
-	t.collisions <- &Collision{makeCollMov(a), makeCollMov(b)}
+	t.collisions <- &Collision{newMov(a), newMov(b)}
 }
 
 // Conflict transmits a conflict packet.
@@ -192,18 +201,22 @@ func (t *Transmitter) Replicate(field map[ent.ID]*ent.Cell) {
 
 // GenerateField transmits a packet containing the entire
 // field that was generated.
-func (t *Transmitter) GenerateField(field map[ent.ID]*ent.Cell) {
-	cells := make([]GeneratedCell, len(field))
+func (t *Transmitter) GenerateField(fieldCells map[ent.ID]*ent.Cell, size vec.V) {
+	cells := make([]GeneratedCell, len(fieldCells))
 	startCells := []StartCell{}
 	i := 0
-	for _, c := range field {
+	for _, c := range fieldCells {
 		cells[i] = makeGenCell(c)
 		if c.Owner() != nil {
 			startCells = append(startCells, makeStartCell(c))
 		}
 		i++
 	}
-	t.field <- &Field{cells, startCells}
+	t.field <- &Field{cells, startCells, size}
+}
+
+func (t *Transmitter) Movements() <-chan *Movement {
+	return t.movements
 }
 
 func (t *Transmitter) Collisions() <-chan *Collision {
@@ -243,15 +256,6 @@ type ReceivedMovement struct {
 	Dest   ent.ID
 }
 
-// BroadcastedMovement is sent by the server
-// to inform all players that a player
-// sends a movement.
-type BroadcastedMovement struct {
-	ID       ent.ID
-	Owner    ent.ID
-	Received ReceivedMovement
-}
-
 // protocolExample prints an example
 // for all the top level packet types
 // as defined by this package to stdout
@@ -259,14 +263,15 @@ type BroadcastedMovement struct {
 func protocolExample() {
 	v := vec.V{2.0, 3.0}
 	c := ent.Circle{v, 5.0}
-	cm := CollisionMovement{1, 10, c, v}
+	mv := &Movement{1, 1, 10, c, v}
 	cell := GeneratedCell{1, c}
 	startCell := StartCell{1, 2}
 	cv := CellVires{1, 20}
-	rm := ReceivedMovement{1, 2}
 	ex := []interface{}{
+		"Movement (sent by the server when a movement was started):",
+		mv,
 		"Collision (sent by the server when a collision occurs):",
-		&Collision{cm, cm},
+		&Collision{mv, mv},
 		"Conflict (sent by the server when a conflict occurs):",
 		&Conflict{
 			5,
@@ -286,17 +291,12 @@ func protocolExample() {
 		&Field{
 			[]GeneratedCell{cell, cell, cell, cell, cell},
 			[]StartCell{startCell, startCell},
+			v,
 		},
 		"Joined (sent by the server when a user joins the room)",
 		&UserJoined{1},
 		"Move (sent by the client when moving vires):",
-		&rm,
-		"Move (sent by the server when a player moved vires):",
-		&BroadcastedMovement{
-			1,
-			1,
-			rm,
-		},
+		&ReceivedMovement{1, 2},
 	}
 	var b bytes.Buffer
 	for _, v := range ex {

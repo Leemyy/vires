@@ -23,14 +23,13 @@ type RX struct {
 
 // TX is a packet sent to the client.
 type TX struct {
-	Sender  ent.ID
 	Type    string
 	Version string
 	Data    interface{}
 }
 
-func newTX(sender ent.ID, typ string, data interface{}) TX {
-	return TX{sender, typ, transm.Version, data}
+func newTX(typ string, data interface{}) TX {
+	return TX{typ, transm.Version, data}
 }
 
 type userConn struct {
@@ -125,12 +124,11 @@ func (r *Room) killUser(c userConn) {
 }
 
 // broadcast sends a message with the specified type and
-// the specified payload as data by the specified sender
-// to everyone in the room.
-func (r *Room) broadcast(sender ent.ID, typ string, data interface{}) {
+// the specified payload to everyone in the room.
+func (r *Room) broadcast(typ string, data interface{}) {
 	for _, userConn := range r.users {
 		select {
-		case userConn.send <- newTX(sender, typ, data):
+		case userConn.send <- newTX(typ, data):
 		default:
 			// send channel is blocked, user is too slow: kill user
 			r.killUser(userConn)
@@ -139,11 +137,10 @@ func (r *Room) broadcast(sender ent.ID, typ string, data interface{}) {
 }
 
 // handleRX parses the actual packet, checks it for validity
-// in the context, notifies the game when necessary and returns
-// the payload of the packet and if the packet was accepted.
-func (r *Room) handleRX(p RX) (payload interface{}, ok bool) {
+// in the context and notifies the game when necessary.
+func (r *Room) handleRX(p RX) {
 	if p.Version != transm.Version {
-		return nil, false
+		return
 	}
 	unmarshal := func(v interface{}) error {
 		return json.Unmarshal(p.Data, v)
@@ -151,21 +148,15 @@ func (r *Room) handleRX(p RX) (payload interface{}, ok bool) {
 	switch p.Type {
 	case "Move":
 		if r.field == nil {
-			return nil, false
+			return
 		}
 		m := transm.ReceivedMovement{}
 		err := unmarshal(&m)
 		if err != nil {
-			return nil, false
+			return
 		}
-		mvid, validMovement := r.field.Move(p.sender, m.Source, m.Dest)
-		if !validMovement {
-			return nil, false
-		}
-		bm := &transm.BroadcastedMovement{mvid, p.sender, m}
-		return bm, true
+		r.field.Move(p.sender, m.Source, m.Dest)
 	}
-	return nil, false
 }
 
 // handler is a monitor goroutine
@@ -191,30 +182,29 @@ func (r *Room) handler() {
 			go r.userWriter(uconn)
 			r.uid++
 			r.users[conn] = uconn
-			r.broadcast(0, "Join", &transm.UserJoined{id})
+			r.broadcast("Join", &transm.UserJoined{id})
 		case u := <-kill:
 			r.killUser(u)
 		case m := <-read:
-			payload, validPacket := r.handleRX(m)
-			if validPacket {
-				r.broadcast(m.sender, m.Type, payload)
-			}
+			r.handleRX(m)
+		case mv := <-gameMsgs.Movements():
+			r.broadcast("Movement", mv)
 		case c := <-gameMsgs.Collisions():
-			r.broadcast(0, "Collision", c)
+			r.broadcast("Collision", c)
 		case c := <-gameMsgs.Conflicts():
-			r.broadcast(0, "Conflict", c)
+			r.broadcast("Conflict", c)
 		case e := <-gameMsgs.EliminatedPlayers():
-			r.broadcast(0, "EliminatedPlayer", e)
+			r.broadcast("EliminatedPlayer", e)
 		case w := <-gameMsgs.Winner():
 			r.field.Close()
 			// set nil to block future movements
 			r.field = nil
 			r.gameMsgs.Disable()
-			r.broadcast(0, "Winner", w)
+			r.broadcast("Winner", w)
 		case rep := <-gameMsgs.Replications():
-			r.broadcast(0, "Replication", rep)
+			r.broadcast("Replication", rep)
 		case f := <-gameMsgs.GeneratedField():
-			r.broadcast(0, "Field", f)
+			r.broadcast("Field", f)
 		case started := <-r.startMatch:
 			if r.field != nil {
 				started <- false

@@ -47,7 +47,7 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	}
 	// handle this here instead of in the caller to avoid the caller trying to read the cells
 	// while we're running our game loop
-	t.GenerateField(f.cells)
+	t.GenerateField(f.cells, f.size)
 	f.startReplication()
 	return f
 }
@@ -164,24 +164,17 @@ func (f *Field) isValidMovement(attacker, src, dst ent.ID) bool {
 
 // Move moves a movement by the specified attacker
 // from the specified source cell to the
-// specified target cell and returns
-// the ID of the movement and whether the
-// movement is valid.
-func (f *Field) Move(attacker, srcid, tgtid ent.ID) (ent.ID, bool) {
-	id := make(chan ent.ID)
-	valid := make(chan bool)
+// specified target cell.
+func (f *Field) Move(attacker, srcid, tgtid ent.ID) {
 	f.ops.Start(time.Now(), func(time.Time) {
 		if !f.isValidMovement(attacker, srcid, tgtid) {
-			id <- 0
-			valid <- false
 			return
 		}
 		mid := f.movementID
-		id <- mid
-		valid <- true
 		src := f.cells[srcid]
 		tgt := f.cells[tgtid]
 		mov := src.Move(mid, tgt)
+		f.transmitter.Move(mov)
 		at := mov.ConflictAt()
 		mov.Stop = f.ops.Start(at, func(time.Time) {
 			f.conflict(mov)
@@ -190,7 +183,6 @@ func (f *Field) Move(attacker, srcid, tgtid ent.ID) (ent.ID, bool) {
 		f.movementID++
 		f.findCollisions(mov)
 	})
-	return <-id, <-valid
 }
 
 // DisconnectPlayer removes the player from

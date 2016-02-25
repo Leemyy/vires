@@ -15,10 +15,28 @@
 
 "Payloads (wrapped in RX):"
 
-"Collision (sent by the server when a collision occurs, all values are from after the collision):"
+"Movement (sent by the server when a movement was started):"
+{
+        "ID": 1,
+        "Owner": 1,
+        "Moving": 10,
+        "Body": {
+                "Location": {
+                        "X": 2,
+                        "Y": 3
+                },
+                "Radius": 5
+        },
+        "Direction": {
+                "X": 2,
+                "Y": 3
+        }
+}
+"Collision (sent by the server when a collision occurs):"
 {
         "A": {
                 "ID": 1,
+                "Owner": 1,
                 "Moving": 10,
                 "Body": {
                         "Location": {
@@ -34,6 +52,7 @@
         },
         "B": {
                 "ID": 1,
+                "Owner": 1,
                 "Moving": 10,
                 "Body": {
                         "Location": {
@@ -48,8 +67,7 @@
                 }
         }
 }
-
-"Conflict (sent by the server when a conflict occurs, all values are from after the collision):"
+"Conflict (sent by the server when a conflict occurs):"
 {
         "Movement": 5,
         "Cell": {
@@ -58,13 +76,10 @@
                 "Owner": 10
         }
 }
-
 "EliminatedPlayer (sent by the server when a player dies):"
 1
-
 "Winner (sent by the server when a player wins the game):"
 1
-
 "Replication (sent by the server when all cells replicate)"
 [
         {
@@ -80,7 +95,6 @@
                 "Stationed": 20
         }
 ]
-
 "Field (sent by the server when the field is generated)"
 {
         "Cells": [
@@ -144,26 +158,18 @@
                         "Owner": 1,
                         "Cell": 2
                 }
-        ]
+        ],
+        "Size": {
+                "X": 2,
+                "Y": 3
+        }
 }
-
-"Joined (sent by the server when a user joins the match):"
+"Joined (sent by the server when a user joins the room)"
 {
         "ID": 1
 }
-
 "Move (sent by the client when moving vires):"
 {
         "Source": 1,
         "Dest": 2
-}
-
-"Move (sent by the server when a player moved vires):"
-{
-        "ID": 1,
-        "Owner": 1,
-        "Received": {
-                "Source": 1,
-                "Dest": 2
-        }
 }
