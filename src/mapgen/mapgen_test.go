@@ -12,11 +12,13 @@ func TestMapgen(t *testing.T) {
 	}
 	for _, currCircleOne := range circles {
 		for _, currCircleTwo := range circles {
-			deltaX := currCircleOne.Location.X - currCircleTwo.Location.X
-			deltaY := currCircleOne.Location.Y - currCircleTwo.Location.Y
-			currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
-			if currentDistance < CellMaximumSize*DistanceFactor {
-				t.Error("Expected distance more than ", CellMaximumSize*DistanceFactor, " got ", currentDistance, " instead")
+			if currCircleOne != currCircleTwo {
+				deltaX := currCircleOne.Location.X - currCircleTwo.Location.X
+				deltaY := currCircleOne.Location.Y - currCircleTwo.Location.Y
+				currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
+				if currentDistance < CellMaximumSize*DistanceFactor {
+					t.Error("Expected distance more than ", CellMaximumSize*DistanceFactor, " got ", currentDistance, " instead")
+				}
 			}
 		}
 	}
