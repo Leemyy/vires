@@ -6,6 +6,7 @@ package mapgen
 //channels = append(channels, Channel{name:"some other name"})
 
 import (
+	//"fmt"
 	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/vec"
 	"math"
@@ -71,12 +72,13 @@ func generateMap(numberOfPlayers int) ([]ent.Circle, []int) {
 	generationSuccessful := false
 	generation := newGeneration(nil, nil, nil)
 	for generationSuccessful == false {
-		generation := newGeneration(nil, nil, nil)
+		var maps []Map
 		for i := 0; i < NumberOfMapsPerGeneration; i++ {
 			currentCellList := generateCellList()
-			generation.maps = append(generation.maps, Map{currentCellList, calculateFitnesses(currentCellList)})
+			maps = append(maps, Map{currentCellList, calculateFitnesses(currentCellList)})
 
 		}
+		generation = newGeneration(maps, nil, nil)
 		setFitnesses(generation)
 		numberOfGenerations := 0
 		for generation.currentLowestFitness.fitness != 0 && numberOfGenerations < 10000 {
