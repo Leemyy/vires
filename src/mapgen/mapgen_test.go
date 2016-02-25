@@ -8,7 +8,7 @@ import (
 func TestMapgen(t *testing.T) {
 	circles, playerCells := generateMap(4)
 	if len(circles) != NumberOfCells {
-		t.Error("Expected ", NumberOfCells, " Cells got ", len(circles), " instead")
+		t.Error("Expected ", NumberOfCells, " Cells, got ", len(circles), " instead")
 	}
 	for _, currCircleOne := range circles {
 		for _, currCircleTwo := range circles {
