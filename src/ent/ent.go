@@ -113,6 +113,14 @@ func (c *Cell) Owner() *Player {
 	return &clone
 }
 
+func (c *Cell) OwnerID() ID {
+	o := c.Owner()
+	if o == nil {
+		return 0
+	}
+	return o.ID()
+}
+
 // Body gets the radius and the location
 // of the cell.
 func (c *Cell) Body() Circle {
