@@ -27,7 +27,11 @@ type Movement struct {
 }
 
 func newMov(m *ent.Movement) *Movement {
-	return &Movement{m.ID(), m.Owner().ID(), m.Moving(), m.Body(), m.Direction()}
+	ownerID := 0
+	if m.Owner() != nil {
+		ownerID = m.Owner().ID()
+	}
+	return &Movement{m.ID(), ownerID, m.Moving(), m.Body(), m.Direction()}
 }
 
 // Collision is transmitted by the server
