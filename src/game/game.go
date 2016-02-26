@@ -92,7 +92,7 @@ func (f *Field) removePlayer(p ent.ID) {
 		}
 	}
 	for _, c := range f.cells {
-		if c.Owner().ID() == p {
+		if c.OwnerID() == p {
 			c.Neutralize()
 		}
 	}
@@ -159,7 +159,7 @@ func (f *Field) isValidMovement(attacker, src, dst ent.ID) bool {
 	if srcCell.IsNeutral() {
 		return false
 	}
-	return srcCell.Owner().ID() == attacker
+	return srcCell.OwnerID() == attacker
 }
 
 // Move moves a movement by the specified attacker
