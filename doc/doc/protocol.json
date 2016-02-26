@@ -79,7 +79,7 @@
 1
 "Winner (sent by the server when a player wins the game):"
 1
-"Replication (sent by the server when all cells replicate)"
+"Replication (sent by the server when all cells replicate):"
 [
         {
                 "ID": 1,
@@ -94,7 +94,7 @@
                 "Stationed": 20
         }
 ]
-"Field (sent by the server when the field is generated)"
+"Field (sent by the server when the field is generated):"
 {
         "Cells": [
                 {
@@ -163,11 +163,11 @@
                 "Y": 3
         }
 }
-"Joined (sent by the server when a user joins the room)"
-{
-        "ID": 1
-}
-"Move (sent by the client when moving vires):"
+"Join (sent by the server when a user joins the room):"
+1
+"OwnID (sent by the server to users to tell them their ID when joining):"
+1
+"Movement (sent by the client when moving vires):"
 {
         "Source": 1,
         "Dest": 2

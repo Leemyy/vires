@@ -123,16 +123,25 @@ func (r *Room) killUser(c userConn) {
 	}
 }
 
+// send sends a message with the specified type
+// and the specified payload to the specified user.
+//
+// if the send channel is blocked because the user
+// is too slow, the user is killed.
+func (r *Room) send(c userConn, typ string, data interface{}) {
+	select {
+	case c.send <- newTX(typ, data):
+	default:
+		// send channel is blocked, user is too slow: kill user
+		r.killUser(c)
+	}
+}
+
 // broadcast sends a message with the specified type and
 // the specified payload to everyone in the room.
 func (r *Room) broadcast(typ string, data interface{}) {
 	for _, userConn := range r.users {
-		select {
-		case userConn.send <- newTX(typ, data):
-		default:
-			// send channel is blocked, user is too slow: kill user
-			r.killUser(userConn)
-		}
+		r.send(userConn, typ, data)
 	}
 }
 
@@ -182,7 +191,8 @@ func (r *Room) handler() {
 			go r.userWriter(uconn)
 			r.uid++
 			r.users[conn] = uconn
-			r.broadcast("Join", &transm.UserJoined{id})
+			r.send(uconn, "OwnID", &id)
+			r.broadcast("Join", &id)
 		case u := <-kill:
 			r.killUser(u)
 		case m := <-read:

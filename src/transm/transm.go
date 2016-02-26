@@ -2,7 +2,7 @@
 // for the data transmission between client
 // and server as well as for the communication
 // between the game and the server.
-package transm
+package main
 
 import (
 	"bytes"
@@ -161,6 +161,7 @@ func (t *Transmitter) Disable() {
 	t.field = nil
 }
 
+// Move transmits a movement packet.
 func (t *Transmitter) Move(m *ent.Movement) {
 	t.movements <- newMov(m)
 }
@@ -245,9 +246,12 @@ func (t *Transmitter) GeneratedField() <-chan *Field {
 
 // UserJoined is transmitted by the server
 // when at any time a user joins the room.
-type UserJoined struct {
-	ID ent.ID
-}
+type UserJoined ent.ID
+
+// OwnID is transmitted by the server
+// to connecting clients to notify
+// them about their own ID.
+type OwnID ent.ID
 
 // ReceivedMovement is transmitted by the client
 // when he decides to send a movement.
@@ -285,17 +289,19 @@ func protocolExample() {
 		1,
 		"Winner (sent by the server when a player wins the game):",
 		1,
-		"Replication (sent by the server when all cells replicate)",
+		"Replication (sent by the server when all cells replicate):",
 		Replication([]CellVires{cv, cv, cv}),
-		"Field (sent by the server when the field is generated)",
+		"Field (sent by the server when the field is generated):",
 		&Field{
 			[]GeneratedCell{cell, cell, cell, cell, cell},
 			[]StartCell{startCell, startCell},
 			v,
 		},
-		"Joined (sent by the server when a user joins the room)",
-		&UserJoined{1},
-		"Move (sent by the client when moving vires):",
+		"Join (sent by the server when a user joins the room):",
+		1,
+		"OwnID (sent by the server to users to tell them their ID when joining):",
+		1,
+		"Movement (sent by the client when moving vires):",
 		&ReceivedMovement{1, 2},
 	}
 	var b bytes.Buffer
