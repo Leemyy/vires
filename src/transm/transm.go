@@ -27,11 +27,7 @@ type Movement struct {
 }
 
 func newMov(m *ent.Movement) *Movement {
-	ownerID := 0
-	if m.Owner() != nil {
-		ownerID = m.Owner().ID()
-	}
-	return &Movement{m.ID(), ownerID, m.Moving(), m.Body(), m.Direction()}
+	return &Movement{m.ID(), m.Owner().ID(), m.Moving(), m.Body(), m.Direction()}
 }
 
 // Collision is transmitted by the server
@@ -49,7 +45,7 @@ type ConflictCell struct {
 }
 
 func makeConflCell(c *ent.Cell) ConflictCell {
-	return ConflictCell{c.ID(), c.Stationed(), c.Owner().ID()}
+	return ConflictCell{c.ID(), c.Stationed(), c.OwnerID()}
 }
 
 // Conflict is transmitted by the server
@@ -102,7 +98,7 @@ type StartCell struct {
 }
 
 func makeStartCell(c *ent.Cell) StartCell {
-	return StartCell{c.ID(), c.Owner().ID()}
+	return StartCell{c.ID(), c.OwnerID()}
 }
 
 // Field is transmitted by the server
