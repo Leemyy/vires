@@ -341,9 +341,9 @@ func (m *Movement) Conflict() {
 	defer m.Kill()
 	tgt := m.target
 	attacker := m.owner
-	defender := tgt.Owner()
+	defid := tgt.OwnerID()
 	// same player, friendly units are merged into the cell
-	if attacker.ID() == defender.ID() {
+	if attacker.ID() == defid {
 		tgt.Merge(m.moving)
 	} else {
 		tgt.Merge(-m.moving)
