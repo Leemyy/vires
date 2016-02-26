@@ -106,6 +106,7 @@ func (t *Timed) scheduler() {
 			timer.Stop()
 		case <-t.removeLast:
 			// the last timer has been removed from externally, take the next first
+			timer.Stop()
 			first = t.takeFirst()
 		case actual := <-timer.C:
 			// the first timer has expired, execute its action
