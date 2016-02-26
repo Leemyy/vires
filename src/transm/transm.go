@@ -2,7 +2,7 @@
 // for the data transmission between client
 // and server as well as for the communication
 // between the game and the server.
-package main
+package transm
 
 import (
 	"bytes"
