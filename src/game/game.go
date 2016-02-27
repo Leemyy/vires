@@ -83,6 +83,11 @@ func (f *Field) checkDominationVictory() {
 	f.transmitter.Win(winner)
 }
 
+func (f *Field) removeMovement(m *ent.Movement) {
+	m.Stop()
+	delete(f.movements, m.ID())
+}
+
 func (f *Field) removePlayer(p ent.ID) {
 	delete(f.players, p)
 	for _, m := range f.movements {
@@ -99,9 +104,18 @@ func (f *Field) removePlayer(p ent.ID) {
 	f.checkDominationVictory()
 }
 
-func (f *Field) removeMovement(m *ent.Movement) {
-	m.Stop()
-	delete(f.movements, m.ID())
+func (f *Field) findCollisions(m *ent.Movement) {
+	for _, m2 := range f.movements {
+		collideAt, collides := m.CollidesWith(m2)
+		if !collides {
+			continue
+		}
+		stopCollision := f.ops.Start(collideAt, func() {
+			f.collide(m, m2)
+		})
+		m.AddCollision(m2, stopCollision)
+		m2.AddCollision(m, stopCollision)
+	}
 }
 
 func (f *Field) viresChanged(m *ent.Movement) {
@@ -118,20 +132,6 @@ func (f *Field) collide(m, m2 *ent.Movement) {
 	f.transmitter.Collide(m, m2)
 	f.viresChanged(m)
 	f.viresChanged(m2)
-}
-
-func (f *Field) findCollisions(m *ent.Movement) {
-	for _, m2 := range f.movements {
-		collideAt, collides := m.CollidesWith(m2)
-		if !collides {
-			continue
-		}
-		stopCollision := f.ops.Start(collideAt, func() {
-			f.collide(m, m2)
-		})
-		m.AddCollision(m2, stopCollision)
-		m2.AddCollision(m, stopCollision)
-	}
 }
 
 func (f *Field) conflict(mv *ent.Movement) {

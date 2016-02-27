@@ -432,6 +432,9 @@ func at(in float64) time.Time {
 // specified movement occurs and returns
 // at what time it occurs.
 func (m *Movement) CollidesWith(m2 *Movement) (collideAt time.Time, collides bool) {
+	if m.ID() == m2.ID() {
+		return time.Now(), false
+	}
 	// movements where the owner is the same
 	// but the target isn't don't collide;
 	// the movements just pass each other

@@ -132,7 +132,6 @@ func (r *Room) send(c userConn, typ string, data interface{}) {
 	select {
 	case c.send <- newTX(typ, data):
 	default:
-		// send channel is blocked, user is too slow: kill user
 		r.killUser(c)
 	}
 }
