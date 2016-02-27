@@ -102,6 +102,8 @@ func (t *Timed) sendAction(a func()) {
 		// (actions send would block
 		// on the scheduler goroutine,
 		// which reads actions).
+		// this essentially trades a panic
+		// for a possible slowdown.
 		go func() { t.actions <- a }()
 	}
 }

@@ -53,9 +53,9 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 }
 
 func (f *Field) startReplication() {
-	var replicate func(time.Time)
+	var replicate func()
 	start := func() { f.ops.Start(time.Now().Add(replicationInterval), replicate) }
-	replicate = func(time.Time) {
+	replicate = func() {
 		for _, c := range f.cells {
 			c.Replicate()
 		}
@@ -126,7 +126,7 @@ func (f *Field) findCollisions(m *ent.Movement) {
 		if !collides {
 			continue
 		}
-		stopCollision := f.ops.Start(collideAt, func(time.Time) {
+		stopCollision := f.ops.Start(collideAt, func() {
 			f.collide(m, m2)
 		})
 		m.AddCollision(m2, stopCollision)
@@ -166,7 +166,7 @@ func (f *Field) isValidMovement(attacker, src, dst ent.ID) bool {
 // from the specified source cell to the
 // specified target cell.
 func (f *Field) Move(attacker, srcid, tgtid ent.ID) {
-	f.ops.Start(time.Now(), func(time.Time) {
+	f.ops.Start(time.Now(), func() {
 		if !f.isValidMovement(attacker, srcid, tgtid) {
 			return
 		}
@@ -176,7 +176,7 @@ func (f *Field) Move(attacker, srcid, tgtid ent.ID) {
 		mov := src.Move(mid, tgt)
 		f.transmitter.Move(mov)
 		at := mov.ConflictAt()
-		mov.Stop = f.ops.Start(at, func(time.Time) {
+		mov.Stop = f.ops.Start(at, func() {
 			f.conflict(mov)
 		})
 		f.movements[mid] = mov
@@ -189,7 +189,7 @@ func (f *Field) Move(attacker, srcid, tgtid ent.ID) {
 // the field, stops all his actions and
 // neutralizes all his cells.
 func (f *Field) DisconnectPlayer(id ent.ID) {
-	f.ops.Start(time.Now(), func(time.Time) {
+	f.ops.Start(time.Now(), func() {
 		f.removePlayer(id)
 	})
 }

@@ -223,7 +223,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 		target:     tgt,
 		body:       Circle{start, radius(moving)},
 		direction:  vec.Scale(vec.SubV(tgt.body.Location, start), speed(moving)),
-		collisions: map[*Movement]func() bool{},
+		collisions: map[*Movement]func(){},
 	}
 	src.Merge(-moving)
 	return mov
@@ -239,8 +239,8 @@ type Movement struct {
 	body   Circle
 	// |Direction| = v, [v] = points/s
 	direction  vec.V
-	collisions map[*Movement]func() bool
-	Stop       func() bool
+	collisions map[*Movement]func()
+	Stop       func()
 }
 
 // ID gets the id of the movement.
@@ -286,14 +286,14 @@ func (m *Movement) Direction() vec.V {
 // The value of the returned map is a function to
 // stop the respective collision from happening.
 // The return value should not be mutated.
-func (m *Movement) Collisions() map[*Movement]func() bool {
+func (m *Movement) Collisions() map[*Movement]func() {
 	return m.collisions
 }
 
 // AddCollision adds a movement this movement collides with
 // to the movement. stopCollision is called when
 // the movement is stopped.
-func (m *Movement) AddCollision(m2 *Movement, stopCollision func() bool) {
+func (m *Movement) AddCollision(m2 *Movement, stopCollision func()) {
 	m.collisions[m2] = stopCollision
 }
 
