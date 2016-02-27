@@ -26,7 +26,7 @@ const (
 )
 
 type Field struct {
-	Size          ent.Vec
+	Size          vec.V
 	Cells         []ent.Circle
 	StartCellIdxs []int
 }
