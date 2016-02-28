@@ -130,8 +130,16 @@ func (f *Field) viresChanged(m *ent.Movement) {
 func (f *Field) collide(m, m2 *ent.Movement) {
 	m.Collide(m2)
 	f.transmitter.Collide(m, m2)
-	f.viresChanged(m)
-	f.viresChanged(m2)
+	// make sure that the dead movement is removed first
+	// to avoid that the same collision is found again
+	// when recalculating collisions
+	if m.Moving() < 0 {
+		f.viresChanged(m)
+		f.viresChanged(m2)
+	} else {
+		f.viresChanged(m2)
+		f.viresChanged(m)
+	}
 }
 
 func (f *Field) conflict(mv *ent.Movement) {
