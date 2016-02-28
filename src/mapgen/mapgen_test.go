@@ -6,7 +6,7 @@ import (
 )
 
 func TestMapgen(t *testing.T) {
-	circles, playerCells := generateMap(4)
+	circles, playerCells := GenerateMap(4)
 	if len(circles) != NumberOfCells {
 		t.Error("Expected ", NumberOfCells, " Cells, got ", len(circles), " instead")
 	}
@@ -32,6 +32,6 @@ func TestMapgen(t *testing.T) {
 
 func BenchmarkMapgen(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		generateMap(4)
+		GenerateMap(4)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/mhuisi/vires/src/ent"
+	"github.com/mhuisi/vires/src/mapgen"
 	"github.com/mhuisi/vires/src/timed"
 	"github.com/mhuisi/vires/src/transm"
 	"github.com/mhuisi/vires/src/vec"
@@ -28,11 +29,20 @@ type Field struct {
 // using the specified transmitter to notify the caller
 // about things that happen in the game.
 func NewField(players []ent.ID, t *transm.Transmitter) *Field {
-	// mapgen algorithm here ...
-
 	ps := make(map[ent.ID]ent.Player, len(players))
 	for _, id := range players {
 		ps[id] = ent.NewPlayer(id)
+	}
+	circles, startCells := mapgen.GenerateMap(len(players))
+	cells := make(map[ent.ID]*ent.Cell)
+	for i, c := range circles {
+		id := ent.ID(i)
+		cells[id] = ent.NewCell(id, c.Radius, nil, c.Location)
+	}
+	i := 0
+	for _, p := range ps {
+		cells[ent.ID(startCells[i])].SetOwner(p)
+		i++
 	}
 	f := &Field{
 		players: ps,
@@ -42,8 +52,8 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 		movementID:  0,
 		ops:         timed.New(),
 		transmitter: t,
-		// change to size from mapgen algorithm later!
-		size: vec.V{},
+		// hardcoded for now
+		size: vec.V{mapgen.MaximumXPosition, mapgen.MaximumYPosition},
 	}
 	// handle this here instead of in the caller to avoid the caller trying to read the cells
 	// while we're running our game loop
