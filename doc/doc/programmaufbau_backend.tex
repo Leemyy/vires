@@ -2,7 +2,7 @@
 Das Backend besteht aus mehrere Paketen und ist wie folgt aufgebaut:
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.6\textwidth]{Architektur.png}
+	\includegraphics[width=0.55\textwidth]{Architektur.png}
 	\caption{Paketaufbau des Backends}
 \end{figure}
 Die Bedeutung der einzelnen Pakete und wichtige Algorithmen werden im Folgenden erklärt.
@@ -114,3 +114,9 @@ Um geschedulte Funktionen auszuführen, würde normalerweise für jede Aktion ei
 Bei dem Scheduler handelt es sich um einen präemptiven Shortest-Time-Remaining-Scheduler, welcher den Garbage Collector, den Arbeitsspeicher und die CPU deutlich weniger belastet, als es mit einer Goroutine für jede Aktion der Fall wäre. \\
 Der Scheduler verwendet eine Monitor-Goroutine, um Zugriffe auf sich selbst zu synchronisieren. Die Monitor-Goroutine wird über einen Actions-Channel angesprochen, welcher verwendet wird, um Zustandsveränderungen an dem Scheduler vorzunehmen. \\
 Am Anfang jeder Iteration führt die Goroutine so lange Actions aus, bis Timer in der Liste sind, die geschedulet werden können. Hieraufhin wird der Timer gestartet und mittels eines select-Statements gleichzeitig auf das Fertigwerden des Timers und Aktionen zum Ausführen gewartet. Führt eine Aktion dazu, dass der aktuell laufende Timer ersetzt werden muss, so wird der aktuelle Timer gestoppt und es werden wieder so lange Actions ausgeführt, bis ein Timer, der geschedulet werden kann, vorhanden ist. Wird ein Timer fertig, so wird seine Aktion ausgeführt, der Timer entfernt und auf den nächsten Timer gewartet.
+
+\subsubsection{mapgen}
+MAPGEN ERKLÄRUNG HIER
+
+\subsubsection{vec}
+\verb+vec+ enthält Funktionen für zweidimensionale Vektormathematik.

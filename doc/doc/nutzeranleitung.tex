@@ -1,1 +1,21 @@
 \section{Nutzeranleitung}
+\subsection{Nutzung}
+NUTZUNG HIER
+
+\subsection{Deployment}
+Um den \vires-Server zu starten, muss lediglich die .zip-Datei für das jeweilige Betriebssystem und die jeweilige Prozessorarchitektur unter 
+\url{BUILD_LINK_HIER_EINFÜGEN} heruntergeladen, entpackt und über die Datei \verb+vires+ (bzw. unter Windows \verb+vires.exe+) ausgeführt werden.
+
+\subsection{Building}
+Bei der Kompilierung des Projekts wird zwischen Backend und Frontend unterschieden:
+\begin{itemize}
+	\item Für die Kompilierung des Backends wird zuerst eine Go-Installation benötigt.\\
+	Hierfür muss eine aktuelle Go-Version von \url{https://golang.org/dl/} heruntergeladen und hieraufhin ein Go-Workspace eingerichtet werden.\\
+	Zur Einrichtung eines Go-Workspaces muss ein Ordner für den Workspace erstellt werden und hieraufhin der Pfad des Ordners in der Umgebungsvariable 
+	\verb+$GOPATH+ gesetzt werden.\\
+	Nach der Einrichtung des Workspaces können der \vires-Sourcecode und alle Abhängigkeiten mithilfe des Konsolenkommandos
+	\verb+go get github.com/mhuisi/vires/...+ heruntergeladen und für das aktuelle Betriebssystem und die aktuelle Architektur kompiliert werden. 
+	Die reine Binärdatei kann dann in \verb+$GOPATH/bin+ aufgefunden werden und sollte hieraufhin nach
+	\verb+$GOPATH/src/github.com/mhuisi/vires/src/vires+ bewegt werden.
+	\item FRONTEND-BUILD-PROZESS HIER EINFÜGEN
+\end{itemize}
