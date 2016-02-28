@@ -74,19 +74,25 @@ func (t *Timed) scheduler() {
 		}
 		first := t.timers[0]
 		timer := time.NewTimer(first.at.Sub(time.Now()))
-		select {
-		case a := <-actions:
-			a()
-			// if the first timer isn't the currently
-			// running one anymore, stop the timer
-			if len(t.timers) == 0 || t.timers[0] != first {
+		scheduleNext := false
+		for !scheduleNext {
+			select {
+			case a := <-actions:
+				a()
+				// if the first timer isn't the currently
+				// running one anymore, stop the timer
+				if len(t.timers) == 0 || t.timers[0] != first {
+					timer.Stop()
+					scheduleNext = true
+				}
+			case <-timer.C:
+				heap.Pop(&t.timers)
+				first.action()
+				scheduleNext = true
+			case <-quit:
 				timer.Stop()
+				return
 			}
-		case <-timer.C:
-			heap.Pop(&t.timers)
-			first.action()
-		case <-quit:
-			return
 		}
 	}
 }
