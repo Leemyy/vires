@@ -6,12 +6,9 @@ import (
 )
 
 func TestMapgen(t *testing.T) {
-	circles, playerCells := GenerateMap(4)
-	if len(circles) != NumberOfCells {
-		t.Error("Expected ", NumberOfCells, " Cells, got ", len(circles), " instead")
-	}
-	for _, currCircleOne := range circles {
-		for _, currCircleTwo := range circles {
+	field := GenerateMap(4)
+	for _, currCircleOne := range field.Cells {
+		for _, currCircleTwo := range field.Cells {
 			if currCircleOne != currCircleTwo {
 				deltaX := currCircleOne.Location.X - currCircleTwo.Location.X
 				deltaY := currCircleOne.Location.Y - currCircleTwo.Location.Y
@@ -22,8 +19,8 @@ func TestMapgen(t *testing.T) {
 			}
 		}
 	}
-	for _, currentPlayer := range playerCells {
-		cellSize := circles[currentPlayer].Radius
+	for _, currentPlayer := range field.StartCellIdxs {
+		cellSize := field.Cells[currentPlayer].Radius
 		if cellSize != PlayerCellDefaultSize {
 			t.Error("Expected Cellsize of ", PlayerCellDefaultSize, " got ", cellSize, " instead ")
 		}
