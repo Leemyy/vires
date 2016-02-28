@@ -1,6 +1,6 @@
 "RX (packets sent to the server):"
 {
-        "Type": "Move",
+        "Type": "Movement",
         "Version": "0.1",
         "Data": "some payload, may be any json type, see below"
 }
@@ -168,7 +168,7 @@
                 "Y": 3
         }
 }
-"Join (sent by the server when a user joins the room):"
+"UserJoined (sent by the server when a user joins the room):"
 1
 "OwnID (sent by the server to users to tell them their ID when joining):"
 1

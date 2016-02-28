@@ -1,8 +1,237 @@
 \section{Übertragungsprotokoll}
+\lstset{style=json}
 Das Backend von \vires\ lässt sich mit beliebigen Clients kombinieren, welche in der Lage sind, Websocket-Verbindungen zu eröffnen,
 insofern sich die Clients an das Übertragungsprotokoll halten. \\
 Der Client, welcher standardmäßig vom Server unterstützt wird, kann also beliebig ausgetauscht werden:
 Es ist theoretisch einfach möglich, \vires\ mit einem Desktopclient oder einem Webclient einer anderen Website zu spielen.
+Dementsprechend ist das Übertragungsprotokoll auch einer der wichtigsten Unterpunkte dieser Dokumentation. \\
 Da \vires\ im Vergleich zu vielen anderen Spielen ein relativ langsames Spiel ist, ist es möglich, 
 eine wirklich sichere Client-Server-Architektur aufzubauen, welche es keinem Client erlaubt, sich
 substantielle Vorteile durch die Veränderung des Client-Programmcodes zu verschaffen. \\
+Der Server verwendet als Übertragungsformat JSON.
+Im Folgenden wird erläutert, wie das Protokoll aufgebaut ist.
+
+\subsection{Client-to-Server}
+Alle Client-to-Server-Pakete besitzen einen Type, welcher angibt, um welche Art Paket es sich handelt, eine Version, welche angibt, mit welcher Protokollversion der Client arbeitet, und Data, welche beliebige JSON-Daten je nach Art des Pakets enthalten kann. Die Grundstruktur eines Client-to-Server-Pakets sieht wie folgt aus:
+\begin{lstlisting}
+{
+    "Type": "Movement",
+    "Version": "0.1",
+    "Data": "A payload"
+}
+\end{lstlisting}
+
+\subsubsection{Movement}
+Movement ist das Paket, das der Client sendet, wenn er ein Movement starten möchte. Hierfür muss lediglich die Quell-ID einer Cell und die Ziel-ID einer Cell angegeben werden.
+
+Beispielpaket:
+\begin{lstlisting}
+{
+        "Source": 1,
+        "Dest": 2
+}
+\end{lstlisting}
+
+\subsection{Server-to-Client}
+Alle Server-to-Client-Pakete besitzen ebenfalls einen Type, welcher angibt, um welche Art Paket es sich handelt, eine Version, welche angibt, mit welcher Protokollversion der Client arbeitet, und Data, welche beliebige JSON-Daten je nach Art des Pakets enthalten kann. Die Grundstruktur eines Server-to-Client-Pakets sieht wie folgt aus:
+\begin{lstlisting}
+{
+        "Type": "Collision",
+        "Version": "0.1",
+        "Data": "A payload"
+}
+\end{lstlisting}
+
+\subsubsection{Movement}
+\label{stc:mov}
+Movement ist das Paket, das zu allen Clients geschickt wird, wenn ein Movement erfolgreich gestartet wurde. Es besteht aus der ID des Movements, der ID des Besitzers, der Menge an Vires, welche sich in dem Movement befinden, dem Startpunkt des Movements, dem Radius des Movements und dem Richtungsvektor des Movements, wobei $|r| = \sqrt{{r_1}^2 + {r_2}^2}$ mit $[|r|] = \frac{Feldeinheiten}{s}$ ist.
+
+Beispielpaket:
+\begin{lstlisting}
+{
+    "ID": 1,
+    "Owner": 1,
+    "Moving": 10,
+    "Body": {
+        "Location": {
+            "X": 2,
+            "Y": 3
+        },
+        "Radius": 5
+    },
+    "Direction": {
+        "X": 2,
+        "Y": 3
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Collision}
+Eine Collision wird zu allen Clients geschickt, wenn eine Collision auf dem Spielfeld stattfindet. Eine Collision besteht immer aus zwei Movement-Typen, deren Aufbau genau der gleiche wie bei dem Movement-Paket unter \ref{stc:mov} ist. Alle Werte in den Movement-Typen wurden nach der Collision berechnet: Stirbt also beispielsweise ein Movement, so wird die Anzahl an Vires in dem Movement null sein.
+
+Beispielpaket:
+\begin{lstlisting}
+{
+    "A": {
+        "ID": 1,
+        "Owner": 1,
+        "Moving": 10,
+        "Body": {
+            "Location": {
+                "X": 2,
+                "Y": 3
+            },
+            "Radius": 5
+        },
+        "Direction": {
+            "X": 2,
+            "Y": 3
+        }
+    },
+    "B": {
+        "ID": 1,
+        "Owner": 1,
+        "Moving": 10,
+        "Body": {
+            "Location": {
+                "X": 2,
+                "Y": 3
+            },
+            "Radius": 5
+        },
+        "Direction": {
+            "X": 2,
+            "Y": 3
+        }
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Conflict}
+Tritt ein Conflict auf, also trifft ein Movement auf seine Target-Cell, so wird ein Conflict-Paket an alle Clients gesendet. Für das Conflict-Paket gilt das gleiche wie für Collision-Pakete: Alle Werte sind nach dem Conflict berechnet, hat die Cell also nach einem Conflict den Besitzer gewechselt, so wird der neue Besitzer übertragen.
+Ein Conflict-Paket besteht aus einer Movement-ID, welche angibt, welches Movement mit der Cell kollidiert, einer Cell-ID, welche die Cell identifiziert, die Ziel des Conflicts ist, die Menge an Vires, die nach dem Conflict noch in der Cell vorhanden ist und die ID des Besitzers der Cell.
+
+Beispielspaket:
+\begin{lstlisting}
+{
+    "Movement": 5,
+    "Cell": {
+        "ID": 1,
+        "Stationed": 2,
+        "Owner": 10
+    }
+}
+\end{lstlisting}
+
+\subsubsection{EliminatedPlayer}
+Wird ein Spieler aus dem Spiel ausgeschlossen, sei es weil er keine Cells mehr besitzt oder seine Verbindung getrennt wurde, so wird ein EliminatedPlayer-Paket an alle Clients gesendet. Bei diesem Paket handelt es sich lediglich um die ID des eliminierten Spielers.
+
+Beispielspaket:
+\begin{lstlisting}
+1
+\end{lstlisting}
+
+\subsubsection{Winner}
+Gewinnt ein Spieler das Spiel, weil er der letzte Überlebende ist, so wird ein Winner-Paket an alle Clients gesendet, welches lediglich die ID des Siegers enthält.
+
+Beispielspaket:
+\begin{lstlisting}
+1
+\end{lstlisting}
+
+\subsubsection{Replication}
+Vermehrt sich die Anzahl an Vires in den Cells, so wird ein Replication-Paket an alle Clients gesendet. Das Replication-Paket enthält die ID und die neue Anzahl an Stationed Vires aller Cells.
+
+Beispielspaket:
+\begin{lstlisting}
+[
+    {
+        "ID": 1,
+        "Stationed": 20
+    },
+    {
+        "ID": 1,
+        "Stationed": 20
+    },
+    {
+        "ID": 1,
+        "Stationed": 20
+    }
+]
+\end{lstlisting}
+
+\subsubsection{Field}
+Wird das Match gestartet und ein Field generiert, so wird ein Field-Paket an alle Clients übertragen. Das Field enthält die ID, den Ort, den Radius und die Capacity jeder Cell. Es ist garantiert, dass die IDs bei null anfangen und es keine Lücken zwischen den IDs gibt.
+Außerdem enthält das Paket die Anfangszellen der Spieler des Matches als ID des Besitzers und ID der Cell, die die Anfangszelle des Besitzers darstellt.
+Letztlich enthält das Paket ebenfalls die Größe des Fields.
+
+Beispielspaket:
+\begin{lstlisting}
+{
+    "Cells": [
+        {
+            "ID": 1,
+            "Body": {
+                "Location": {
+                    "X": 2,
+                    "Y": 3
+                },
+                "Radius": 5
+            },
+            "Capacity": 10
+        },
+        {
+            "ID": 1,
+            "Body": {
+                "Location": {
+                    "X": 2,
+                    "Y": 3
+                },
+                "Radius": 5
+            },
+            "Capacity": 10
+        },
+        {
+            "ID": 1,
+            "Body": {
+                "Location": {
+                    "X": 2,
+                    "Y": 3
+                },
+                "Radius": 5
+            },
+            "Capacity": 10
+        }
+    ],
+    "StartCells": [
+        {
+            "Owner": 1,
+            "Cell": 2
+        },
+        {
+            "Owner": 1,
+            "Cell": 2
+        }
+    ],
+    "Size": {
+        "X": 2,
+        "Y": 3
+    }
+}
+\end{lstlisting}
+
+\subsubsection{UserJoined}
+Tritt ein User dem Room bei, so wird ein UserJoined-Paket an alle Clients gesendet. Bei einem UserJoined-Paket handelt es sich lediglich um die ID des Users.
+
+Beispielspaket:
+\begin{lstlisting}
+1
+\end{lstlisting}
+
+\subsubsection{OwnID}
+Tritt ein user dem Room bei, so wird ihm mittels eines OwnID-Pakets seine eigene ID im Spiel mitgeteilt. Auch bei dem OwnID-Paket handelt es sich nur um die ID des Users.
+
+Beispielspaket:
+\begin{lstlisting}
+1
+\end{lstlisting}
