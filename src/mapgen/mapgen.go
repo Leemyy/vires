@@ -6,7 +6,7 @@ package mapgen
 //channels = append(channels, Channel{name:"some other name"})
 
 import (
-	//"fmt"
+	"fmt"
 	"math"
 	"math/rand"
 
@@ -73,9 +73,20 @@ func setFitnesses(generation *Generation) {
 }
 
 func GenerateMap(numberOfPlayers int) Field {
-	maximumXPosition := int(8000 + 2000*math.Pow(math.Log2(float64(numberOfPlayers)), 2))
-	maximumYPosition := int(8000 + 2000*math.Pow(math.Log2(float64(numberOfPlayers)), 2))
-	numberOfCells := int(50 + 10*math.Pow(math.Log2(float64(numberOfPlayers-1)), 2))
+	var maximumXPosition int
+	var maximumYPosition int
+	var numberOfCells int
+	if numberOfPlayers > 0 {
+		maximumXPosition = int(2000 + 500*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
+		maximumYPosition = int(2000 + 500*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
+		numberOfCells = int(10 + 2*math.Pow(math.Log2(float64(numberOfPlayers)), 2))
+	} else {
+		maximumXPosition = 8000
+		maximumYPosition = 8000
+		numberOfCells = 10
+
+	}
+	fmt.Println("Number of Players: ", numberOfPlayers, "Map X Size: ", maximumXPosition, " Map Y Size: ", maximumYPosition, " Number of Cells: ", numberOfCells)
 	generationSuccessful := false
 	generation := newGeneration(nil, nil, nil)
 	for generationSuccessful == false {
