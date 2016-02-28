@@ -75,7 +75,7 @@ func setFitnesses(generation *Generation) {
 	}
 }
 
-func generateMap(numberOfPlayers int) ([]ent.Circle, []int) {
+func GenerateMap(numberOfPlayers int) ([]ent.Circle, []int) {
 	generationSuccessful := false
 	generation := newGeneration(nil, nil, nil)
 	for generationSuccessful == false {
