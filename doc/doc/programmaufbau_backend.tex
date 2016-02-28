@@ -77,3 +77,33 @@ Dieser Algorithmus verhält sich gegenüber einigen Alternativen wie folgt:
 \end{itemize}
 Die Zustandsraumkomplexität des Algorithmus ist $\mathcal{O}(n^2)$, da sich für jedes Movement bis n Movements gemerkt werden müssen.
 Es wäre möglich, die Zustandsraumkomplexität weiterhin auf $\mathcal{O}(n)$ zu reduzieren, indem man sich lediglich die nächste Collision eines Movements anstatt alle Collisions eines Movements merkt, was allerdings in anderen Bereichen für größere Kosten sorgen würde und schwerer umzusetzen ist, als die aktuelle Version des Algorithmus.
+
+\subsubsection{transm}
+\verb+transm+ enthält alle Typen, welche für die Datenübertragung und die Verbindung zwischen \verb+room+ und \verb+game+ benötigt werden.
+Der Transmitter in \verb+transm+ sorgt dafür, dass Typen aus \verb+game+ in Pakete umkonvertiert werden, welche dann von \verb+room+ an die Spieler weitergeleitet werden können. Immer wenn \verb+game+ den Spielern etwas mitteilen möchte, geschieht dies über \verb+transm+. \\
+Alle anderen Typen in \verb+transm+ sind Typen, die ein Paket oder einen Teil eines Pakets repräsentieren, und sowohl zum Senden als auch zum Empfangen verwendet werden. Bei der Datenübertragung werden diese Typen entweder in das Übertragungsformat JSON serialisiert, oder es wird von JSON in diese Typen serialisiert. \\
+\verb+transm+ enthält außerdem eine Main-Funktion, welche dazu verwendet werden kann, um ein JSON-Beispiel für das Übertragungsprotokoll zu generieren.
+
+\subsubsection{ent}
+\verb+ent+ beschäftigt sich mit den Entities auf einem Feld und kümmert sich um alle Operationen zwischen Entities, die ohne das gesamte Feld ausgeführt werden können. \\
+Als solches kümmert es sich um Operationen auf den Cells, auf Movements und auf Spielern. \\
+Den wohl wichtigsten und komplexesten Teil von \verb+ent+ macht die Kollisionsbestimmung zwischen zwei Movements aus. Da die \vires-Kollisionsbestimmung eine \textit{priori}-Kollisionsbestimmung ist, damit die Timer-Architektur des Spiels verfolgt werden kann, müssen Kollisionen im Vorraus mathematisch festgestellt werden. \\
+Wir betrachten die Bewegung des Movements als eine Vektorgerade $g: \vec{x} = \vec{a} + t \cdot \vec{d}$. $\vec{x}$ ist die neue Position des Movements, $\vec{a}$ die Ausgangsposition des Movements, $t$ die vergangene Zeit und $\vec{d}$ der Richtungsvektor des Movements, wobei $|d| = \sqrt{{d_x}^2 + {d_y}^2}$ die Geschwindigkeit des Movements repräsentiert. Die Cells können als Kreise ausgedrückt werden. Für Kreise gilt, dass die Differenz zwischen einem Punkt auf dem Außenkreis und dem Mittelpunkt genau dem Radius entsprechen muss, es gilt also $c: r = |\vec{u} - \vec{m}|$. Betrachtet man dann den Mittelpunkt des Kreises als Gerade, so ergibt sich $r = |\vec{u} - \vec{a} - t \cdot \vec{d}|$.\\
+In \vires\ kollidieren zwei Movements, wenn sich der Mittelpunkt des kleineren Movements im größeren Movement befindet, also wenn $|m_1 - m_2| < r_1$. Vereinfacht interessieren uns aber nur die Schnittpunkte des Mittelpunkts des kleineren Movements mit dem Außenkreis des größeren Movements, da das kleinere Movement nach der Collision verschwindet. Es ist also nicht wichtig, dass $|m_1 - m_2| < r_1$, da uns nicht interessiert, über welchen Zeitraum sich das kleinere Movement im größeren Movement befindet. Diese Vereinfachung ermöglicht es uns, das Problem auf folgendes zu reduzieren: Wir wollen die Schnittpunkte der Vektorgerade des kleineren Movements $g: \vec{x} = \vec{a} + t \cdot \vec{d}$ mit dem Außenkreis des größeren Movements $c: r = |\vec{u} - \vec{m}|$ bestimmen. 
+Um das Problem weiter zu vereinfachen, betrachten wir die Bewegung des kleineren Movements relativ zu dem des größeren Movements, anstatt beide Bewegungen parallel zu betrachten. Hieraus ergibt sich die Gleichung $\vec{x_r} = \vec{x_1} - \vec{x_2}$, wobei $\vec{x_1}$ das größere der beiden Movements darstellt.
+Insgesamt muss also diese relative Vektorgerade den Außenkreis des größeren Movements, welches sich aufgrund der relativen Betrachtung in $m(0, 0)$ befindet, schneiden. Dies ergibt $r = |\vec{x_r} - \vec{0}|$, bzw. $r = |\vec{x_r}|$. Löst man nun die Substitution auf, so ergibt sich $r = |\vec{x_1} - \vec{x_2}|$ und 
+hieraufhin $r = |\vec{a_1} + t \cdot \vec{d_1} - (\vec{a_2} + t \cdot \vec{d_2})|$, bzw. $r^2 = (\vec{a_1} + t \cdot \vec{d_1} - (\vec{a_2} + t \cdot \vec{d_2}))^2$. 
+Stellt man diese Gleichung mittels quadratischer Ergänzung für Skalarprodukte und Substitution für Distanzen um, so erhält man:
+\begin{equation*}
+\begin{split}
+i_{1,2} = & \pm \sqrt{\frac{(\vec{m_1} - \vec{m_2}) \cdot (\vec{d_1} - \vec{d_2})}{|\vec{d_1} - \vec{d_2}|}^2 - (m_{1_x} - m_{2_x})^2 - (m_{1_y} - m_{2_y})^2 + (r_1 \vee r_2)^2} \\
+  & - \frac{(\vec{m_1} - \vec{m_2}) \cdot (\vec{d_1} - \vec{d_2})}{|\vec{d_1} - \vec{d_2}|}
+\end{split}
+\end{equation*}
+Mit dieser Funktion lässt sich dann berechnen, nach welchen Strecken die Collision stattfindet.
+\begin{enumerate}
+\item Sind $i_1$ und $i_2$ beide positiv, so findet die Collision bei der kürzesten der beiden Strecken statt: $t_c = \frac{i_1 \wedge i_2}{|\vec{d_1} - \vec{d_2}|}$
+\item Sind $i_1$ und $i_2$ beide negativ, so fand die Collision in der Vergangenheit statt
+\item Ist eine der beiden Strecken positiv und die andere negativ, so findet die Collision in diesem Moment statt
+\end{enumerate}
+Eine Visualisierung dieser Berechnung kann hier gefunden werden: \url{http://tube.geogebra.org/material/simple/id/2757139}
