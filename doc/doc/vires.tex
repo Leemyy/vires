@@ -5,8 +5,50 @@
 \usepackage[T1]{fontenc}
 \usepackage[colorlinks]{hyperref}
 \usepackage{amsmath}
+\usepackage{listings}
 \usepackage{graphicx}
 \usepackage{here}
+
+% json styling
+
+\newcommand\JSONnumbervaluestyle{\color{blue}}
+\newcommand\JSONstringvaluestyle{\color{red}}
+
+\newif\ifcolonfoundonthisline
+
+\makeatletter
+
+\lstdefinestyle{json}
+{
+  showstringspaces    = false,
+  keywords            = {false,true},
+  alsoletter          = 0123456789.,
+  morestring          = [s]{"}{"},
+  stringstyle         = \ifcolonfoundonthisline\JSONstringvaluestyle\fi,
+  MoreSelectCharTable =%
+    \lst@DefSaveDef{`:}\colon@json{\processColon@json},
+  basicstyle          = \ttfamily,
+  keywordstyle        = \ttfamily\bfseries,
+}
+
+\newcommand\processColon@json{%
+  \colon@json%
+  \ifnum\lst@mode=\lst@Pmode%
+    \global\colonfoundonthislinetrue%
+  \fi
+}
+
+\lst@AddToHook{Output}{%
+  \ifcolonfoundonthisline%
+    \ifnum\lst@mode=\lst@Pmode%
+      \def\lst@thestyle{\JSONnumbervaluestyle}%
+    \fi
+  \fi
+  \lsthk@DetectKeywords% 
+}
+
+\lst@AddToHook{EOL}%
+  {\global\colonfoundonthislinefalse}
 
 \begin{document}
 

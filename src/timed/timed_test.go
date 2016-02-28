@@ -9,7 +9,7 @@ import (
 )
 
 func TestTimed(t *testing.T) {
-	const n = 1500
+	const n = 1000
 	const maxms = 1000
 	const chance = 0.3
 	timed := New()
@@ -19,7 +19,7 @@ func TestTimed(t *testing.T) {
 	now := time.Now()
 	for i := 0; i < n; i++ {
 		d := rand.Intn(maxms)
-		at := now.Add(time.Duration(d) * time.Nanosecond)
+		at := now.Add(time.Duration(d) * time.Millisecond)
 		wg.Add(1)
 		stop := timed.Start(at, func() {
 			results <- d

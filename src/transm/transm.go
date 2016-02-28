@@ -313,7 +313,7 @@ func protocolExample() {
 			[]StartCell{startCell, startCell},
 			v,
 		},
-		"Join (sent by the server when a user joins the room):",
+		"UserJoined (sent by the server when a user joins the room):",
 		1,
 		"OwnID (sent by the server to users to tell them their ID when joining):",
 		1,
