@@ -16,6 +16,40 @@ import (
 
 const Version = "0.1"
 
+// RX is a packet received
+// by the client and used for
+// pre-parsing the type and the
+// version of the packet.
+type RX struct {
+	sender  ent.ID
+	Type    string
+	Version string
+	Data    json.RawMessage
+}
+
+// MakeRX creates a new, empty packet
+// for parsing stream data by the specified
+// sender.
+func MakeRX(sender ent.ID) RX {
+	return RX{sender: sender}
+}
+
+// Sender gets the sender of this packet.
+func (rx RX) Sender() ent.ID {
+	return rx.sender
+}
+
+// TX is a packet sent to the client.
+type TX struct {
+	Type    string
+	Version string
+	Data    interface{}
+}
+
+func newTX(typ string, data interface{}) TX {
+	return TX{typ, Version, data}
+}
+
 // Movement represents a movement
 // transmitted to the client.
 type Movement struct {
@@ -122,71 +156,61 @@ type Field struct {
 // Transmitter and relays the data
 // to clients.
 type Transmitter struct {
-	movements         chan *Movement
-	collisions        chan *Collision
-	conflicts         chan *Conflict
-	eliminatedPlayers chan *EliminatedPlayer
-	replications      chan Replication
-	winner            chan *Winner
-	field             chan *Field
+	packets chan TX
 }
 
-// Open opens all the channels of Transmitter,
+// Open opens the Transmitter,
 // enabling communication.
 func (t *Transmitter) Open() {
-	t.movements = make(chan *Movement, 1024)
-	t.collisions = make(chan *Collision, 1024)
-	t.conflicts = make(chan *Conflict, 512)
-	t.eliminatedPlayers = make(chan *EliminatedPlayer, 16)
-	t.replications = make(chan Replication, 512)
-	t.winner = make(chan *Winner)
-	t.field = make(chan *Field, 1)
-
+	t.packets = make(chan TX, 1024)
 }
 
-// Disable nils all the channels of Transmitter,
+// Disable nils the Transmitter,
 // disabling communication and disabling
-// the respective channels as cases.
+// the transmitter as case in selects.
 //
 // This also makes sure that when a
-// game ends, the channels are niled,
+// game ends, the transmitter is niled,
 // so no left over data is transmitted
 // after the game ended.
 func (t *Transmitter) Disable() {
-	t.movements = nil
-	t.collisions = nil
-	t.conflicts = nil
-	t.eliminatedPlayers = nil
-	t.replications = nil
-	t.winner = nil
-	t.field = nil
+	t.packets = nil
+}
+
+// Packets gets the packet channel.
+func (t *Transmitter) Packets() <-chan TX {
+	return t.packets
+}
+
+func (t *Transmitter) sendTX(typ string, data interface{}) {
+	t.packets <- newTX(typ, data)
 }
 
 // Move transmits a movement packet.
 func (t *Transmitter) Move(m *ent.Movement) {
-	t.movements <- newMov(m)
+	t.sendTX("Movement", newMov(m))
 }
 
 // Collide transmits a collision packet.
 func (t *Transmitter) Collide(a, b *ent.Movement) {
-	t.collisions <- &Collision{newMov(a), newMov(b)}
+	t.sendTX("Collision", &Collision{newMov(a), newMov(b)})
 }
 
 // Conflict transmits a conflict packet.
 func (t *Transmitter) Conflict(m *ent.Movement, c *ent.Cell) {
-	t.conflicts <- &Conflict{m.ID(), makeConflCell(c)}
+	t.sendTX("Conflict", &Conflict{m.ID(), makeConflCell(c)})
 }
 
 // Eliminate transmits a packet meaning that a player was eliminated.
 func (t *Transmitter) Eliminate(p ent.Player) {
 	e := EliminatedPlayer(p.ID())
-	t.eliminatedPlayers <- &e
+	t.sendTX("EliminatedPlayer", &e)
 }
 
 // Win transmits a packet meaning that a player won the game.
 func (t *Transmitter) Win(p ent.Player) {
 	w := Winner(p.ID())
-	t.winner <- &w
+	t.sendTX("Winner", &w)
 }
 
 // Replicate transmits a packet containing updated
@@ -198,7 +222,7 @@ func (t *Transmitter) Replicate(field map[ent.ID]*ent.Cell) {
 		cvs[i] = makeCellVires(c)
 		i++
 	}
-	t.replications <- cvs
+	t.sendTX("Replication", cvs)
 }
 
 // GenerateField transmits a packet containing the entire
@@ -214,45 +238,27 @@ func (t *Transmitter) GenerateField(fieldCells map[ent.ID]*ent.Cell, size vec.V)
 		}
 		i++
 	}
-	t.field <- &Field{cells, startCells, size}
-}
-
-func (t *Transmitter) Movements() <-chan *Movement {
-	return t.movements
-}
-
-func (t *Transmitter) Collisions() <-chan *Collision {
-	return t.collisions
-}
-
-func (t *Transmitter) Conflicts() <-chan *Conflict {
-	return t.conflicts
-}
-
-func (t *Transmitter) EliminatedPlayers() <-chan *EliminatedPlayer {
-	return t.eliminatedPlayers
-}
-
-func (t *Transmitter) Winner() <-chan *Winner {
-	return t.winner
-}
-
-func (t *Transmitter) Replications() <-chan Replication {
-	return t.replications
-}
-
-func (t *Transmitter) GeneratedField() <-chan *Field {
-	return t.field
+	t.sendTX("Field", &Field{cells, startCells, size})
 }
 
 // UserJoined is transmitted by the server
 // when at any time a user joins the room.
 type UserJoined ent.ID
 
+// MakeUserJoined creates a new UserJoined packet.
+func MakeUserJoined(userID ent.ID) TX {
+	return newTX("UserJoined", userID)
+}
+
 // OwnID is transmitted by the server
 // to connecting clients to notify
 // them about their own ID.
 type OwnID ent.ID
+
+// MakeOwnID creates a new OwnID packet.
+func MakeOwnID(userID ent.ID) TX {
+	return newTX("OwnID", userID)
+}
 
 // ReceivedMovement is transmitted by the client
 // when he decides to send a movement.
@@ -273,12 +279,21 @@ func protocolExample() {
 	startCell := StartCell{1, 2}
 	cv := CellVires{1, 20}
 	ex := []interface{}{
+		"RX (packets sent to the server):",
+		RX{
+			Type:    "Movement",
+			Version: Version,
+			Data:    json.RawMessage("some payload, may be any json type, see below"),
+		},
+		"TX (packets sent by the server):",
+		newTX("Collision", "some payload, may be any json type, see below"),
+		"Payloads:",
 		"Movement (sent by the server when a movement was started):",
 		mv,
 		"Collision (sent by the server when a collision occurs):",
-		&Collision{mv, mv},
+		Collision{mv, mv},
 		"Conflict (sent by the server when a conflict occurs):",
-		&Conflict{
+		Conflict{
 			5,
 			ConflictCell{
 				1,
@@ -293,7 +308,7 @@ func protocolExample() {
 		"Replication (sent by the server when all cells replicate):",
 		Replication([]CellVires{cv, cv, cv}),
 		"Field (sent by the server when the field is generated):",
-		&Field{
+		Field{
 			[]GeneratedCell{cell, cell, cell, cell, cell},
 			[]StartCell{startCell, startCell},
 			v,
@@ -303,7 +318,7 @@ func protocolExample() {
 		"OwnID (sent by the server to users to tell them their ID when joining):",
 		1,
 		"Movement (sent by the client when moving vires):",
-		&ReceivedMovement{1, 2},
+		ReceivedMovement{1, 2},
 	}
 	var b bytes.Buffer
 	for _, v := range ex {

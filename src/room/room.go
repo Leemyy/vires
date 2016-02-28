@@ -10,32 +10,10 @@ import (
 	"github.com/mhuisi/vires/src/transm"
 )
 
-// RX is a packet received
-// by the client and used for
-// pre-parsing the type and the
-// version of the packet.
-type RX struct {
-	sender  ent.ID
-	Type    string
-	Version string
-	Data    json.RawMessage
-}
-
-// TX is a packet sent to the client.
-type TX struct {
-	Type    string
-	Version string
-	Data    interface{}
-}
-
-func newTX(typ string, data interface{}) TX {
-	return TX{typ, transm.Version, data}
-}
-
 type userConn struct {
 	id   ent.ID
 	conn *websocket.Conn
-	send chan TX
+	send chan transm.TX
 }
 
 // Room represents a single entity
@@ -49,7 +27,7 @@ type Room struct {
 	// users to disconnect
 	kill chan userConn
 	// channel to process packets from users
-	read     chan RX
+	read     chan transm.RX
 	gameMsgs *transm.Transmitter
 	// starts a match and echos back if it was started
 	startMatch chan chan<- bool
@@ -65,7 +43,7 @@ func NewRoom() *Room {
 		uid:        1,
 		join:       make(chan *websocket.Conn, 16),
 		kill:       make(chan userConn, 16),
-		read:       make(chan RX, 512),
+		read:       make(chan transm.RX, 512),
 		gameMsgs:   &transm.Transmitter{},
 		startMatch: make(chan chan<- bool),
 	}
@@ -97,7 +75,7 @@ func (r *Room) userWriter(c userConn) {
 // userid is killed.
 func (r *Room) userReader(c userConn) {
 	for {
-		p := RX{sender: c.id}
+		p := transm.MakeRX(c.id)
 		err := c.conn.ReadJSON(&p)
 		if err != nil {
 			r.kill <- c
@@ -123,30 +101,28 @@ func (r *Room) killUser(c userConn) {
 	}
 }
 
-// send sends a message with the specified type
-// and the specified payload to the specified user.
+// send sends a message to the specified user.
 //
-// if the send channel is blocked because the user
+// If the send channel is blocked because the user
 // is too slow, the user is killed.
-func (r *Room) send(c userConn, typ string, data interface{}) {
+func (r *Room) send(c userConn, tx transm.TX) {
 	select {
-	case c.send <- newTX(typ, data):
+	case c.send <- tx:
 	default:
 		r.killUser(c)
 	}
 }
 
-// broadcast sends a message with the specified type and
-// the specified payload to everyone in the room.
-func (r *Room) broadcast(typ string, data interface{}) {
+// broadcast sends a message to everyone in the room.
+func (r *Room) broadcast(tx transm.TX) {
 	for _, userConn := range r.users {
-		r.send(userConn, typ, data)
+		r.send(userConn, tx)
 	}
 }
 
 // handleRX parses the actual packet, checks it for validity
 // in the context and notifies the game when necessary.
-func (r *Room) handleRX(p RX) {
+func (r *Room) handleRX(p transm.RX) {
 	if p.Version != transm.Version {
 		return
 	}
@@ -163,7 +139,7 @@ func (r *Room) handleRX(p RX) {
 		if err != nil {
 			return
 		}
-		r.field.Move(p.sender, m.Source, m.Dest)
+		r.field.Move(p.Sender(), m.Source, m.Dest)
 	}
 }
 
@@ -177,43 +153,31 @@ func (r *Room) handler() {
 	kill := r.kill
 	read := r.read
 	gameMsgs := r.gameMsgs
-	// gameMsgs members are not cached
-	// because they can become nil
-	// to block the respective cases
 	for {
 		select {
 		case conn := <-join:
 			id := r.uid
-			send := make(chan TX, 64)
+			send := make(chan transm.TX, 64)
 			uconn := userConn{id, conn, send}
 			go r.userReader(uconn)
 			go r.userWriter(uconn)
 			r.uid++
 			r.users[conn] = uconn
-			r.send(uconn, "OwnID", &id)
-			r.broadcast("Join", &id)
+			r.send(uconn, transm.MakeOwnID(id))
+			r.broadcast(transm.MakeUserJoined(id))
 		case u := <-kill:
 			r.killUser(u)
 		case m := <-read:
 			r.handleRX(m)
-		case mv := <-gameMsgs.Movements():
-			r.broadcast("Movement", mv)
-		case c := <-gameMsgs.Collisions():
-			r.broadcast("Collision", c)
-		case c := <-gameMsgs.Conflicts():
-			r.broadcast("Conflict", c)
-		case e := <-gameMsgs.EliminatedPlayers():
-			r.broadcast("EliminatedPlayer", e)
-		case w := <-gameMsgs.Winner():
-			r.field.Close()
-			// set nil to block future movements
-			r.field = nil
-			r.gameMsgs.Disable()
-			r.broadcast("Winner", w)
-		case rep := <-gameMsgs.Replications():
-			r.broadcast("Replication", rep)
-		case f := <-gameMsgs.GeneratedField():
-			r.broadcast("Field", f)
+		case p := <-gameMsgs.Packets():
+			switch p.Data.(type) {
+			case transm.Field:
+				r.field.Close()
+				// set nil to block future movements
+				r.field = nil
+				r.gameMsgs.Disable()
+			}
+			r.broadcast(p)
 		case started := <-r.startMatch:
 			if r.field != nil {
 				started <- false
