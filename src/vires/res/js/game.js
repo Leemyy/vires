@@ -56,7 +56,7 @@ vires.states.match = {
   cameraDrag: false,
   cameraStart: null,
   load: function(Field) {
-    var cellData, firstCell, i, k, l, len, owner, palette, ref, ref1, server, start;
+    var cellData, firstCell, i, l, len, m, owner, palette, ref, ref1, server, start;
     server = new Player(0);
     server.color = gfx.makeColor(0);
     this.players = {
@@ -71,8 +71,8 @@ vires.states.match = {
     this.targetMarker.unlink();
     this.fieldSize = vec2.fromValues(Field.Size.X, Field.Size.Y);
     ref = Field.Cells;
-    for (k = 0, len = ref.length; k < len; k++) {
-      cellData = ref[k];
+    for (l = 0, len = ref.length; l < len; l++) {
+      cellData = ref[l];
       this.cells[cellData.ID] = new Cell(cellData);
     }
     this.lookup = this.cells.slice(0);
@@ -89,7 +89,7 @@ vires.states.match = {
     this.random.shuffle(palette);
     this.spectating = true;
     firstCell = null;
-    for (i = l = 0, ref1 = Field.StartCells.length; 0 <= ref1 ? l < ref1 : l > ref1; i = 0 <= ref1 ? ++l : --l) {
+    for (i = m = 0, ref1 = Field.StartCells.length; 0 <= ref1 ? m < ref1 : m > ref1; i = 0 <= ref1 ? ++m : --m) {
       start = Field.StartCells[i];
       owner = new Player(start.Owner);
       owner.color = palette[i % palette.length];
@@ -222,7 +222,7 @@ vires.states.match = {
     vec2.min(gfx.camera.pos, gfx.camera.pos, this.fieldSize);
   },
   digestTraffic: function() {
-    var A, B, Msg, data, k, len, update;
+    var A, B, Msg, data, l, len, update;
     Msg = connection.messages.pop();
     while ((Msg != null)) {
       data = Msg.Data;
@@ -231,8 +231,8 @@ vires.states.match = {
           this.movements[data.ID] = new Movement(data);
           break;
         case "Replication":
-          for (k = 0, len = data.length; k < len; k++) {
-            update = data[k];
+          for (l = 0, len = data.length; l < len; l++) {
+            update = data[l];
             this.cells[update.ID].Stationed = update.Stationed;
           }
           break;
@@ -269,20 +269,28 @@ vires.states.match = {
       Msg = connection.messages.pop();
     }
   },
-  animate: function() {},
+  animate: function() {
+    var k, mov, ref, time;
+    time = vires.time;
+    ref = this.movements;
+    for (k in ref) {
+      mov = ref[k];
+      mov.move(time);
+    }
+  },
   killPlayer: function(ID) {
-    var cell, k, l, len, len1, move, ref, ref1;
+    var cell, l, len, len1, m, move, ref, ref1;
     this.players[ID].kill();
     ref = this.cells;
-    for (k = 0, len = ref.length; k < len; k++) {
-      cell = ref[k];
+    for (l = 0, len = ref.length; l < len; l++) {
+      cell = ref[l];
       if (cell.Owner === ID) {
         cell.Owner = 0;
       }
     }
     ref1 = this.movements;
-    for (l = 0, len1 = ref1.length; l < len1; l++) {
-      move = ref1[l];
+    for (m = 0, len1 = ref1.length; m < len1; m++) {
+      move = ref1[m];
       if (move.Owner === ID) {
         move.kill();
         delete this.movements[move.ID];
@@ -290,10 +298,10 @@ vires.states.match = {
     }
   },
   cellAt: function(pos) {
-    var cell, k, len, ref;
+    var cell, l, len, ref;
     ref = this.lookup;
-    for (k = 0, len = ref.length; k < len; k++) {
-      cell = ref[k];
+    for (l = 0, len = ref.length; l < len; l++) {
+      cell = ref[l];
       if (vec2.distance(input.cursor, cell.Pos) <= cell.Radius) {
         return cell;
       }
@@ -301,7 +309,7 @@ vires.states.match = {
     return null;
   },
   cellAtFast: function(pos) {
-    var current, head, highBound, i, k, lowBound, max, min, ref, ref1, searching, targetMax, targetMin;
+    var current, head, highBound, i, l, lowBound, max, min, ref, ref1, searching, targetMax, targetMin;
     targetMin = pos[x] - this.maxCellSize;
     targetMax = pos[x] + this.maxCellSize;
     lowBound = this.lookup.length - 1;
@@ -353,7 +361,7 @@ vires.states.match = {
       }
     }
     if (highBound - lowBound >= 0) {
-      for (i = k = ref = lowBound, ref1 = highBound; ref <= ref1 ? k <= ref1 : k >= ref1; i = ref <= ref1 ? ++k : --k) {
+      for (i = l = ref = lowBound, ref1 = highBound; ref <= ref1 ? l <= ref1 : l >= ref1; i = ref <= ref1 ? ++l : --l) {
         if (vec2.distance(input.cursor, this.lookup[i].Pos) <= this.lookup[i].Radius) {
           return this.lookup[i];
         }
@@ -366,14 +374,14 @@ vires.states.match = {
 vires.states.loading = {
   animation: [],
   load: function() {
-    var color, i, k, material, mesh, segment;
+    var color, i, l, material, mesh, segment;
     vec2.set(gfx.camera.pos, 0, 0);
     gfx.camera.zoom = 5;
     color = gfx.makeColor(2);
     mesh = gfx.mesh.round;
     material = gfx.material.loading;
     this.animation = new Array(10);
-    for (i = k = 0; k < 10; i = ++k) {
+    for (i = l = 0; l < 10; i = ++l) {
       this.animation[i] = vec2.create();
       segment = new Primitive(this.animation[i], mesh, material, i);
       segment.scale = 0.5 + i * 0.05;
@@ -387,8 +395,8 @@ vires.states.loading = {
   digestInput: function() {},
   digestTraffic: function() {},
   animate: function() {
-    var distance, i, k, step;
-    for (i = k = 0; k < 9; i = ++k) {
+    var distance, i, l, step;
+    for (i = l = 0; l < 9; i = ++l) {
       vec2.copy(this.animation[i], this.animation[i + 1]);
     }
     distance = vec2.distance(input.cursor, this.animation[9]);
@@ -403,14 +411,14 @@ vires.states.loading = {
 vires.states.lobby = {
   animation: [],
   load: function() {
-    var color, i, k, material, mesh, segment;
+    var color, i, l, material, mesh, segment;
     vec2.set(gfx.camera.pos, 0, 0);
     gfx.camera.zoom = 5;
     color = gfx.makeColor(10);
     mesh = gfx.mesh.round;
     material = gfx.material.loading;
     this.animation = new Array(10);
-    for (i = k = 0; k < 10; i = ++k) {
+    for (i = l = 0; l < 10; i = ++l) {
       this.animation[i] = vec2.create();
       segment = new Primitive(this.animation[i], mesh, material, i);
       segment.color = vec4.clone(color);

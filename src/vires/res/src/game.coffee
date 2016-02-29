@@ -282,6 +282,10 @@ vires.states.match =
 		return
 
 	animate: ->
+		time = vires.time
+		for k, mov of @movements
+			mov.move(time)
+		
 		return
 
 
