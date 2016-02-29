@@ -20,6 +20,7 @@ type userConn struct {
 // Room represents a single entity
 // that hosts a match.
 type Room struct {
+	id    string
 	users map[*websocket.Conn]userConn
 	// current userid
 	uid ent.ID
@@ -32,14 +33,17 @@ type Room struct {
 	gameMsgs *transm.Transmitter
 	// starts a match and echos back if it was started
 	startMatch chan chan<- bool
+	notifyQuit chan<- *Room
+	quit       chan struct{}
 	field      *game.Field
 }
 
 // NewRoom creates a new room and launches
 // the handler for inbound connections
 // and starting the match.
-func NewRoom() *Room {
+func NewRoom(id string, notifyQuit chan<- *Room) *Room {
 	r := &Room{
+		id:         id,
 		users:      map[*websocket.Conn]userConn{},
 		uid:        1,
 		join:       make(chan *websocket.Conn, 16),
@@ -47,6 +51,8 @@ func NewRoom() *Room {
 		read:       make(chan transm.RX, 512),
 		gameMsgs:   &transm.Transmitter{},
 		startMatch: make(chan chan<- bool),
+		notifyQuit: notifyQuit,
+		quit:       make(chan struct{}),
 	}
 	go r.handler()
 	return r
@@ -105,6 +111,9 @@ func (r *Room) killUser(c userConn) {
 	if r.field != nil {
 		r.field.DisconnectPlayer(c.id)
 	}
+	if len(r.users) == 0 {
+		close(r.quit)
+	}
 }
 
 // send sends a message to the specified user.
@@ -159,6 +168,8 @@ func (r *Room) handler() {
 	kill := r.kill
 	read := r.read
 	gameMsgs := r.gameMsgs
+	start := r.startMatch
+	quit := r.quit
 	for {
 		select {
 		case conn := <-join:
@@ -184,7 +195,7 @@ func (r *Room) handler() {
 				r.gameMsgs.Disable()
 			}
 			r.broadcast(p)
-		case started := <-r.startMatch:
+		case started := <-start:
 			if r.field != nil {
 				started <- false
 				break
@@ -198,8 +209,17 @@ func (r *Room) handler() {
 			}
 			r.gameMsgs.Open()
 			r.field = game.NewField(uids, r.gameMsgs)
+		case <-quit:
+			r.notifyQuit <- r
+			// we assume that when a quit msg is sent, proper cleanup has already occured
+			return
 		}
 	}
+}
+
+// ID gets the room id.
+func (r *Room) ID() string {
+	return r.id
 }
 
 // StartMatch starts the match and returns whether
