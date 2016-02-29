@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/mhuisi/vires/src/ent"
@@ -47,7 +48,7 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	f := &Field{
 		players: ps,
 		// change to cells from mapgen algorithm later!
-		cells:       map[ent.ID]*ent.Cell{},
+		cells:       cells,
 		movements:   map[ent.ID]*ent.Movement{},
 		movementID:  0,
 		ops:         timed.New(),
@@ -57,6 +58,18 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	}
 	// handle this here instead of in the caller to avoid the caller trying to read the cells
 	// while we're running our game loop
+	for _, c1 := range f.cells {
+		for _, c2 := range f.cells {
+			if c1 == c2 {
+				continue
+			}
+			d := vec.Abs(vec.SubV(c1.Body().Location, c2.Body().Location))
+			if d < c1.Body().Radius+c2.Body().Radius {
+				fmt.Println("Overlap!")
+				fmt.Println(d, c1.Body().Radius, c2.Body().Radius)
+			}
+		}
+	}
 	t.GenerateField(f.cells, f.size)
 	f.startReplication()
 	return f

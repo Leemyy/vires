@@ -95,6 +95,7 @@ type EliminatedPlayer ent.ID
 
 // Winner is transmitted by the server
 // when a player wins the match.
+// If Winner is 0, nobody won the match.
 type Winner ent.ID
 
 // CellVires represents the amount of vires
