@@ -14,7 +14,7 @@ import (
 	"github.com/mhuisi/vires/src/vec"
 )
 
-const Version = "0.2"
+const Version = "0.1"
 
 // RX is a packet received
 // by the client and used for

@@ -65,6 +65,10 @@ func NewRoom(id string, notifyQuit chan<- *Room) *Room {
 // userid is killed.
 func (r *Room) userWriter(c userConn) {
 	for tx := range c.send {
+		if tx.Type != "Replication" {
+			m2, _ := json.Marshal(tx)
+			fmt.Printf("%s\n", string(m2))
+		}
 		err := c.conn.WriteJSON(tx)
 		if err != nil {
 			r.kill <- c
@@ -88,8 +92,6 @@ func (r *Room) userReader(c userConn) {
 			r.kill <- c
 			return
 		}
-		m, _ := json.Marshal(p)
-		fmt.Printf("%s\n", string(m))
 		r.read <- p
 	}
 }
@@ -142,7 +144,7 @@ func (r *Room) handleRX(p transm.RX) {
 		return json.Unmarshal(p.Data, v)
 	}
 	switch p.Type {
-	case "Move":
+	case "Movement":
 		if r.field == nil {
 			return
 		}
@@ -151,6 +153,8 @@ func (r *Room) handleRX(p transm.RX) {
 		if err != nil {
 			return
 		}
+		m2, _ := json.Marshal(m)
+		fmt.Printf("%s\n", string(m2))
 		r.field.Move(p.Sender(), m.Source, m.Dest)
 	}
 }
