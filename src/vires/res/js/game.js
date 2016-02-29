@@ -120,7 +120,6 @@ vires.states.match = {
       hover = this.cellAt(input.cursor);
       if ((hover != null)) {
         if (!(this.target != null)) {
-          console.log("1");
           this.target = hover;
           this.targetMarker.pos = hover.Pos;
           this.targetMarker.scale = hover.Radius;
@@ -131,7 +130,6 @@ vires.states.match = {
             this.markers[this.target.ID].mark.unlink();
           }
         } else if (this.target.ID !== hover.ID) {
-          console.log("2");
           if (this.target.Owner === vires.Self) {
             if (!(this.markers[this.target.ID] != null)) {
               this.markers[this.target.ID] = {
@@ -153,15 +151,12 @@ vires.states.match = {
           }
         }
       } else if ((this.target != null)) {
-        console.log("3");
         if (this.target.Owner === vires.Self) {
-          console.log("3.1");
           if (!(this.markers[this.target.ID] != null)) {
             this.markers[this.target.ID] = {
               mark: new Primitive(this.target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker),
               cell: this.target
             };
-            console.log(this.markers[this.target.ID]);
           } else {
             this.markers[this.target.ID].mark.link();
           }
@@ -173,7 +168,6 @@ vires.states.match = {
     if (input.leftReleased) {
       hover = this.cellAt(input.cursor);
       if ((hover != null)) {
-        console.log(this.markers);
         sources = [];
         ref = this.markers;
         for (id in ref) {
@@ -229,6 +223,8 @@ vires.states.match = {
       switch (Msg.Type) {
         case "Movement":
           this.movements[data.ID] = new Movement(data);
+          console.log("Movement " + data.ID);
+          console.log(this.movements[data.ID]);
           break;
         case "Replication":
           for (l = 0, len = data.length; l < len; l++) {
@@ -245,6 +241,9 @@ vires.states.match = {
         case "Collision":
           A = this.movements[data.A.ID];
           B = this.movements[data.B.ID];
+          console.log("Collision " + data.A.ID + " " + data.B.ID);
+          console.log(A);
+          console.log(B);
           if (data.A.Moving > 0) {
             A.update(data.A);
           } else {
@@ -619,7 +618,7 @@ Movement = (function() {
     this.Moving = Data.Moving;
     this.O = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y);
     this.Radius = Data.Body.Radius;
-    this.V = vec2.fromValues(Data.Body.Direction.X, Data.Body.Direction.Y);
+    this.V = vec2.fromValues(Data.Direction.X, Data.Direction.Y);
     this.birth = vires.time;
     this.pos = vec2.clone(this.O);
     this.primitive.scale = this.Radius;

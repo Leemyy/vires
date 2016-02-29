@@ -140,7 +140,7 @@ vires.states.match =
 			if (hover?)
 				#Cursor is over a Cell
 				if !(@target?)
-					console.log "1"
+					#console.log "1"
 					#No Cell is currently marked as target
 					#Mark hovered Cell
 					@target = hover
@@ -151,7 +151,7 @@ vires.states.match =
 					if (@markers[@target.ID]?)
 						@markers[@target.ID].mark.unlink()
 				else if (@target.ID != hover.ID)
-					console.log "2"
+					#console.log "2"
 					#Another Cell is marked as target
 					if (@target.Owner == vires.Self)
 						#Place source marker
@@ -171,17 +171,17 @@ vires.states.match =
 						@markers[@target.ID].mark.unlink()
 
 			else if (@target?)
-				console.log "3"
+				#console.log "3"
 				#Cursor just left a Cell
 				if (@target.Owner == vires.Self)
-					console.log "3.1"
+					#console.log "3.1"
 					#That Cell was owned by the Player
 					#Place source marker
 					if !(@markers[@target.ID]?)
 						@markers[@target.ID] = 
 						mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
 						cell: @target
-						console.log @markers[@target.ID]
+						#console.log @markers[@target.ID]
 					else
 						@markers[@target.ID].mark.link()
 				#Remove target marker
@@ -192,7 +192,7 @@ vires.states.match =
 			hover = @cellAt(input.cursor)
 			if (hover?)
 				#Send Movements
-				console.log @markers
+				#console.log @markers
 				sources = []
 				for id, marked of @markers
 					if(marked.cell.ID != hover.ID)
@@ -250,6 +250,8 @@ vires.states.match =
 			switch Msg.Type
 				when "Movement"
 					@movements[data.ID] = new Movement(data)
+					console.log "Movement #{data.ID}"
+					console.log @movements[data.ID]
 				when "Replication"
 					for update in data
 						@cells[update.ID].Stationed = update.Stationed
@@ -261,6 +263,9 @@ vires.states.match =
 				when "Collision"
 					A = @movements[data.A.ID]
 					B = @movements[data.B.ID]
+					console.log "Collision #{data.A.ID} #{data.B.ID}"
+					console.log A
+					console.log B
 					if(data.A.Moving > 0)
 						A.update(data.A)
 					else
@@ -627,7 +632,7 @@ class Movement
 		@Moving = Data.Moving
 		@O = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y)
 		@Radius = Data.Body.Radius
-		@V = vec2.fromValues(Data.Body.Direction.X, Data.Body.Direction.Y)
+		@V = vec2.fromValues(Data.Direction.X, Data.Direction.Y)
 		@birth = vires.time
 		@pos = vec2.clone(@O)
 
