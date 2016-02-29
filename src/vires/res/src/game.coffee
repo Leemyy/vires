@@ -255,7 +255,7 @@ vires.states.match =
 						@cells[update.ID].Stationed = update.Stationed
 				when "Conflict"
 					@movements[data.Movement].kill()
-					delete movements[data.Movement]
+					delete @movements[data.Movement]
 					@cells[data.Cell.ID].Stationed = data.Cell.Stationed
 					@cells[data.Cell.ID].switchOwner(@players[data.Cell.Owner])
 				when "Collision"

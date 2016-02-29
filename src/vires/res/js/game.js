@@ -238,7 +238,7 @@ vires.states.match = {
           break;
         case "Conflict":
           this.movements[data.Movement].kill();
-          delete movements[data.Movement];
+          delete this.movements[data.Movement];
           this.cells[data.Cell.ID].Stationed = data.Cell.Stationed;
           this.cells[data.Cell.ID].switchOwner(this.players[data.Cell.Owner]);
           break;
