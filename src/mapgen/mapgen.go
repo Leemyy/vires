@@ -6,7 +6,7 @@ package mapgen
 //channels = append(channels, Channel{name:"some other name"})
 
 import (
-	//"fmt"
+	"fmt"
 	"math"
 	"math/rand"
 
@@ -18,9 +18,6 @@ const (
 	CellMinimumSize           = 40
 	PlayerCellDefaultSize     = 140
 	CellMaximumSize           = 240
-	MaximumXPosition          = 8000
-	MaximumYPosition          = 8000
-	NumberOfCells             = 50
 	DistanceFactor            = 1
 	NumberOfMapsPerGeneration = 8
 )
@@ -32,9 +29,9 @@ type Field struct {
 }
 
 type Cell struct {
-	xPosition int32
-	yPosition int32
-	size      int32
+	xPosition int
+	yPosition int
+	size      int
 }
 
 type Map struct {
@@ -75,13 +72,27 @@ func setFitnesses(generation *Generation) {
 	}
 }
 
-func GenerateMap(numberOfPlayers int) ([]ent.Circle, []int) {
+func GenerateMap(numberOfPlayers int) Field {
+	var maximumXPosition int
+	var maximumYPosition int
+	var numberOfCells int
+	if numberOfPlayers > 0 {
+		maximumXPosition = int(2000 + 500*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
+		maximumYPosition = int(2000 + 500*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
+		numberOfCells = int(10 + 2*math.Pow(math.Log2(float64(numberOfPlayers)), 2))
+	} else {
+		maximumXPosition = 8000
+		maximumYPosition = 8000
+		numberOfCells = 10
+
+	}
+	fmt.Println("Number of Players: ", numberOfPlayers, "Map X Size: ", maximumXPosition, " Map Y Size: ", maximumYPosition, " Number of Cells: ", numberOfCells)
 	generationSuccessful := false
 	generation := newGeneration(nil, nil, nil)
 	for generationSuccessful == false {
 		var maps []Map
 		for i := 0; i < NumberOfMapsPerGeneration; i++ {
-			currentCellList := generateCellList()
+			currentCellList := generateCellList(maximumXPosition, maximumYPosition, numberOfCells)
 			maps = append(maps, Map{currentCellList, calculateFitnesses(currentCellList)})
 
 		}
@@ -89,20 +100,20 @@ func GenerateMap(numberOfPlayers int) ([]ent.Circle, []int) {
 		setFitnesses(generation)
 		numberOfGenerations := 0
 		for generation.currentLowestFitness.fitness != 0 && numberOfGenerations < 10000 {
-			crossDivider := rand.Int31n(NumberOfCells)
+			crossDivider := rand.Intn(numberOfCells)
 			var childCellList []Cell
-			for i := int32(0); i < crossDivider; i++ {
+			for i := 0; i < crossDivider; i++ {
 				if rand.Int31n(100) >= 2 {
 					childCellList = append(childCellList, generation.currentLowestFitness.cells[i])
 				} else {
-					childCellList = append(childCellList, Cell{rand.Int31n(MaximumXPosition), rand.Int31n(MaximumYPosition), rand.Int31n(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
+					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
 				}
 			}
-			for i := crossDivider; i < NumberOfCells; i++ {
+			for i := crossDivider; i < numberOfCells; i++ {
 				if rand.Int31n(100) >= 2 {
 					childCellList = append(childCellList, generation.currentSecondBestFitness.cells[i])
 				} else {
-					childCellList = append(childCellList, Cell{rand.Int31n(MaximumXPosition), rand.Int31n(MaximumYPosition), rand.Int31n(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
+					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
 				}
 			}
 			for i, currentMap := range generation.maps {
@@ -130,7 +141,7 @@ func GenerateMap(numberOfPlayers int) ([]ent.Circle, []int) {
 		circles[randomNumber].Radius = PlayerCellDefaultSize
 		playerIndex = append(playerIndex, randomNumber)
 	}
-	return circles, playerIndex
+	return Field{vec.V{float64(maximumXPosition), float64(maximumYPosition)}, circles, playerIndex}
 }
 
 func calculateFitnesses(cells []Cell) float64 {
@@ -149,10 +160,10 @@ func calculateFitnesses(cells []Cell) float64 {
 	return 0
 }
 
-func generateCellList() []Cell {
+func generateCellList(maximumXPosition int, maximumYPosition, numberOfCells int) []Cell {
 	var cells []Cell
-	for i := 0; i < NumberOfCells; i++ {
-		cells = append(cells, Cell{rand.Int31n(MaximumXPosition), rand.Int31n(MaximumYPosition), rand.Int31n(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
+	for i := 0; i < numberOfCells; i++ {
+		cells = append(cells, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
 	}
 	return cells
 }
