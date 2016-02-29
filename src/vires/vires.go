@@ -14,21 +14,13 @@ import (
 
 const (
 	roomIDPattern = "{roomid:[0-9]+}"
-	staticDir     = "./static/"
-	tmplDir       = "./tmpl/"
 )
 
 var (
 	upgrader = websocket.Upgrader{}
-	roomTmpl = template.Must(template.ParseFiles(tmplDir + "room.html"))
+	roomTmpl = template.Must(template.ParseFiles("./res/room.html"))
 	rooms    = map[string]*room.Room{}
 )
-
-func onMainPage(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("Connected to main page")
-	// Possibly cache files?
-	http.ServeFile(w, req, staticDir+"main.html")
-}
 
 // roomID gets the id of the current room from the url of an http request.
 func roomID(r *http.Request) string {
@@ -73,9 +65,8 @@ func startMatch(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	// Main page
-	r.HandleFunc("/", onMainPage).Methods("GET")
 	// Rooms
+	r.PathPrefix("/res").Handler(http.StripPrefix("/res", http.FileServer(http.Dir("./res/"))))
 	r.HandleFunc(fmt.Sprintf("/%s", roomIDPattern), onRoom).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/c", roomIDPattern), connectToRoom)
 	r.HandleFunc(fmt.Sprintf("/%s/s", roomIDPattern), startMatch)
