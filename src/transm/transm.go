@@ -134,7 +134,7 @@ type StartCell struct {
 }
 
 func makeStartCell(c *ent.Cell) StartCell {
-	return StartCell{c.ID(), c.OwnerID()}
+	return StartCell{c.OwnerID(), c.ID()}
 }
 
 // Field is transmitted by the server

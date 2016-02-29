@@ -65,8 +65,6 @@ func NewRoom(id string, notifyQuit chan<- *Room) *Room {
 // userid is killed.
 func (r *Room) userWriter(c userConn) {
 	for tx := range c.send {
-		//m, _ := json.Marshal(tx)
-		//fmt.Printf("%s", string(m))
 		err := c.conn.WriteJSON(tx)
 		if err != nil {
 			r.kill <- c
@@ -84,7 +82,6 @@ func (r *Room) userWriter(c userConn) {
 // userid is killed.
 func (r *Room) userReader(c userConn) {
 	for {
-		fmt.Println("user reader started")
 		p := transm.MakeRX(c.id)
 		err := c.conn.ReadJSON(&p)
 		if err != nil {
@@ -92,7 +89,7 @@ func (r *Room) userReader(c userConn) {
 			return
 		}
 		m, _ := json.Marshal(p)
-		fmt.Printf("%s", string(m))
+		fmt.Printf("%s\n", string(m))
 		r.read <- p
 	}
 }
