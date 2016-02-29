@@ -111,7 +111,7 @@ Beispielpaket:
 Tritt ein Conflict auf, also trifft ein Movement auf seine Target-Cell, so wird ein Conflict-Paket an alle Clients gesendet. Für das Conflict-Paket gilt das gleiche wie für Collision-Pakete: Alle Werte sind nach dem Conflict berechnet, hat die Cell also nach einem Conflict den Besitzer gewechselt, so wird der neue Besitzer übertragen.
 Ein Conflict-Paket besteht aus einer Movement-ID, welche angibt, welches Movement mit der Cell kollidiert, einer Cell-ID, welche die Cell identifiziert, die Ziel des Conflicts ist, die Menge an Vires, die nach dem Conflict noch in der Cell vorhanden ist und die ID des Besitzers der Cell.
 
-Beispielspaket:
+Beispielpaket:
 \begin{lstlisting}
 {
     "Movement": 5,
@@ -126,7 +126,7 @@ Beispielspaket:
 \subsubsection{EliminatedPlayer}
 Wird ein Spieler aus dem Spiel ausgeschlossen, sei es weil er keine Cells mehr besitzt oder seine Verbindung getrennt wurde, so wird ein EliminatedPlayer-Paket an alle Clients gesendet. Bei diesem Paket handelt es sich lediglich um die ID des eliminierten Spielers.
 
-Beispielspaket:
+Beispielpaket:
 \begin{lstlisting}
 1
 \end{lstlisting}
@@ -134,7 +134,7 @@ Beispielspaket:
 \subsubsection{Winner}
 Gewinnt ein Spieler das Spiel, weil er der letzte Überlebende ist, so wird ein Winner-Paket an alle Clients gesendet, welches lediglich die ID des Siegers enthält.
 
-Beispielspaket:
+Beispielpaket:
 \begin{lstlisting}
 1
 \end{lstlisting}
@@ -142,7 +142,7 @@ Beispielspaket:
 \subsubsection{Replication}
 Vermehrt sich die Anzahl an Vires in den Cells, so wird ein Replication-Paket an alle Clients gesendet. Das Replication-Paket enthält die ID und die neue Anzahl an Stationed Vires aller Cells.
 
-Beispielspaket:
+Beispielpaket:
 \begin{lstlisting}
 [
     {
@@ -165,7 +165,7 @@ Wird das Match gestartet und ein Field generiert, so wird ein Field-Paket an all
 Außerdem enthält das Paket die Anfangszellen der Spieler des Matches als ID des Besitzers und ID der Cell, die die Anfangszelle des Besitzers darstellt.
 Letztlich enthält das Paket ebenfalls die Größe des Fields.
 
-Beispielspaket:
+Beispielpaket:
 \begin{lstlisting}
 {
     "Cells": [
@@ -223,7 +223,7 @@ Beispielspaket:
 \subsubsection{UserJoined}
 Tritt ein User dem Room bei, so wird ein UserJoined-Paket an alle Clients gesendet. Bei einem UserJoined-Paket handelt es sich lediglich um die ID des Users.
 
-Beispielspaket:
+Beispielpaket:
 \begin{lstlisting}
 1
 \end{lstlisting}
@@ -231,7 +231,7 @@ Beispielspaket:
 \subsubsection{OwnID}
 Tritt ein user dem Room bei, so wird ihm mittels eines OwnID-Pakets seine eigene ID im Spiel mitgeteilt. Auch bei dem OwnID-Paket handelt es sich nur um die ID des Users.
 
-Beispielspaket:
+Beispielpaket:
 \begin{lstlisting}
 1
 \end{lstlisting}
