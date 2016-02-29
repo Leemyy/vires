@@ -155,11 +155,13 @@ vires.states.match = {
       } else if ((this.target != null)) {
         console.log("3");
         if (this.target.Owner === vires.Self) {
+          console.log("3.1");
           if (!(this.markers[this.target.ID] != null)) {
             this.markers[this.target.ID] = {
               mark: new Primitive(this.target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker),
               cell: this.target
             };
+            console.log(this.markers[this.target.ID]);
           } else {
             this.markers[this.target.ID].mark.link();
           }
@@ -581,7 +583,7 @@ Movement = (function() {
     this.Moving = Data.Moving;
     this.O = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y);
     this.Radius = Data.Body.Radius;
-    this.V = vec2.fromValues(Data.Body.Direction.X, Data.Body.Direction.Y);
+    this.V = vec2.fromValues(Data.Direction.X, Data.Direction.Y);
     this.birth = vires.time;
     this.pos = vec2.clone(this.O);
     this.primitive = new Primitive(this.pos, gfx.mesh.round, gfx.material.movement);
