@@ -174,12 +174,14 @@ vires.states.match =
 				console.log "3"
 				#Cursor just left a Cell
 				if (@target.Owner == vires.Self)
+					console.log "3.1"
 					#That Cell was owned by the Player
 					#Place source marker
 					if !(@markers[@target.ID]?)
 						@markers[@target.ID] = 
 						mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
 						cell: @target
+						console.log @markers[@target.ID]
 					else
 						@markers[@target.ID].mark.link()
 				#Remove target marker
@@ -590,7 +592,7 @@ class Movement
 		@Moving = Data.Moving
 		@O = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y)
 		@Radius = Data.Body.Radius
-		@V = vec2.fromValues(Data.Body.Direction.X, Data.Body.Direction.Y)
+		@V = vec2.fromValues(Data.Direction.X, Data.Direction.Y)
 		@birth = vires.time
 		@pos = vec2.clone(@O)
 
