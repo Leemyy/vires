@@ -595,7 +595,7 @@ Movement = (function() {
       this.primitive.height = settings.indexOther - 1;
     }
     this.primitive.scale = this.Radius;
-    this.primitive.color = this.players[this.Owner].color;
+    this.primitive.color = vires.states.match.players[this.Owner].color;
     return;
   }
 

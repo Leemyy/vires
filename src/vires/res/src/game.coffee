@@ -604,7 +604,7 @@ class Movement
 		else
 			@primitive.height = settings.indexOther - 1
 		@primitive.scale = @Radius
-		@primitive.color = @players[@Owner].color
+		@primitive.color = vires.states.match.players[@Owner].color
 		return
 
 	#Updates the position of this Movement
