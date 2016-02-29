@@ -237,25 +237,25 @@ vires.states.match = {
           }
           break;
         case "Conflict":
-          movements[data.Movement].kill();
+          this.movements[data.Movement].kill();
           delete movements[data.Movement];
-          cells[data.Cell.ID].Stationed = data.Cell.Stationed;
-          cells[data.Cell.ID].switchOwner(this.players[data.Cell.Owner]);
+          this.cells[data.Cell.ID].Stationed = data.Cell.Stationed;
+          this.cells[data.Cell.ID].switchOwner(this.players[data.Cell.Owner]);
           break;
         case "Collision":
-          A = movements[data.A.ID];
-          B = movements[data.B.ID];
+          A = this.movements[data.A.ID];
+          B = this.movements[data.B.ID];
           if (data.A.Moving > 0) {
             A.update(data.A);
           } else {
             A.kill();
-            delete movements[A.ID];
+            delete this.movements[A.ID];
           }
           if (data.B.Moving > 0) {
             B.update(data.B);
           } else {
             B.kill();
-            delete movements[B.ID];
+            delete this.movements[B.ID];
           }
           break;
         case "EliminatedPlayer":
