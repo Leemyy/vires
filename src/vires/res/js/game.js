@@ -100,6 +100,7 @@ vires.states.match = {
         firstCell = this.cells[start.Cell];
       }
     }
+    settings.minZoom = 1000 / this.fieldSize[1];
     if (this.spectating) {
       vec2.set(gfx.camera.pos, this.fieldSize[x] / 2, this.fieldSize[y] / 2);
       gfx.camera.zoom = gfx.width / this.fieldSize[x];
@@ -120,7 +121,7 @@ vires.states.match = {
       if ((hover != null)) {
         if (!(this.target != null)) {
           this.target = hover;
-          console.log("Target: " + vires.time);
+          console.log(hover);
           this.targetMarker.pos = hover.Pos;
           this.targetMarker.scale = hover.Radius;
           if (this.targetMarker.index < 0) {
@@ -176,6 +177,11 @@ vires.states.match = {
             sources.push(marked.cell);
           }
         }
+        console.log("---");
+        console.log(sources);
+        console.log("-@-");
+        console.log(hover);
+        console.log("---");
         connection.sendMove(hover, sources);
       }
       this.target = null;

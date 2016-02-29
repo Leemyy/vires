@@ -112,6 +112,7 @@ vires.states.match =
 				@spectating = false
 				firstCell = @cells[start.Cell]
 
+		settings.minZoom = 1000 / @fieldSize[1]
 		if (@spectating)
 			vec2.set(gfx.camera.pos, @fieldSize[x]/2, @fieldSize[y]/2)
 			gfx.camera.zoom = gfx.width / @fieldSize[x]
@@ -142,7 +143,7 @@ vires.states.match =
 					#No Cell is currently marked as target
 					#Mark hovered Cell
 					@target = hover
-					console.log "Target: #{vires.time}"
+					console.log hover #--
 					@targetMarker.pos = hover.Pos
 					@targetMarker.scale = hover.Radius
 					if (@targetMarker.index < 0)
@@ -191,6 +192,11 @@ vires.states.match =
 				for id, marked of @markers
 					if(marked.cell.ID != hover.ID)
 						sources.push(marked.cell)
+				console.log "---"
+				console.log sources
+				console.log "-@-"
+				console.log hover
+				console.log "---"
 				connection.sendMove(hover, sources)
 			#Remove all markers
 			@target = null

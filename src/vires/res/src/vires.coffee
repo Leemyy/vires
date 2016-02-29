@@ -208,7 +208,7 @@ nextInput = ->
 	input.right = input.next.right
 	input.middle = input.next.middle
 	input.left = input.next.left
-	input.scroll = input.next.scroll
+	input.scroll = Math.sign(input.next.scroll)
 	input.x = input.next.x
 	input.y = input.next.y
 
