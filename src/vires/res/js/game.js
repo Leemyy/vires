@@ -604,7 +604,7 @@ Movement = (function() {
   };
 
   Movement.prototype.kill = function() {
-    return primitive.unlink();
+    this.primitive.unlink();
   };
 
   Movement.prototype.update = function(Data) {
@@ -614,7 +614,7 @@ Movement = (function() {
     this.V = vec2.fromValues(Data.Body.Direction.X, Data.Body.Direction.Y);
     this.birth = vires.time;
     this.pos = vec2.clone(this.O);
-    return this.primitive.scale = this.Radius;
+    this.primitive.scale = this.Radius;
   };
 
   return Movement;

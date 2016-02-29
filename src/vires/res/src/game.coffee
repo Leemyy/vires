@@ -614,7 +614,8 @@ class Movement
 
 	#Stops this Movement from being displayed
 	kill: ->
-		primitive.unlink()
+		@primitive.unlink()
+		return
 
 	#Modifies this movement after a Collision
 	# was received from the server
@@ -627,3 +628,4 @@ class Movement
 		@pos = vec2.clone(@O)
 
 		@primitive.scale = @Radius
+		return
