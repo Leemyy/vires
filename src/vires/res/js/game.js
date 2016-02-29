@@ -5,7 +5,7 @@ var Cell, Movement, Player, Random, convertGameCoords, convertMouseCoords, setti
 settings = {
   minZoom: 1,
   maxZoom: 100,
-  zoomSpeed: 0.5,
+  zoomSpeed: 0.2,
   indexNeutral: 10,
   indexSelf: 30,
   indexOther: 20,
@@ -120,8 +120,8 @@ vires.states.match = {
       hover = this.cellAt(input.cursor);
       if ((hover != null)) {
         if (!(this.target != null)) {
+          console.log("1");
           this.target = hover;
-          console.log(hover);
           this.targetMarker.pos = hover.Pos;
           this.targetMarker.scale = hover.Radius;
           if (this.targetMarker.index < 0) {
@@ -131,6 +131,7 @@ vires.states.match = {
             this.markers[this.target.ID].mark.unlink();
           }
         } else if (this.target.ID !== hover.ID) {
+          console.log("2");
           if (this.target.Owner === vires.Self) {
             if (!(this.markers[this.target.ID] != null)) {
               this.markers[this.target.ID] = {
@@ -152,6 +153,7 @@ vires.states.match = {
           }
         }
       } else if ((this.target != null)) {
+        console.log("3");
         if (this.target.Owner === vires.Self) {
           if (!(this.markers[this.target.ID] != null)) {
             this.markers[this.target.ID] = {
@@ -169,6 +171,7 @@ vires.states.match = {
     if (input.leftReleased) {
       hover = this.cellAt(input.cursor);
       if ((hover != null)) {
+        console.log(this.markers);
         sources = [];
         ref = this.markers;
         for (id in ref) {
@@ -177,11 +180,6 @@ vires.states.match = {
             sources.push(marked.cell);
           }
         }
-        console.log("---");
-        console.log(sources);
-        console.log("-@-");
-        console.log(hover);
-        console.log("---");
         connection.sendMove(hover, sources);
       }
       this.target = null;
@@ -202,12 +200,12 @@ vires.states.match = {
     if (input.scroll !== 0 && !this.cameraDrag) {
       prevZoom = gfx.camera.zoom;
       if (input.scroll > 0) {
-        gfx.camera.zoom *= input.scroll * settings.zoomSpeed;
+        gfx.camera.zoom *= 1 + input.scroll * settings.zoomSpeed;
         if (gfx.camera.zoom > settings.maxZoom) {
           gfx.camera.zoom = settings.maxZoom;
         }
       } else {
-        gfx.camera.zoom /= -input.scroll * settings.zoomSpeed;
+        gfx.camera.zoom /= 1 - input.scroll * settings.zoomSpeed;
         if (gfx.camera.zoom < settings.minZoom) {
           gfx.camera.zoom = settings.minZoom;
         }

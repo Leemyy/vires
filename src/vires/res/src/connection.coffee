@@ -3,6 +3,7 @@ connection=
 	url: "ws://" + window.location.host + "/#{vires.room}/c"
 	messages: new Array(0)
 	socket: null
+	debug: new Array(0)
 
 	init: ->
 		connection.socket = new WebSocket(@url)
@@ -17,7 +18,10 @@ connection=
 
 		connection.socket.onmessage= (msg)->
 			try
-				connection.messages.push(JSON.parse(msg.data))
+				Packet = JSON.parse(msg.data)
+				connection.messages.push(Packet)
+				if (Packet.Type != "Replication")
+					connection.debug.push(msg.data)
 			catch err
 				console.error(err)
 				#...
@@ -35,6 +39,7 @@ connection=
 			Version: @version
 			Data: payload
 		data = JSON.stringify(packet)
+		console.log data
 		@socket.send(data)
 		return
 
@@ -70,83 +75,3 @@ connection=
 			when "OwnID" #
 				vires.Self = Msg.Data
 		return
-
-
-packets=
-	field:{
-    "Type": "Field",
-    "Version": "0.1",
-    "Data": {
-        "Cells": [
-                {
-                        "ID": 0,
-                        "Body": {
-                                "Location": {
-                                        "X": 200,
-                                        "Y": 200
-                                },
-                                "Radius": 3
-                        },
-                        "Capacity": 10
-                },
-                {
-                        "ID": 1,
-                        "Body": {
-                                "Location": {
-                                        "X": 180,
-                                        "Y": 210
-                                },
-                                "Radius": 5
-                        },
-                        "Capacity": 10
-                },
-                {
-                        "ID": 2,
-                        "Body": {
-                                "Location": {
-                                        "X": 200,
-                                        "Y": 260
-                                },
-                                "Radius": 3
-                        },
-                        "Capacity": 10
-                },
-                {
-                        "ID": 3,
-                        "Body": {
-                                "Location": {
-                                        "X": 240,
-                                        "Y": 190
-                                },
-                                "Radius": 5
-                        },
-                        "Capacity": 10
-                },
-                {
-                        "ID": 4,
-                        "Body": {
-                                "Location": {
-                                        "X": 230,
-                                        "Y": 230
-                                },
-                                "Radius": 4
-                        },
-                        "Capacity": 10
-                }
-        ],
-        "StartCells": [
-                {
-                        "Owner": 1,
-                        "Cell": 3
-                },
-                {
-                        "Owner": 2,
-                        "Cell": 2
-                }
-        ],
-        "Size": {
-                "X": 800,
-                "Y": 600
-        }
-    }
-}
