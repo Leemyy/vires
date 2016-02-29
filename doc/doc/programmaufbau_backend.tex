@@ -2,8 +2,7 @@
 Das Backend besteht aus mehrere Paketen und ist wie folgt aufgebaut:
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.55\textwidth]{Architektur.png}
-	\caption{Paketaufbau des Backends}
+	\includegraphics[width=0.8\textwidth]{Architektur.png}
 \end{figure}
 Die Bedeutung der einzelnen Pakete und wichtige Algorithmen werden im Folgenden erklärt.
 
@@ -17,7 +16,6 @@ Der Handler für \verb+/<roomid>/c+ eröffnet dann auch serverseitig die Websock
 \verb+room+ verwaltet die Websocket-Verbindungen eines Rooms. Verbindet sich der erste User mit dem Room, so wird der Room erstellt. \\
 Alle Operationen eines Rooms werden von einer Monitor-Goroutine verwaltet, welche den Zugriff auf alle Zustände des Rooms synchronisiert. \\
 Insgesamt verwaltet die Monitor-Goroutine Spielerverbindungen, Matches, Pakete von und an Nutzer und Pakete vom Spiel. \\
-Genauere Informationen über Monitor-Goroutines können unter \verb+MONITOR_GOROUTINE_REF_HIER_EINFÜGEN+ gefunden werden. \\
 Wird eine Websocket-Verbindung zu dem Room hinzugefügt, so werden für diese Verbindung eine Reader- und eine Writer-Goroutine gestartet. 
 
 \subsubsection{game}
@@ -25,6 +23,10 @@ Wird eine Websocket-Verbindung zu dem Room hinzugefügt, so werden für diese Ve
 Der \vires-Server verfolgt einen anderen Ansatz als die meisten Serverapplikationen von Spielen: 
 Anstatt innerhalb eines Game-Loops zu überprüfen, ob bestimmte Bedingungen erfüllt sind,
 werden alle Aktionen vorberechnet und mittels Timern und einem Scheduler verzögert, bis die Aktion ausgeführt werden soll. \\
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Timers.png}
+\end{figure}
 \vires\ ist langsam und der Server soll in der Lage sein, sehr viele Matches gleichzeitig auszuführen. 
 Würde der Server für jedes Match Game-Loops verwenden, so wäre entweder die Bearbeitungszeit sehr schlecht oder eine hohe
 Überprüfungsfrequenz würde Serverleistung verschwenden. \\
