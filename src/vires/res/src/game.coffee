@@ -1,7 +1,7 @@
 settings = 
 	minZoom: 1
 	maxZoom: 100
-	zoomSpeed: 0.5
+	zoomSpeed: 0.2
 	indexNeutral: 10
 	indexSelf: 30
 	indexOther: 20
@@ -140,10 +140,10 @@ vires.states.match =
 			if (hover?)
 				#Cursor is over a Cell
 				if !(@target?)
+					console.log "1"
 					#No Cell is currently marked as target
 					#Mark hovered Cell
 					@target = hover
-					console.log hover #--
 					@targetMarker.pos = hover.Pos
 					@targetMarker.scale = hover.Radius
 					if (@targetMarker.index < 0)
@@ -151,6 +151,7 @@ vires.states.match =
 					if (@markers[@target.ID]?)
 						@markers[@target.ID].mark.unlink()
 				else if (@target.ID != hover.ID)
+					console.log "2"
 					#Another Cell is marked as target
 					if (@target.Owner == vires.Self)
 						#Place source marker
@@ -170,6 +171,7 @@ vires.states.match =
 						@markers[@target.ID].mark.unlink()
 
 			else if (@target?)
+				console.log "3"
 				#Cursor just left a Cell
 				if (@target.Owner == vires.Self)
 					#That Cell was owned by the Player
@@ -188,15 +190,16 @@ vires.states.match =
 			hover = @cellAt(input.cursor)
 			if (hover?)
 				#Send Movements
+				console.log @markers
 				sources = []
 				for id, marked of @markers
 					if(marked.cell.ID != hover.ID)
 						sources.push(marked.cell)
-				console.log "---"
-				console.log sources
-				console.log "-@-"
-				console.log hover
-				console.log "---"
+				#console.log "---"
+				#console.log sources
+				#console.log "-@-"
+				#console.log hover
+				#console.log "---"
 				connection.sendMove(hover, sources)
 			#Remove all markers
 			@target = null
@@ -218,11 +221,11 @@ vires.states.match =
 		if(input.scroll != 0 && !@cameraDrag)
 			prevZoom = gfx.camera.zoom
 			if(input.scroll > 0)
-				gfx.camera.zoom *= input.scroll * settings.zoomSpeed
+				gfx.camera.zoom *= 1 + input.scroll * settings.zoomSpeed
 				if(gfx.camera.zoom>settings.maxZoom)
 					gfx.camera.zoom = settings.maxZoom
 			else
-				gfx.camera.zoom /= -input.scroll * settings.zoomSpeed
+				gfx.camera.zoom /= 1 - input.scroll * settings.zoomSpeed
 				if(gfx.camera.zoom<settings.minZoom)
 					gfx.camera.zoom = settings.minZoom
 
