@@ -129,10 +129,14 @@ func (f *Field) removePlayer(p ent.ID) {
 
 func (f *Field) findCollisions(m *ent.Movement) {
 	for _, m2 := range f.movements {
+		fmt.Println(m.ID(), m2.ID())
 		collideAt, collides := m.CollidesWith(m2)
+		fmt.Println(collides)
 		if !collides {
 			continue
 		}
+		fmt.Println("Starting a collision now!")
+		m2 := m2
 		stopCollision := f.ops.Start(collideAt, func() {
 			f.collide(m, m2)
 		})
@@ -152,6 +156,7 @@ func (f *Field) viresChanged(m *ent.Movement) {
 
 func (f *Field) collide(m, m2 *ent.Movement) {
 	m.Collide(m2)
+	fmt.Println(m.ID(), m2.ID())
 	f.transmitter.Collide(m, m2)
 	// make sure that the dead movement is removed first
 	// to avoid that the same collision is found again
