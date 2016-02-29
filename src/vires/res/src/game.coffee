@@ -254,23 +254,23 @@ vires.states.match =
 					for update in data
 						@cells[update.ID].Stationed = update.Stationed
 				when "Conflict"
-					movements[data.Movement].kill()
+					@movements[data.Movement].kill()
 					delete movements[data.Movement]
-					cells[data.Cell.ID].Stationed = data.Cell.Stationed
-					cells[data.Cell.ID].switchOwner(@players[data.Cell.Owner])
+					@cells[data.Cell.ID].Stationed = data.Cell.Stationed
+					@cells[data.Cell.ID].switchOwner(@players[data.Cell.Owner])
 				when "Collision"
-					A = movements[data.A.ID]
-					B = movements[data.B.ID]
+					A = @movements[data.A.ID]
+					B = @movements[data.B.ID]
 					if(data.A.Moving > 0)
 						A.update(data.A)
 					else
 						A.kill()
-						delete movements[A.ID]
+						delete @movements[A.ID]
 					if(data.B.Moving > 0)
 						B.update(data.B)
 					else
 						B.kill()
-						delete movements[B.ID]
+						delete @movements[B.ID]
 				when "EliminatedPlayer"
 					#Neutralize everything owned by player
 					@killPlayer(data)
