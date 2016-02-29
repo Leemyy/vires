@@ -207,7 +207,7 @@ func speed(n Vires) float64 {
 	if n == 0 {
 		return 0
 	}
-	return 100 / float64(n)
+	return 1000 / float64(n)
 }
 
 // Move creates a movement which describes
