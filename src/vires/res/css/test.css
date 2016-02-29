@@ -1,0 +1,44 @@
+body{
+	margin: 0px;
+	padding: 0px;
+	font-family: Calibri,"PT Sans",sans-serif;
+}
+
+
+.centered{
+	margin-left: auto;
+	margin-right: auto;
+	padding: 5px;
+}
+
+
+#overlay{
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	z-index: 999999;
+	background-color: rgba(200, 200, 200, 0.5);
+}
+
+#menu{
+	margin-top: 200px;
+	background-color: red;
+	width: 300px;
+	height: 450px;
+}
+
+#page{
+	height: 100%;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+#viewport{
+	height: 100%;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
