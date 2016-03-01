@@ -139,21 +139,6 @@ func GenerateMap(numberOfPlayers int) Field {
 	return Field{vec.V{float64(maximumXPosition), float64(maximumYPosition)}, circles, playerIndex}
 }
 
-/*func calculateFitnesses(cells []Cell) float64 {
-	for _, currCellOne := range cells {
-		for _, currCellTwo := range cells {
-			if currCellOne != currCellTwo {
-				deltaX := currCellOne.xPosition - currCellTwo.xPosition
-				deltaY := currCellOne.yPosition - currCellTwo.yPosition
-				currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
-				if currentDistance <= CellMaximumSize*DistanceFactor {
-					return 100
-				}
-			}
-		}
-	}
-	return 0
-}*/
 func calculateFitnesses(cells []Cell) float64 {
 	allSmallestDistances := make([]float64, len(cells))
 	for i, currCellOne := range cells {
