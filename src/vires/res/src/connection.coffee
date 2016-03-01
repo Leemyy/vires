@@ -19,9 +19,9 @@ connection=
 		connection.socket.onmessage= (msg)->
 			try
 				Packet = JSON.parse(msg.data)
-				connection.messages.push(Packet)
+				connection.messages.unshift(Packet)
 				if (Packet.Type != "Replication")
-					connection.debug.push(msg.data)
+					connection.debug.unshift(msg.data)
 			catch err
 				console.error(err)
 				#...
@@ -39,7 +39,6 @@ connection=
 			Version: @version
 			Data: payload
 		data = JSON.stringify(packet)
-		console.log data
 		@socket.send(data)
 		return
 

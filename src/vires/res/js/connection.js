@@ -17,9 +17,9 @@ connection = {
       var Packet, err;
       try {
         Packet = JSON.parse(msg.data);
-        connection.messages.push(Packet);
+        connection.messages.unshift(Packet);
         if (Packet.Type !== "Replication") {
-          connection.debug.push(msg.data);
+          connection.debug.unshift(msg.data);
         }
       } catch (_error) {
         err = _error;
@@ -38,7 +38,6 @@ connection = {
       Data: payload
     };
     data = JSON.stringify(packet);
-    console.log(data);
     this.socket.send(data);
   },
   sendMove: function(target, sources) {
