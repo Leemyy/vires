@@ -633,19 +633,19 @@ class Movement
 		@Moving = Data.Moving
 		console.log "O: "
 		console.log @O
-		@O = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y)
+		vec2.set(@O, Data.Body.Location.X, Data.Body.Location.Y)
 		console.log @O
 		@Radius = Data.Body.Radius
 		console.log "V: "
 		console.log @V
-		@V = vec2.fromValues(Data.Direction.X, Data.Direction.Y)
+		vec2.set(@V, Data.Direction.X, Data.Direction.Y)
 		console.log @V
 		console.log "birth: #{@birth}"
 		@birth = vires.time
 		console.log @birth
 		console.log "pos:"
 		console.log @pos
-		@pos = vec2.copy(@pos, @O)
+		vec2.copy(@pos, @O)
 		console.log @pos
 		console.log "--updated!"
 
