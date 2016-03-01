@@ -145,6 +145,7 @@ func calculateFitnesses(cells []Cell, mapMid vec.V) float64 {
 		var smallestDistance float64
 		currentDistance := calculateDistance(currCellOne.xPosition, int(mapMid.X), currCellOne.yPosition, int(mapMid.Y))
 		if smallestDistanceToMapMid == 0 || smallestDistanceToMapMid < currentDistance {
+			//CHECK DIS!!!
 			smallestDistanceToMapMid = (currentDistance / (mapMid.X / 2)) * 100
 		}
 		for _, currCellTwo := range cells {
