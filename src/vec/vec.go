@@ -12,7 +12,7 @@ var zvec = V{0, 0}
 
 // AddV adds two vectors.
 func AddV(v1, v2 V) V {
-	return V{v1.X + v2.X, v1.X + v2.X}
+	return V{v1.X + v2.X, v1.Y + v2.Y}
 }
 
 // Add adds a scalar to a vector.
