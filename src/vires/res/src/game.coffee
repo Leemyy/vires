@@ -53,6 +53,7 @@ vires.states.match =
 	fieldSize: vec2.fromValues(800, 800)
 	spectating: false
 	maxCellSize: 1
+	minCellSize: 10000
 
 	cameraDrag: false
 	cameraStart: null
@@ -78,6 +79,11 @@ vires.states.match =
 		#Initialize Field
 		for cellData in Field.Cells
 			@cells[cellData.ID] = new Cell(cellData)
+			radius = cellData.Body.Radius
+			if (radius > @maxCellSize)
+				@maxCellSize = radius
+			if (radius < @minCellSize)
+				@minCellSize = radius
 
 		#Prepare cell lookup
 		@lookup = @cells.slice(0)
@@ -112,13 +118,14 @@ vires.states.match =
 				@spectating = false
 				firstCell = @cells[start.Cell]
 
-		settings.minZoom = 1000 / @fieldSize[1]
+		settings.minZoom = 800 / @fieldSize[1]
+		settings.maxZoom = 200 / @minCellSize 
 		if (@spectating)
 			vec2.set(gfx.camera.pos, @fieldSize[x]/2, @fieldSize[y]/2)
 			gfx.camera.zoom = gfx.width / @fieldSize[x]
 		else
-			vec2.set(gfx.camera.pos, firstCell.Pos[x], firstCell.Pos[x])
-			gfx.camera.zoom = settings.maxZoom / firstCell.Radius
+			vec2.set(gfx.camera.pos, firstCell.Pos[x], firstCell.Pos[y])
+			gfx.camera.zoom = 100 / firstCell.Radius
 		return
 
 	unload: ->
@@ -135,7 +142,7 @@ vires.states.match =
 		#	new Primitive(mouse, gfx.mesh.round, gfx.color[Math.floor(Math.random()*gfx.color.length)], height)
 
 		#Cell marking
-		if (input.left)
+		if (input.left && !@spectating)
 			hover = @cellAt(input.cursor)
 			if (hover?)
 				#Cursor is over a Cell
@@ -157,8 +164,8 @@ vires.states.match =
 						#Place source marker
 						if !(@markers[@target.ID]?)
 							@markers[@target.ID] = 
-							mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
-							cell: @target
+								mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
+								cell: @target
 						else
 							@markers[@target.ID].mark.link()
 					#Assign new target
@@ -179,8 +186,8 @@ vires.states.match =
 					#Place source marker
 					if !(@markers[@target.ID]?)
 						@markers[@target.ID] = 
-						mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
-						cell: @target
+							mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
+							cell: @target
 						#console.log @markers[@target.ID]
 					else
 						@markers[@target.ID].mark.link()
@@ -188,7 +195,7 @@ vires.states.match =
 				@target = null
 				@targetMarker.unlink()
 
-		if (input.leftReleased)
+		if (input.leftReleased && !@spectating)
 			hover = @cellAt(input.cursor)
 			if (hover?)
 				#Send Movements
@@ -277,10 +284,11 @@ vires.states.match =
 						B.kill()
 						delete @movements[B.ID]
 				when "EliminatedPlayer"
-					#Neutralize everything owned by player
+					if(vires.Self == data)
+						@spectating = true
 					@killPlayer(data)
 				when "Winner"
-					return
+					vires.load("lobby", @players[data].color)
 				else
 					connection.defaultDigest(Msg)
 			Msg = connection.messages.pop()
@@ -411,11 +419,15 @@ vires.states.loading =
 vires.states.lobby = 
 	animation: []
 
-	load: ->
+	load: (winner)->
 		vec2.set(gfx.camera.pos, 0, 0)
 		gfx.camera.zoom = 5
 
-		color = gfx.makeColor(10)
+		color = null
+		if(winner?)
+			color = winner
+		else
+			color = gfx.makeColor(10)
 		mesh = gfx.mesh.round
 		material = gfx.material.loading
 		@animation = new Array(10)

@@ -32,7 +32,7 @@ new Material("marker" , gfx.shader.color)
 #"yellow"
 #"zinnia"
 #Add all Player colors to one collection
-gfx.color.push( vec4.fromValues(0, 0, 0, 1))
+gfx.color.push( vec4.fromValues(0.6627450980392157, 0.6627450980392157, 0.6627450980392157, 1))
 gfx.color.push( vec4.fromValues(0.9411764705882353, 0.6392156862745098, 1, 1))
 gfx.color.push( vec4.fromValues(0, 0.4588235294117647, 0.8627450980392157, 1))
 gfx.color.push( vec4.fromValues(0.6, 0.24705882352941178, 0, 1))

@@ -9,7 +9,7 @@ new Material("loading", gfx.shader.color);
 
 new Material("marker", gfx.shader.color);
 
-gfx.color.push(vec4.fromValues(0, 0, 0, 1));
+gfx.color.push(vec4.fromValues(0.6627450980392157, 0.6627450980392157, 0.6627450980392157, 1));
 
 gfx.color.push(vec4.fromValues(0.9411764705882353, 0.6392156862745098, 1, 1));
 

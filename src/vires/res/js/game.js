@@ -53,10 +53,11 @@ vires.states.match = {
   fieldSize: vec2.fromValues(800, 800),
   spectating: false,
   maxCellSize: 1,
+  minCellSize: 10000,
   cameraDrag: false,
   cameraStart: null,
   load: function(Field) {
-    var cellData, firstCell, i, l, len, m, owner, palette, ref, ref1, server, start;
+    var cellData, firstCell, i, l, len, m, owner, palette, radius, ref, ref1, server, start;
     server = new Player(0);
     server.color = gfx.makeColor(0);
     this.players = {
@@ -74,6 +75,13 @@ vires.states.match = {
     for (l = 0, len = ref.length; l < len; l++) {
       cellData = ref[l];
       this.cells[cellData.ID] = new Cell(cellData);
+      radius = cellData.Body.Radius;
+      if (radius > this.maxCellSize) {
+        this.maxCellSize = radius;
+      }
+      if (radius < this.minCellSize) {
+        this.minCellSize = radius;
+      }
     }
     this.lookup = this.cells.slice(0);
     this.lookup.sort(function(a, b) {
@@ -100,13 +108,14 @@ vires.states.match = {
         firstCell = this.cells[start.Cell];
       }
     }
-    settings.minZoom = 1000 / this.fieldSize[1];
+    settings.minZoom = 800 / this.fieldSize[1];
+    settings.maxZoom = 200 / this.minCellSize;
     if (this.spectating) {
       vec2.set(gfx.camera.pos, this.fieldSize[x] / 2, this.fieldSize[y] / 2);
       gfx.camera.zoom = gfx.width / this.fieldSize[x];
     } else {
-      vec2.set(gfx.camera.pos, firstCell.Pos[x], firstCell.Pos[x]);
-      gfx.camera.zoom = settings.maxZoom / firstCell.Radius;
+      vec2.set(gfx.camera.pos, firstCell.Pos[x], firstCell.Pos[y]);
+      gfx.camera.zoom = 100 / firstCell.Radius;
     }
   },
   unload: function() {
@@ -116,7 +125,7 @@ vires.states.match = {
   },
   digestInput: function() {
     var delta, hover, id, lerp, marked, offset, prevZoom, ref, sources, zoomFactor;
-    if (input.left) {
+    if (input.left && !this.spectating) {
       hover = this.cellAt(input.cursor);
       if ((hover != null)) {
         if (!(this.target != null)) {
@@ -165,7 +174,7 @@ vires.states.match = {
         this.targetMarker.unlink();
       }
     }
-    if (input.leftReleased) {
+    if (input.leftReleased && !this.spectating) {
       hover = this.cellAt(input.cursor);
       if ((hover != null)) {
         sources = [];
@@ -258,10 +267,14 @@ vires.states.match = {
           }
           break;
         case "EliminatedPlayer":
+          if (vires.Self === data) {
+            this.spectating = true;
+          }
           this.killPlayer(data);
           break;
         case "Winner":
-          return;
+          vires.load("lobby", this.players[data].color);
+          break;
         default:
           connection.defaultDigest(Msg);
       }
@@ -409,11 +422,16 @@ vires.states.loading = {
 
 vires.states.lobby = {
   animation: [],
-  load: function() {
+  load: function(winner) {
     var color, i, l, material, mesh, segment;
     vec2.set(gfx.camera.pos, 0, 0);
     gfx.camera.zoom = 5;
-    color = gfx.makeColor(10);
+    color = null;
+    if ((winner != null)) {
+      color = winner;
+    } else {
+      color = gfx.makeColor(10);
+    }
     mesh = gfx.mesh.round;
     material = gfx.material.loading;
     this.animation = new Array(10);
