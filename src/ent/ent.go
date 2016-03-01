@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"fmt"
 	"math"
 	"time"
 
@@ -355,7 +354,6 @@ func (m *Movement) Conflict() {
 		tgt.Merge(-m.moving)
 		// cell died, change owner
 		if tgt.IsDead() {
-			fmt.Println("Cell changed owner")
 			tgt.SetOwner(attacker)
 		}
 	}

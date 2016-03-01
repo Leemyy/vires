@@ -3,7 +3,6 @@ package room
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/gorilla/websocket"
 	"github.com/mhuisi/vires/src/ent"
@@ -65,10 +64,6 @@ func NewRoom(id string, notifyQuit chan<- *Room) *Room {
 // userid is killed.
 func (r *Room) userWriter(c userConn) {
 	for tx := range c.send {
-		if tx.Type != "Replication" {
-			m2, _ := json.Marshal(tx)
-			fmt.Printf("%s\n", string(m2))
-		}
 		err := c.conn.WriteJSON(tx)
 		if err != nil {
 			r.kill <- c
@@ -153,8 +148,6 @@ func (r *Room) handleRX(p transm.RX) {
 		if err != nil {
 			return
 		}
-		m2, _ := json.Marshal(m)
-		fmt.Printf("%s\n", string(m2))
 		r.field.Move(p.Sender(), m.Source, m.Dest)
 	}
 }
@@ -188,7 +181,6 @@ func (r *Room) handler() {
 		case m := <-read:
 			r.handleRX(m)
 		case p := <-gameMsgs.Packets():
-			fmt.Printf("%T\n", p.Data)
 			switch p.Type {
 			case "Winner":
 				r.field.Close()
