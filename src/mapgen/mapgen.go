@@ -135,7 +135,6 @@ func GenerateMap(numberOfPlayers int) Field {
 		playerIndex[i] = randomNumber
 	}
 	fmt.Println("Number of Players: ", numberOfPlayers, "Map X Size: ", maximumXPosition, " Map Y Size: ", maximumYPosition, " Number of Cells: ", numberOfCells)
-	fmt.Println("wooooo")
 	return Field{vec.V{float64(maximumXPosition), float64(maximumYPosition)}, circles, playerIndex}
 }
 
