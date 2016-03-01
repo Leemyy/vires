@@ -631,7 +631,7 @@ Movement = (function() {
     console.log(this.birth);
     console.log("pos:");
     console.log(this.pos);
-    this.pos = vec2.clone(this.O);
+    this.pos = vec2.copy(this.pos, this.O);
     console.log(this.pos);
     console.log("--updated!");
     this.primitive.scale = this.Radius;

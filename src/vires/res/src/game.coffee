@@ -645,7 +645,7 @@ class Movement
 		console.log @birth
 		console.log "pos:"
 		console.log @pos
-		@pos = vec2.clone(@O)
+		@pos = vec2.copy(@pos, @O)
 		console.log @pos
 		console.log "--updated!"
 
