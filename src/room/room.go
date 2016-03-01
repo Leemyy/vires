@@ -188,8 +188,9 @@ func (r *Room) handler() {
 		case m := <-read:
 			r.handleRX(m)
 		case p := <-gameMsgs.Packets():
-			switch p.Data.(type) {
-			case transm.Winner:
+			fmt.Printf("%T\n", p.Data)
+			switch p.Type {
+			case "Winner":
 				r.field.Close()
 				// set nil to block future movements
 				r.field = nil

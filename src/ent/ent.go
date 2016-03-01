@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -25,9 +26,9 @@ type Player struct {
 
 // NewPlayer creates a new player
 // with the specified ID and
-// an amount of cells of 1.
+// an amount of cells of 0.
 func NewPlayer(id ID) *Player {
-	return &Player{id, 1}
+	return &Player{id, 0}
 }
 
 // ID gets the id of the player.
@@ -354,6 +355,7 @@ func (m *Movement) Conflict() {
 		tgt.Merge(-m.moving)
 		// cell died, change owner
 		if tgt.IsDead() {
+			fmt.Println("Cell changed owner")
 			tgt.SetOwner(attacker)
 		}
 	}

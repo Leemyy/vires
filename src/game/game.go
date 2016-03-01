@@ -91,7 +91,7 @@ func (f *Field) Close() {
 }
 
 func (f *Field) checkDominationVictory() {
-	if len(f.players) > 0 {
+	if len(f.players) > 1 {
 		return
 	}
 	var winner *ent.Player
@@ -102,7 +102,7 @@ func (f *Field) checkDominationVictory() {
 	if winner == nil {
 		winner = ent.NewPlayer(0)
 	}
-	f.transmitter.Win(winner)
+	f.transmitter.Win(winner.ID())
 }
 
 func (f *Field) removeMovement(m *ent.Movement) {
@@ -111,6 +111,8 @@ func (f *Field) removeMovement(m *ent.Movement) {
 }
 
 func (f *Field) removePlayer(p ent.ID) {
+	f.transmitter.Eliminate(p)
+	fmt.Println("Remove player: ", p)
 	delete(f.players, p)
 	for _, m := range f.movements {
 		if m.Owner().ID() == p {
@@ -175,9 +177,11 @@ func (f *Field) conflict(mv *ent.Movement) {
 	mv.ClearCollisions()
 	f.removeMovement(mv)
 	f.transmitter.Conflict(mv, target)
+	if defender != nil {
+		fmt.Println("Cells at conflict: ", defender.Cells())
+	}
 	if defender != nil && defender.IsDead() {
 		defid := defender.ID()
-		f.transmitter.Eliminate(defender)
 		f.removePlayer(defid)
 	}
 }
