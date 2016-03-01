@@ -1,3 +1,5 @@
+// Package game handles game field
+// instances.
 package game
 
 import (
