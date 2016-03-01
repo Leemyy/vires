@@ -38,11 +38,15 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	cells := make(map[ent.ID]*ent.Cell)
 	for i, c := range field.Cells {
 		id := ent.ID(i)
-		cells[id] = ent.NewCell(id, c.Radius, nil, c.Location)
+		cells[id] = ent.NewCell(id, c.Radius, c.Location)
 	}
 	fmt.Println("Capacities:")
 	for _, c := range cells {
 		fmt.Println(c.Capacity())
+	}
+	fmt.Println("Replications:")
+	for _, c := range cells {
+		fmt.Println(c.Replication())
 	}
 	i := 0
 	for _, p := range ps {

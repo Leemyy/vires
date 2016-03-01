@@ -54,6 +54,7 @@ type Circle struct {
 // Cell represents a cell on the field.
 type Cell struct {
 	id       ID
+	force    float64
 	capacity Vires
 	// [Replication] = vires/cycle
 	replication Vires
@@ -65,16 +66,15 @@ type Cell struct {
 
 // NewCell creates a new cell with the specified id,
 // the specified force, which determines its capacity, its
-// replication and its radius, the owner, which may be
-// nil if the cell is neutral, and loc, which is the
+// replication and its radius and loc, which is the
 // location of the cell.
-func NewCell(id ID, force float64, owner *Player, loc vec.V) *Cell {
+func NewCell(id ID, force float64, loc vec.V) *Cell {
 	return &Cell{
 		id:          id,
+		force:       force,
 		capacity:    capacity(force),
-		replication: replication(force),
+		replication: neutralReplication(force),
 		stationed:   0,
-		owner:       owner,
 		body:        Circle{loc, cellRadius(force)},
 	}
 }
@@ -129,12 +129,16 @@ func (c *Cell) Body() Circle {
 
 func capacity(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(force)
+	return Vires(math.Pi * sq(force) / 200)
 }
 
 func replication(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(force / 20)
+	return Vires(force / 5)
+}
+
+func neutralReplication(force float64) Vires {
+	return replication(force) / 2
 }
 
 func cellRadius(force float64) float64 {
@@ -180,7 +184,9 @@ func (c *Cell) IsNeutral() bool {
 // removes the cell from the original owner
 // and adds the cell to the new owner.
 func (c *Cell) SetOwner(o Player) {
-	if !c.IsNeutral() {
+	if c.IsNeutral() {
+		c.replication = replication(c.force)
+	} else {
 		c.owner.cells--
 	}
 	o.cells++
@@ -195,6 +201,7 @@ func (c *Cell) Neutralize() {
 	}
 	c.owner.cells--
 	c.owner = nil
+	c.replication = neutralReplication(c.force)
 }
 
 func radius(n Vires) float64 {
@@ -205,7 +212,7 @@ func speed(radius float64) float64 {
 	if radius == 0 {
 		return 0
 	}
-	return 1000 / radius
+	return 3000 / radius
 }
 
 // Move creates a movement which describes
