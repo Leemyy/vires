@@ -3,10 +3,15 @@ package mapgen
 import (
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/vec"
 )
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 const (
 	CellMinimumSize           = 80

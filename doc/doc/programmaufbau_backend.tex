@@ -129,7 +129,7 @@ Ein genetischer Algorithmus arbeitet nach dem Prinzip der Evolution. Dabei werde
 	\centering
 	\includegraphics[width=0.6\textwidth]{cellDistance.png}
 \end{figure}
-Die Errechnung der Fitness einer Map erfolgt im Fall von \vires\ sowohl über die Distanzen zwischen den Cells zueinander, als auch über die Distanzen zwischen dem Mittelpunkt der Map und den Cells. Dies hat den Vorteil, dass die Bildung eines leeren Kreises in der Mitte der Map verhindert wird. Unterschreiten die Distanzen zwischen den Cells einen gewissen Schwellwert(beispielsweise Cells kollidieren bei der Generation miteinander), so wird die Fitness der Map auf 0 gesetzt und sie ist somit ungeeignet für die weitere Verwertung. Andernfalls errechnet sich die Fitness der Map aus der minimalen Distanz einer Cell zu ihrem nächsten Nachbarn, und der maximalen Distanz einer Cell zu ihrem nächsten Nachbarn. Die Errechnung der Distanzen erschließt sich aus dem Satz des Pythagoras und erfolgt folgendermaßen:\\
+Die Errechnung der Fitness einer Map erfolgt im Fall von \vires\ sowohl über die Distanzen zwischen den Cells zueinander, als auch über die Distanzen zwischen dem Mittelpunkt der Map und den Cells. Dies hat den Vorteil, dass die Bildung eines leeren Kreises in der Mitte der Map verhindert wird. Unterschreiten die Distanzen zwischen den Cells einen gewissen Schwellwert (beispielsweise wenn Cells bei der Generation miteinander kollidieren), so wird die Fitness der Map auf 0 gesetzt und sie ist somit ungeeignet für die weitere Verwertung. Andernfalls errechnet sich die Fitness der Map aus der minimalen Distanz einer Cell zu ihrem nächsten Nachbarn und der maximalen Distanz einer Cell zu ihrem nächsten Nachbarn. Die Errechnung der Distanzen erschließt sich aus dem Satz des Pythagoras und erfolgt folgendermaßen:\\
 \begin{equation*}
 D_{Cells} = \pm \sqrt{\Delta X^2 + \Delta Y^2}
 \end{equation*}
@@ -141,7 +141,7 @@ und \\
 \begin{equation*}
 \Delta Y = Cell1_y - Cell2_y
 \end{equation*}
-Für die Distanz vom Map Mittelpunkt zur nächstgelegenen Cell gilt: \\
+Für die Distanz vom Map-Mittelpunkt zur nächstgelegenen Cell gilt: \\
 \begin{equation*}
 D_{Middle} = \pm \sqrt{(Mid_x - Cell_x)^2 + (Mid_y - Cell_y)^2}
 \end{equation*}
@@ -150,5 +150,6 @@ Die Fitness einer Map wird nun wie folgt berechnet: \\
 Fitness = \frac{D_{CellsMin}}{D_{CellsMax}} \cdot 1000 - \frac{D_{CellToMid}}{D_{MidToBorder}} \cdot 100
 \end{equation*}
 Nach dieser Berechnung kann eine Map eine maximale Fitness von 1000 erreichen. Eine solche Map wäre nach der gegebenen Kalkulation quasi perfekt. Im Falle von \vires\ wird eine Fitness von mindestens 500 gefordert, damit die Map als spielbar eingestuft wird.
+
 \subsubsection{vec}
 \verb+vec+ enthält Funktionen für zweidimensionale Vektormathematik.

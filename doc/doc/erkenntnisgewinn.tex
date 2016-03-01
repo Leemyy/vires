@@ -10,8 +10,8 @@ Der Webserver, das Routing des Webservers und die Verwendung von Websockets habe
 Die Verwendung von Goroutinen und Channels hat sich in einigen Bereichen unseres Projekts als sehr nützlich erwiesen. Für die Verbindungen der User, den Scheduler und die Verbindung zwischen verschiedener Komponenten des Programms stellen Channels eine sehr gute Lösung dar. \\
 Ist das Problem allerdings zustandsorientiert in seiner Natur, so ist die Verwendung von Channels nicht mehr viel praktischer als die Verwendung von Mutexes. Für ein solches Problem gibt es drei mögliche Lösungen: Entweder man verwendet ein Lock, man verwendet eine Monitor-Goroutine oder man verwendet einen Channel als Lock. Die erste Lösung ist wahrscheinlich die performanteste, da keine extra Goroutine zur Synchronisation benötigt wird, während sich bei der Verwendung einer Monitor-Goroutine alle synchronisierten Operationen an einer Stelle im Code befinden, was die Synchronisation relativ leicht überblickbar macht.
 
-Die Timer-Architektur hat sich dagegen als nicht wirklich erfolgreich gezeigt. Da wir noch nicht in der Lage waren, den Server wirklich unter einer großen Load zu testen, können wir keine wirkliche Aussage über die wirkliche Performanz dieses Ansatzes treffen. \\
-Klar ist allerdings, dass diese Architektur deutlich komplizierter zu entwickeln ist und einen stark in seiner Entwicklung einschränkt. Da alle Kollisionen im Voraus bestimmt werden müssen, muss ein Priori-Kollisionsalgorithmus verwendet werden, welcher deutlich komplizierter als die meisten Posteri-Kollisionsalgorithmen ist. Für den Priori-Kollisionsalgorithmus mussten wir unseren eigenen Algorithmus entwickeln, während wir mit einer Posteri-Kollisionsdetektion lediglich einen Quad-Tree hätten verwenden müssen. Auch das Scheduling von Timern ist nicht einfach, und besonders die mathematische Bestimmung der Kollisionszeit ist ziemlich kompliziert. Hinzu kommt noch, dass ein Priori-Kollisionsalgorithmus die Möglichkeit verhindert, geometrische Objekte zu verwenden, die nicht leicht mithilfe von Vektoren ausgedrückt werden können. Sich bewegende Kreise sind noch vergleichsweise einfach zu implementieren, während sich rotierende Dreiecke ein, im Bezug auf die Performanz, fast unlösbares Problem darstellen würden. \\
+Die Timer-Architektur hat sich dagegen als nicht wirklich erfolgreich gezeigt. Da wir noch nicht in der Lage waren, den Server wirklich unter einer großen Load zu testen, können wir keine wirkliche Aussage über die wirkliche Performanz dieses Ansatzes treffen. Tests mit wenigen Rooms und fünf Spielern haben allerdings gezeigt, dass der Server ohne Probleme die Load verarbeiten konnte und zu allen Zeiten, mit Ausnahme der Generierung einer Map, bei einem Intel i5 2500k 4x3.3GHz die Prozessorauslastung des Serverprogramms <0.1\% war und der Speicherverbrauch ebenfalls lediglich bei <15MB blieb.\\
+Klar ist allerdings, dass diese Architektur deutlich komplizierter zu entwickeln ist und einen stark in seiner Entwicklung einschränkt. Da alle Kollisionen im Voraus bestimmt werden müssen, muss ein Priori-Kollisionsalgorithmus verwendet werden, welcher deutlich komplizierter als die meisten Posteri-Kollisionsalgorithmen ist. Für den Priori-Kollisionsalgorithmus mussten wir unseren eigenen Algorithmus entwickeln, während wir mit einer Posteri-Kollisionsdetektion lediglich einen Quad-Tree hätten verwenden müssen. Auch das Scheduling von Timern ist nicht einfach, und besonders die mathematische Bestimmung der Kollisionszeit ist ziemlich kompliziert. Hinzu kommt noch, dass ein Priori-Kollisionsalgorithmus die Möglichkeit verhindert, geometrische Objekte zu verwenden, die nicht leicht mithilfe von Vektoren ausgedrückt werden können. Sich bewegende Kreise sind noch vergleichsweise einfach zu implementieren, während sich rotierende Dreiecke ein im Bezug auf die Performanz fast unlösbares Problem darstellen würden. \\
 Trotzdem hat ein Priori-Kollisionsalgorithmus den Vorteil, dass es nicht passieren kann, dass sich Movements innerhalb eines Frames kreuzen können, ohne dass eine Kollision festgestellt wird, wenn sich die Movements zu schnell bewegen. \\
 Insgesamt würden wir diese Entscheidung aufgrund ihren limitierenden Implikationen nicht erneut treffen.
 
@@ -23,6 +23,7 @@ Zudem sollten die Versionen mit \verb+interface{}+-Typen deutlich langsamer sein
 
 Im Folgenden sind USlices unsortierte Slices mit \verb+interface{}+, Slices sind unsortierte Slices mit einem konkreten Typen, Set sind Maps mit \verb+interface{}+ als Key und CoherentSet sind Maps mit konkreten Typen als Key. \\
 Die Benchmarks haben das Folgende ergeben:
+\begin{figure}[H]
 \begin{tabular}{ l | c | r }
 Benchmark & iterations & time/iteration \\
 \hline
@@ -42,6 +43,7 @@ BenchmarkSliceRemove & 200000 & 45687 ns/op \\
 BenchmarkCoherentSetRemove & 20000000 & 167 ns/op \\
 \hline
 \end{tabular}
+\end{figure}
 
 \subsection{Frontend}
 \subsubsection{Coffeescript}

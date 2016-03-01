@@ -1,7 +1,8 @@
+// Package game handles game field
+// instances.
 package game
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/mhuisi/vires/src/ent"
@@ -39,14 +40,6 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	for i, c := range field.Cells {
 		id := ent.ID(i)
 		cells[id] = ent.NewCell(id, c.Radius, c.Location)
-	}
-	fmt.Println("Capacities:")
-	for _, c := range cells {
-		fmt.Println(c.Capacity())
-	}
-	fmt.Println("Replications:")
-	for _, c := range cells {
-		fmt.Println(c.Replication())
 	}
 	i := 0
 	for _, p := range ps {
@@ -112,7 +105,6 @@ func (f *Field) removeMovement(m *ent.Movement) {
 
 func (f *Field) removePlayer(p ent.ID) {
 	f.transmitter.Eliminate(p)
-	fmt.Println("Remove player: ", p)
 	delete(f.players, p)
 	for _, m := range f.movements {
 		if m.Owner().ID() == p {
@@ -177,9 +169,6 @@ func (f *Field) conflict(mv *ent.Movement) {
 	mv.ClearCollisions()
 	f.removeMovement(mv)
 	f.transmitter.Conflict(mv, target)
-	if defender != nil {
-		fmt.Println("Cells at conflict: ", defender.Cells())
-	}
 	if defender != nil && defender.IsDead() {
 		defid := defender.ID()
 		f.removePlayer(defid)
