@@ -34,7 +34,7 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	for _, id := range players {
 		ps[id] = ent.NewPlayer(id)
 	}
-	field := mapgen.GenerateMap(len(players))
+	field := mapgen.GenerateMap(20)
 	cells := make(map[ent.ID]*ent.Cell)
 	for i, c := range field.Cells {
 		id := ent.ID(i)

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	CellMinimumSize           = 40
+	CellMinimumSize           = 80
 	PlayerCellDefaultSize     = 140
 	CellMaximumSize           = 240
 	DistanceFactor            = 1
@@ -86,7 +86,6 @@ func GenerateMap(numberOfPlayers int) Field {
 		numberOfCells = 10
 
 	}
-	fmt.Println("Number of Players: ", numberOfPlayers, "Map X Size: ", maximumXPosition, " Map Y Size: ", maximumYPosition, " Number of Cells: ", numberOfCells)
 	generationSuccessful := false
 	generation := newGeneration(nil, nil, nil)
 	for generationSuccessful == false {
@@ -106,14 +105,14 @@ func GenerateMap(numberOfPlayers int) Field {
 				if rand.Int31n(100) >= 2 {
 					childCellList = append(childCellList, generation.currentLowestFitness.cells[i])
 				} else {
-					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
+					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn((CellMaximumSize-CellMinimumSize)+CellMinimumSize) / 2})
 				}
 			}
 			for i := crossDivider; i < numberOfCells; i++ {
 				if rand.Int31n(100) >= 2 {
 					childCellList = append(childCellList, generation.currentSecondBestFitness.cells[i])
 				} else {
-					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
+					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn((CellMaximumSize-CellMinimumSize)+CellMinimumSize) / 2})
 				}
 			}
 			for i, currentMap := range generation.maps {
@@ -141,6 +140,8 @@ func GenerateMap(numberOfPlayers int) Field {
 		circles[randomNumber].Radius = PlayerCellDefaultSize
 		playerIndex = append(playerIndex, randomNumber)
 	}
+	fmt.Println("Number of Players: ", numberOfPlayers, "Map X Size: ", maximumXPosition, " Map Y Size: ", maximumYPosition, " Number of Cells: ", numberOfCells)
+
 	return Field{vec.V{float64(maximumXPosition), float64(maximumYPosition)}, circles, playerIndex}
 }
 
@@ -151,7 +152,7 @@ func calculateFitnesses(cells []Cell) float64 {
 				deltaX := currCellOne.xPosition - currCellTwo.xPosition
 				deltaY := currCellOne.yPosition - currCellTwo.yPosition
 				currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
-				if currentDistance < CellMaximumSize*DistanceFactor {
+				if currentDistance <= CellMaximumSize*DistanceFactor {
 					return 100
 				}
 			}
@@ -163,7 +164,7 @@ func calculateFitnesses(cells []Cell) float64 {
 func generateCellList(maximumXPosition int, maximumYPosition, numberOfCells int) []Cell {
 	var cells []Cell
 	for i := 0; i < numberOfCells; i++ {
-		cells = append(cells, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize})
+		cells = append(cells, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn((CellMaximumSize-CellMinimumSize)+CellMinimumSize) / 2})
 	}
 	return cells
 }
