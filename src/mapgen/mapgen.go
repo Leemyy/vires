@@ -17,7 +17,7 @@ import (
 const (
 	CellMinimumSize           = 80
 	PlayerCellDefaultSize     = 140
-	CellMaximumSize           = 240
+	CellMaximumSize           = 200
 	DistanceFactor            = 1.1
 	NumberOfMapsPerGeneration = 8
 )
@@ -77,8 +77,8 @@ func GenerateMap(numberOfPlayers int) Field {
 	var maximumYPosition int
 	var numberOfCells int
 	if numberOfPlayers > 0 {
-		maximumXPosition = int(2000 + 500*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
-		maximumYPosition = int(2000 + 500*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
+		maximumXPosition = int(2000 + 700*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
+		maximumYPosition = int(2000 + 700*math.Pow(math.Log2(float64(numberOfPlayers)), 1.5))
 		numberOfCells = int(10 + 2*math.Pow(math.Log2(float64(numberOfPlayers)), 2))
 	} else {
 		maximumXPosition = 8000
