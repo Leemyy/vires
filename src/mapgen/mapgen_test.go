@@ -31,6 +31,6 @@ func TestMapgen(t *testing.T) {
 
 func BenchmarkMapgen(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		GenerateMap(4)
+		GenerateMap(20)
 	}
 }

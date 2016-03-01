@@ -18,7 +18,7 @@ const (
 	CellMinimumSize           = 80
 	PlayerCellDefaultSize     = 140
 	CellMaximumSize           = 240
-	DistanceFactor            = 1
+	DistanceFactor            = 1.1
 	NumberOfMapsPerGeneration = 8
 )
 
@@ -137,7 +137,7 @@ func GenerateMap(numberOfPlayers int) Field {
 		for contains(playerIndex, randomNumber) {
 			randomNumber = rand.Intn(len(circles) - 1)
 		}
-		circles[randomNumber].Radius = PlayerCellDefaultSize
+		circles[randomNumber].Radius = PlayerCellDefaultSize / 2
 		playerIndex = append(playerIndex, randomNumber)
 	}
 	fmt.Println("Number of Players: ", numberOfPlayers, "Map X Size: ", maximumXPosition, " Map Y Size: ", maximumYPosition, " Number of Cells: ", numberOfCells)
