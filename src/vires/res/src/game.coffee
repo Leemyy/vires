@@ -632,21 +632,21 @@ class Movement
 		console.log "updating #{@ID}"
 		@Moving = Data.Moving
 		console.log "O: "
-		console.log @O
+		console.log @O[0], @O[1]
 		vec2.set(@O, Data.Body.Location.X, Data.Body.Location.Y)
-		console.log @O
+		console.log @O[0], @O[1]
 		@Radius = Data.Body.Radius
 		console.log "V: "
-		console.log @V
+		console.log @V[0], @V[1]
 		vec2.set(@V, Data.Direction.X, Data.Direction.Y)
-		console.log @V
+		console.log @V[0], @V[1]
 		console.log "birth: #{@birth}"
 		@birth = vires.time
 		console.log @birth
 		console.log "pos:"
-		console.log @pos
+		console.log @pos[0], @pos[1]
 		vec2.copy(@pos, @O)
-		console.log @pos
+		console.log @pos[0], @pos[1]
 		console.log "--updated!"
 
 		@primitive.scale = @Radius
