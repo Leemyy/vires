@@ -161,6 +161,9 @@ func (f *Field) viresChanged(m *ent.Movement) {
 }
 
 func (f *Field) collide(m, m2 *ent.Movement) {
+	fmt.Println("Bodies:")
+	fmt.Println(m.Body().Location)
+	fmt.Println(m2.Body().Location)
 	m.Collide(m2)
 	fmt.Println(m.ID(), m2.ID())
 	f.transmitter.Collide(m, m2)
@@ -174,6 +177,8 @@ func (f *Field) collide(m, m2 *ent.Movement) {
 		f.viresChanged(m2)
 		f.viresChanged(m)
 	}
+	fmt.Println(m.Body().Location)
+	fmt.Println(m2.Body().Location)
 }
 
 func (f *Field) conflict(mv *ent.Movement) {

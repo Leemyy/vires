@@ -436,8 +436,9 @@ func at(in float64) time.Time {
 
 func (m *Movement) UpdatePosition() {
 	now := time.Now()
-	fmt.Println("s: ", float64(now.Sub(m.lastTime)/time.Second))
-	m.body.Location = vec.AddV(m.body.Location, vec.Mul(m.direction, float64(now.Sub(m.lastTime)/time.Second)))
+	fmt.Println(m.Body().Location)
+	m.body.Location = vec.AddV(m.body.Location, vec.Mul(m.direction, float64(now.Sub(m.lastTime))/float64(time.Second)))
+	fmt.Println(m.Body().Location)
 	m.lastTime = now
 }
 
