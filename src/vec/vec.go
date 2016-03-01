@@ -1,3 +1,4 @@
+// Package vec provides functions for working with 2D vectors.
 package vec
 
 import "math"
