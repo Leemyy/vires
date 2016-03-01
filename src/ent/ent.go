@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -199,7 +200,7 @@ func (c *Cell) Neutralize() {
 
 func radius(n Vires) float64 {
 	// placeholder, needs testing
-	return float64(n)
+	return float64(n) / 100
 }
 
 func speed(n Vires) float64 {
@@ -207,7 +208,7 @@ func speed(n Vires) float64 {
 	if n == 0 {
 		return 0
 	}
-	return 1000 / float64(n)
+	return 10000 / float64(n)
 }
 
 // Move creates a movement which describes
@@ -222,6 +223,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 		moving:     moving,
 		target:     tgt,
 		body:       Circle{start, radius(moving)},
+		lastTime:   time.Now(),
 		direction:  vec.Scale(vec.SubV(tgt.body.Location, start), speed(moving)),
 		collisions: map[*Movement]func(){},
 	}
@@ -232,11 +234,12 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 // Movement represents vires that are
 // moving in between cells.
 type Movement struct {
-	id     ID
-	owner  Player
-	moving Vires
-	target *Cell
-	body   Circle
+	id       ID
+	owner    Player
+	moving   Vires
+	target   *Cell
+	body     Circle
+	lastTime time.Time
 	// |Direction| = v, [v] = points/s
 	direction  vec.V
 	collisions map[*Movement]func()
@@ -397,6 +400,7 @@ func collideIn(m1 *Movement, m2 *Movement) (float64, bool) {
 	// the center of the larger movement is at (0, 0).
 	b1 := m1.body
 	b2 := m2.body
+	fmt.Println("Locations: ", b1.Location, b2.Location)
 	p := vec.SubV(b1.Location, b2.Location)
 	v := vec.SubV(m1.direction, m2.direction)
 	r := math.Max(b1.Radius, b2.Radius)
@@ -428,6 +432,13 @@ func at(in float64) time.Time {
 	return time.Now().Add(time.Duration(in * float64(time.Second)))
 }
 
+func (m *Movement) UpdatePosition() {
+	now := time.Now()
+	fmt.Println("s: ", float64(now.Sub(m.lastTime)/time.Second))
+	m.body.Location = vec.AddV(m.body.Location, vec.Mul(m.direction, float64(now.Sub(m.lastTime)/time.Second)))
+	m.lastTime = now
+}
+
 // CollidesWith checks if a collision with the
 // specified movement occurs and returns
 // at what time it occurs.
@@ -439,7 +450,10 @@ func (m *Movement) CollidesWith(m2 *Movement) (collideAt time.Time, collides boo
 	// but the target isn't don't collide;
 	// the movements just pass each other
 	if !(m.owner == m2.owner && m.target != m2.target) {
+		m.UpdatePosition()
+		m2.UpdatePosition()
 		in, collides := collideIn(m, m2)
+		fmt.Println("In: ", in)
 		return at(in), collides
 	}
 	return time.Now(), false

@@ -137,6 +137,7 @@ func (f *Field) findCollisions(m *ent.Movement) {
 		}
 		fmt.Println("Starting a collision now!")
 		m2 := m2
+		fmt.Println(collideAt)
 		stopCollision := f.ops.Start(collideAt, func() {
 			f.collide(m, m2)
 		})
@@ -176,7 +177,7 @@ func (f *Field) conflict(mv *ent.Movement) {
 	mv.Conflict()
 	f.removeMovement(mv)
 	f.transmitter.Conflict(mv, target)
-	if defender.IsDead() {
+	if defender != nil && defender.IsDead() {
 		defid := defender.ID()
 		f.transmitter.Eliminate(*defender)
 		f.removePlayer(defid)
