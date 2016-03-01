@@ -15,7 +15,7 @@ const (
 	CellMaximumSize           = 200
 	DistanceFactor            = 1.1
 	NumberOfMapsPerGeneration = 8
-	NeededFitness             = 800
+	NeededFitness             = 500
 )
 
 type Field struct {
