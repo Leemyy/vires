@@ -151,6 +151,11 @@ func (f *Field) viresChanged(m *ent.Movement) {
 	if m.IsDead() {
 		f.removeMovement(m)
 	} else {
+		m.Stop()
+		at := m.ConflictAt()
+		m.Stop = f.ops.Start(at, func() {
+			f.conflict(m)
+		})
 		f.findCollisions(m)
 	}
 }
