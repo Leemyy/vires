@@ -30,7 +30,6 @@ func roomID(r *http.Request) string {
 
 func onRoom(w http.ResponseWriter, r *http.Request) {
 	id := roomID(r)
-	fmt.Println("Connected to room id:", id)
 	roomTmpl.Execute(w, id)
 }
 
@@ -79,6 +78,7 @@ func main() {
 	r.HandleFunc(fmt.Sprintf("/%s/s", roomIDPattern), startMatch)
 	go quitRooms()
 	http.Handle("/", r)
+	fmt.Println("Webserver starting.")
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatalf("Cannot start webserver: %s\n", err)

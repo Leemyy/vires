@@ -22,8 +22,8 @@ func TestMapgen(t *testing.T) {
 		}
 		for _, currentPlayer := range field.StartCellIdxs {
 			cellSize := field.Cells[currentPlayer].Radius
-			if cellSize != PlayerCellDefaultSize {
-				t.Error("Expected Cellsize of ", PlayerCellDefaultSize, " got ", cellSize, " instead ")
+			if cellSize != PlayerCellDefaultSize/2 {
+				t.Error("Expected Cellsize of ", PlayerCellDefaultSize/2, " got ", cellSize, " instead ")
 			}
 		}
 	}
@@ -31,6 +31,6 @@ func TestMapgen(t *testing.T) {
 
 func BenchmarkMapgen(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		GenerateMap(4)
+		GenerateMap(20)
 	}
 }

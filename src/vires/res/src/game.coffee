@@ -641,12 +641,25 @@ class Movement
 	#Modifies this movement after a Collision
 	# was received from the server
 	update: (Data)->
+		console.log "updating #{@ID}"
 		@Moving = Data.Moving
-		@O = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y)
+		console.log "O: "
+		console.log @O[0], @O[1]
+		vec2.set(@O, Data.Body.Location.X, Data.Body.Location.Y)
+		console.log @O[0], @O[1]
 		@Radius = Data.Body.Radius
-		@V = vec2.fromValues(Data.Direction.X, Data.Direction.Y)
+		console.log "V: "
+		console.log @V[0], @V[1]
+		vec2.set(@V, Data.Direction.X, Data.Direction.Y)
+		console.log @V[0], @V[1]
+		console.log "birth: #{@birth}"
 		@birth = vires.time
-		@pos = vec2.clone(@O)
+		console.log @birth
+		console.log "pos:"
+		console.log @pos[0], @pos[1]
+		vec2.copy(@pos, @O)
+		console.log @pos[0], @pos[1]
+		console.log "--updated!"
 
 		@primitive.scale = @Radius
 		return

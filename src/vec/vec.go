@@ -1,3 +1,4 @@
+// Package vec provides functions for working with 2D vectors.
 package vec
 
 import "math"
@@ -68,4 +69,10 @@ func Unit(v V) V {
 // to the new length.
 func Scale(v V, n float64) V {
 	return Mul(Unit(v), n)
+}
+
+// Dist calculates the distance
+// between two vectors.
+func Dist(v1 V, v2 V) float64 {
+	return Abs(SubV(v1, v2))
 }

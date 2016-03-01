@@ -1,1 +1,36 @@
 \subsection{Frontend}
+Das Frontend besteht aus sieben Dateien, die sich in grob in fünf Bereiche unterteilen lassen.
+
+\subsubsection{Setup} (\verb+vires.coffee+)
+Dies ist der Einstiegspunkt des Codes. Hier finden die Initialisierung der anderen Programmteile, sowie alle Zugriffe auf das \verb+document+ statt. 
+Nachdem die Seite fertig geladen ist, werden zunächst Callbacks für alle Maus-bezogenen Events gesetzt. Diese Callback-Funktionen setzen lediglich Flags für die entsprechenden Inputs, da sie sonst während eines Frames Daten verändern könnten, was leicht zu Fehlern führen kann.
+Als nächstes wird der \verb+WebGLRenderingContext+ des \verb+<canvas>+-Elements (i.F. Viewport) initialisiert. Falls der Browser des Nutzers kein WebGL unterstützt, wird nur ein Fehler ausgegeben und das Programm beendet. Andernfalls werden danach die drei anderen Komponenten initialisiert.
+Der letzte Schritt des Setups besteht darin, den Main-Loop des Spiels zu starten.
+
+\subsubsection{Logik} (\verb+game.coffee+)
+In dieser Datei ist sämtlicher Code, der direkt mit der Spiellogik zu tun hat. Sie enthält mehrere \verb+states+, welche verschiedene Zustände des Clients darstellen.
+\begin{itemize}
+	\item \verb+loading+ ist der Startzustand, er enthält quasi keine Funktionalität. Seine einzige Aufgabe ist es, auf den Verbindungsaufbau zu warten und währenddessen eine Animation anzuzeigen. Diese Animation dient hauptsächlich dem Zweck, zu erkennen, ob der Clent abgestürzt ist. Sobald eine WebSocket-Verbindung zum Server aufgebaut wurde, wechselt der Zustand zu \verb+lobby+
+	\item \verb+lobby+ hat momentan kaum mehr Funktionalität als \verb+loading+. Auch hier wird hauptsächlich eine Animation angezeigt. Zukünftig soll es hier möglich sein, alle Spieler im Raum zu sehen, in den Zuschauer-Modus und zurück zu wechseln und das Spiel direkt zu starten. Momentan gibt es für das Beitreten anderer Spieler aber keinen Indikator und das Match muss über einen Link gestartet werden. Sobald der Client vom Server den Spielstart mitgeteilt bekommt, wechselt der Zustand zu \verb+match+.
+	\item \verb+match+ ist der der komplexeste Zustand. Er ist für die Verarbeitung des eigentlichen Spiels zuständig. Dabei müssen Nutzereingaben verarbeitet, Objekte animiert und Pakete gesendet, sowie verarbeitet werden.
+	Eine Reaktion auf Nutzereingaben ist das Anpassen von Position und Zoom der Kamera. Hierbei wird die Kamera so bewegt, dass es scheint, als würde der Nutzer das Spielfeld verschieben. Gleichzeitig wird aber verhindert, dass die Kamera das Spielfeld verlässt oder zu extem zoomt.
+	Die zweite Reaktion auf Nutzereingaben ist das Markieren von Cells und das Senden von Movements, wobei nur Cells, die dem Nutzer gehören, markiert werden. Beendet der Nutzer seine Selektion mit dem Cursor über einer Cell, so wird dem Server der vom Nutzer durchgeführte Angriff übertragen.
+	Damit Spielobjekte animiert werden, muss der Client lediglich bei jedem Tick die Position und Größe von Objekten anpassen.
+	Als letztes muss der Client alle vom Server empfangenen Pakete verarbeiten und seine lokale Darstellung des Spielfeldes dementsprechend anpassen.
+\end{itemize}
+
+Damit empfangene Daten vom Client leicht verarbeitet werden können, existieren einige Klassen, die jeweils bestimmte tTile von Server-Paketen zu nutzbaren Objekten parsen. Außerdem vefügen diese Klassen über Funktionen um ihre Darstellung zu erleichtern.
+
+\subsubsection{Verbindung} (\verb+connection.coffee+)
+Diese Datei ist verantwortlich für die Client-Server-Kommunikation. Wird ein Paket vom Server empfangen, wird es hier geparsed und die resultierenden Daten werden zwischengespeichert. Diese Daten können dann im nächsten Frame von der Logik bearbeitet werden.
+Soll ein Paket an den Server gesendet werden, wird umgekehrt verfahren. Zunächst werden in einem Wrapper die entsprechenden Header verpackt. Danach wird der Datensatz in einen JSON-String konvertiert und dieser wird an den Server gesendet.
+
+\subsubsection{Grafik} (\verb+render.coffee+)
+Die Grafik ist für die Kommunikation mit der Grafikkarte via WebGL und damit auch für das erzeugen des Bildes zuständig. Beim Start des Programms muss sie zunächst Speicher auf der Grafikkarte reservieren und die verschiedenen Ressourcen in den Grafikspeicher laden. Anschließend muss sie die verschiedenen Daten im Grafikspeicher verknüpfen, damit das eigentliche Rendering schnell unmd fehlerlos abläuft. Für diese Aufgaben existieren verschiedene Klassen, die zur Handhabung der unterschiedlichen Ressourcen dienen.
+Während jedes Frames ist es dann lediglich nötig, eine minimale Menge von Daten und Befehlen an die Grafikkarte zu schicken, damit das gewünschte Bild entsteht.
+
+
+\subsubsection{Ressourcen} (\verb+shaders.coffee+, \verb+meshes.coffee+ \& \verb+materials.coffee+)
+
+Bei den Ressourcen handelt es sich fast ausschließlich um Daten, die, um ihr Parsing zu erleichtern, bereits in Codeform vorliegen.
+Beim Initialisieren des Spieles werden die verschiedenen Ressourcen aus diesen Dateien durch das Grafikpaket verarbeitet. Dazu sind im Grafikpaket Klassen definiert, die für das Verarbeiten der Ressourcen zuständig sind.
