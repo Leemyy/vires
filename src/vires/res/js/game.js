@@ -617,19 +617,23 @@ Movement = (function() {
   Movement.prototype.update = function(Data) {
     console.log("updating " + this.ID);
     this.Moving = Data.Moving;
-    console.log("O: " + this.O);
+    console.log("O: ");
+    console.log(this.O);
     this.O = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y);
     console.log(this.O);
     this.Radius = Data.Body.Radius;
-    console.log("V: " + this.V);
+    console.log("V: ");
+    console.log(this.V);
     this.V = vec2.fromValues(Data.Direction.X, Data.Direction.Y);
     console.log(this.V);
     console.log("birth: " + this.birth);
     this.birth = vires.time;
     console.log(this.birth);
+    console.log("pos:");
     console.log(this.pos);
     this.pos = vec2.clone(this.O);
     console.log(this.pos);
+    console.log("--updated!");
     this.primitive.scale = this.Radius;
   };
 
