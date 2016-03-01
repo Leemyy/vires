@@ -366,6 +366,8 @@ func (m *Movement) Conflict() {
 // The set of collisions in a movement
 // is not modified by this method.
 func (m *Movement) Collide(m2 *Movement) {
+	m.UpdatePosition()
+	m2.UpdatePosition()
 	// merge movements if two movements with the same owner and the same target collide
 	if m.owner.ID() == m2.owner.ID() {
 		if m.target == m2.target {

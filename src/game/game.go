@@ -151,6 +151,11 @@ func (f *Field) viresChanged(m *ent.Movement) {
 	if m.IsDead() {
 		f.removeMovement(m)
 	} else {
+		m.Stop()
+		at := m.ConflictAt()
+		m.Stop = f.ops.Start(at, func() {
+			f.conflict(m)
+		})
 		f.findCollisions(m)
 	}
 }
@@ -175,6 +180,7 @@ func (f *Field) conflict(mv *ent.Movement) {
 	target := mv.Target()
 	defender := target.Owner()
 	mv.Conflict()
+	mv.ClearCollisions()
 	f.removeMovement(mv)
 	f.transmitter.Conflict(mv, target)
 	if defender != nil && defender.IsDead() {
