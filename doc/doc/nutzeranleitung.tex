@@ -1,6 +1,12 @@
 \section{Nutzeranleitung}
 \subsection{Nutzung}
-NUTZUNG HIER
+Unter der Annahme, dass unter einer URL wie \verb+http://vires.com+ ein funktionfähiger \vires-Server zu erreichen ist, kann ein Nutzer sich wie folgt mit ihm verbinden:
+Um \vires\ zu spielen, muss der Nutzer mit einem beliebigen, aktuellen Browser zur URL \verb+http://vires.com/1+ navigieren. Dadurch betritt er automatisch den Raum mit der \verb+Room ID+ 1. Hat er den Raum ohne Fehler betreten, sollte ein grüner Punkt angezeigt werden, der seinem Cursor folgt. Nun können weitere Spieler sich mit der gleichen URL verbinden, um gemeinsam in einem Raum zu spielen. Sobald das Match gestartet werden soll, muss der Nutzer einen weiteren Tab im Browser öffnen, auf dem er die URL \verb+http://vires.com/1/s+ öffnet. Dadurch startet der Server das Match mit allen Spielern, die sich aktuell im Raum befinden. \\
+Die Room ID ist beliebig austauschbar: Es können mehrere Matches parallel unter unterschiedlichen Room IDs ausgeführt werden. \\
+Zu Beginn des Matches wird jedem Spieler eine Farbe sowie eine Cell zugewiesen. Seine eigene Start-Cell erkennt der Nutzer daran, dass die Kamera zu Beginn des Matches direkt über ihr steht. \\
+Spieler können nun Movements zu anderen Cells starten. Um ein Movement zu starten, muss die linke Maustaste gehalten werden und über eine Cell bewegt werden. Durch das Bewegen der Maus über die Cell wird die Cell als Source-Cell für ein Movement ausgewählt. Hieraufhin kann die linke Maustaste über einer anderen Cell losgelassen werden, um die Hälfte der Vires der Source-Cell zur ausgewählten Target-Cell zu bewegen. Es können auch mehrere Cells als Source-Cells ausgewählt werden, indem mit gehaltener linken Maustaste die Maus über mehrere eigene Cells mit eigener Farbe bewegt werden. Wird dann die Maustaste über einer Cell losgelassen, so werden Movements von allen ausgewählten Source-Cells zu der ausgewählten Target-Cell gestartet. \\
+Die Kamera kann mithilfe dem Halten der rechten Maustaste bewegt werden. Mithilfe des Mausrads kann die Kamera gezoomt werden. \\
+Zu genaueren Infos bezüglich des eigentlichen Spiels ist der Absatz \textit{Spielerklärung} im \href{https://github.com/mhuisi/vires/blob/master/doc/fsd/vires.pdf}{Pflichtenheft} zu beachten.
 
 \subsection{Deployment}
 Um den \vires-Server zu starten, muss lediglich die .zip-Datei für das jeweilige Betriebssystem und die jeweilige Prozessorarchitektur unter 

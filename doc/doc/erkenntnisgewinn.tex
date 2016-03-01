@@ -1,8 +1,8 @@
 \section{Erkenntnisgewinn}
-\subsection{Backend}
-\subsubsection{Go}
 Go hat sich als Backend-Sprache als praktisch erwiesen, da das Ökosystem und Go's Unterstützung für Goroutinen und Channels viele Dinge vereinfacht haben. \\
 Die Menge an Sourcecode, welcher nötig war, um das Backend zu entwickeln, war deutlich geringer, als es beispielsweise in Java der Fall gewesen wäre, da Go deutlich weniger Verbosität aufweißt, als es in Java der Fall wäre.
+
+Coffeescript war definitiv ein Schritt in die richtige Richtung im Gegensatz zu reinem Javascript, jedoch gibt es auch nach wie vor in Coffeescript eine Menge Fallen, in die man erst zur Runtime fällt, was die Entwicklung deutlich erschwert.
 
 Gorilla hat sich ebenfalls als sehr nützliches Framework gezeigt. Der Grund hierfür ist hauptsächlich, dass Gorilla nicht versucht, mittels Inversion Of Control dem eigenen Code die Kontrolle zu entreißen, was bedeutet, dass für die Nutzung des Frameworks lediglich Go-Code und keine externen Tools benötigt werden. Der Lernaufwand ist also deutlich geringer - und der entstandene Code liest sich, als würde man eine Library verwenden.
 Der Webserver, das Routing des Webservers und die Verwendung von Websockets haben sich deshalb als sehr einfach erwiesen.
@@ -44,8 +44,3 @@ BenchmarkCoherentSetRemove & 20000000 & 167 ns/op \\
 \hline
 \end{tabular}
 \end{figure}
-
-\subsection{Frontend}
-\subsubsection{Coffeescript}
-\subsubsection{WebGL}
-% andere Themen?
