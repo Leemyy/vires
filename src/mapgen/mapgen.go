@@ -15,7 +15,7 @@ const (
 	CellMaximumSize           = 200
 	DistanceFactor            = 1.1
 	NumberOfMapsPerGeneration = 8
-	NeededFitness             = 500
+	NeededFitness             = 400
 )
 
 type Field struct {
@@ -88,7 +88,7 @@ func GenerateMap(numberOfPlayers int) Field {
 		maps := make([]Map, NumberOfMapsPerGeneration)
 		for i := 0; i < NumberOfMapsPerGeneration; i++ {
 			currentCellList := generateCellList(maximumXPosition, maximumYPosition, numberOfCells)
-			maps[i] = Map{currentCellList, calculateFitnesses(currentCellList)}
+			maps[i] = Map{currentCellList, calculateFitnesses(currentCellList, vec.V{float64(maximumXPosition) / 2, float64(maximumYPosition) / 2})}
 		}
 		generation = newGeneration(maps, nil, nil)
 		setFitnesses(generation)
@@ -112,7 +112,7 @@ func GenerateMap(numberOfPlayers int) Field {
 			}
 			for i, currentMap := range generation.maps {
 				if &currentMap == generation.currentSecondBestFitness {
-					generation.maps[i] = Map{childCellList, calculateFitnesses(childCellList)}
+					generation.maps[i] = Map{childCellList, calculateFitnesses(childCellList, vec.V{float64(maximumXPosition) / 2, float64(maximumYPosition) / 2})}
 				}
 			}
 			numberOfGenerations++
@@ -139,15 +139,18 @@ func GenerateMap(numberOfPlayers int) Field {
 	return Field{vec.V{float64(maximumXPosition), float64(maximumYPosition)}, circles, playerIndex}
 }
 
-func calculateFitnesses(cells []Cell) float64 {
+func calculateFitnesses(cells []Cell, mapMid vec.V) float64 {
 	allSmallestDistances := make([]float64, len(cells))
+	var smallestDistanceToMapMid float64
 	for i, currCellOne := range cells {
 		var smallestDistance float64
+		currentDistance := calculateDistance(currCellOne.xPosition, int(mapMid.X), currCellOne.yPosition, int(mapMid.Y))
+		if smallestDistanceToMapMid == 0 || smallestDistanceToMapMid < currentDistance {
+			smallestDistanceToMapMid = (currentDistance / (mapMid.X / 2)) * 100
+		}
 		for _, currCellTwo := range cells {
 			if currCellOne != currCellTwo {
-				deltaX := currCellOne.xPosition - currCellTwo.xPosition
-				deltaY := currCellOne.yPosition - currCellTwo.yPosition
-				currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
+				currentDistance := calculateDistance(currCellOne.xPosition, currCellTwo.xPosition, currCellOne.yPosition, currCellTwo.yPosition)
 				if currentDistance <= CellMaximumSize*DistanceFactor {
 					return 0
 				} else if smallestDistance == 0 || smallestDistance < currentDistance {
@@ -157,8 +160,14 @@ func calculateFitnesses(cells []Cell) float64 {
 		}
 		allSmallestDistances[i] = smallestDistance
 	}
+	//fmt.Println(smallestDistanceToMapMid)
+	return ((getLowestValue(allSmallestDistances) / getHighestValue(allSmallestDistances)) * 1000) - smallestDistanceToMapMid
+}
 
-	return (getLowestValue(allSmallestDistances) / getHighestValue(allSmallestDistances)) * 1000
+func calculateDistance(xPositionOne int, xPositionTwo int, yPositionOne int, yPositionTwo int) float64 {
+	deltaX := xPositionOne - xPositionTwo
+	deltaY := yPositionOne - yPositionTwo
+	return math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
 }
 
 func getLowestValue(values []float64) float64 {
