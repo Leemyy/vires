@@ -26,8 +26,8 @@ type Player struct {
 // NewPlayer creates a new player
 // with the specified ID and
 // an amount of cells of 1.
-func NewPlayer(id ID) Player {
-	return Player{id, 1}
+func NewPlayer(id ID) *Player {
+	return &Player{id, 1}
 }
 
 // ID gets the id of the player.
@@ -106,11 +106,7 @@ func (c *Cell) Stationed() Vires {
 // Owner gets the owner of this cell.
 // May be nil if the cell is neutral.
 func (c *Cell) Owner() *Player {
-	if c.owner == nil {
-		return nil
-	}
-	clone := *c.owner
-	return &clone
+	return c.owner
 }
 
 func (c *Cell) OwnerID() ID {
@@ -183,14 +179,14 @@ func (c *Cell) IsNeutral() bool {
 // SetOwner sets the owner of this cell,
 // removes the cell from the original owner
 // and adds the cell to the new owner.
-func (c *Cell) SetOwner(o Player) {
+func (c *Cell) SetOwner(o *Player) {
 	if c.IsNeutral() {
 		c.replication = replication(c.force)
 	} else {
 		c.owner.cells--
 	}
 	o.cells++
-	c.owner = &o
+	c.owner = o
 }
 
 // Neutralize resets the owner of this cell
@@ -224,7 +220,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 	r := radius(moving)
 	mov := &Movement{
 		id:         mvid,
-		owner:      *src.owner,
+		owner:      src.owner,
 		moving:     moving,
 		target:     tgt,
 		body:       Circle{start, r},
@@ -240,7 +236,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 // moving in between cells.
 type Movement struct {
 	id       ID
-	owner    Player
+	owner    *Player
 	moving   Vires
 	target   *Cell
 	body     Circle
@@ -259,7 +255,7 @@ func (m *Movement) ID() ID {
 // Owner gets the owner of the movement,
 // ie the player that sent the movement.
 func (m *Movement) Owner() Player {
-	return m.owner
+	return *m.owner
 }
 
 // Moving gets the amount of vires present
@@ -380,8 +376,8 @@ func (m *Movement) Collide(m2 *Movement) {
 		m2t := m2.target
 		if mt == m2t {
 			// collision with friendly movement
-			d1 := vec.Dist(mt.Body().Location, m.Body().Location)
-			d2 := vec.Dist(m2t.Body().Location, m2.Body().Location)
+			d1 := vec.Dist(mt.body.Location, m.body.Location)
+			d2 := vec.Dist(m2t.body.Location, m2.body.Location)
 			// merge movement that is further away into
 			// movement that is closer
 			if d2 < d1 {
@@ -395,8 +391,9 @@ func (m *Movement) Collide(m2 *Movement) {
 		return
 	}
 	// standard collision
+	mov := m.moving
 	m.Merge(-m2.moving)
-	m2.Merge(-m.moving)
+	m2.Merge(-mov)
 }
 
 // IsDead returns whether the movement is dead.

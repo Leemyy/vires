@@ -17,7 +17,7 @@ const (
 
 // Field represents a game instance of a field.
 type Field struct {
-	players     map[ent.ID]ent.Player
+	players     map[ent.ID]*ent.Player
 	cells       map[ent.ID]*ent.Cell
 	movements   map[ent.ID]*ent.Movement
 	movementID  ent.ID
@@ -30,7 +30,7 @@ type Field struct {
 // using the specified transmitter to notify the caller
 // about things that happen in the game.
 func NewField(players []ent.ID, t *transm.Transmitter) *Field {
-	ps := make(map[ent.ID]ent.Player, len(players))
+	ps := make(map[ent.ID]*ent.Player, len(players))
 	for _, id := range players {
 		ps[id] = ent.NewPlayer(id)
 	}
@@ -91,13 +91,16 @@ func (f *Field) Close() {
 }
 
 func (f *Field) checkDominationVictory() {
-	if len(f.players) > 1 {
+	if len(f.players) > 0 {
 		return
 	}
-	var winner ent.Player
+	var winner *ent.Player
 	// get first winner
 	for _, winner = range f.players {
 		break
+	}
+	if winner == nil {
+		winner = ent.NewPlayer(0)
 	}
 	f.transmitter.Win(winner)
 }
@@ -174,7 +177,7 @@ func (f *Field) conflict(mv *ent.Movement) {
 	f.transmitter.Conflict(mv, target)
 	if defender != nil && defender.IsDead() {
 		defid := defender.ID()
-		f.transmitter.Eliminate(*defender)
+		f.transmitter.Eliminate(defender)
 		f.removePlayer(defid)
 	}
 }
