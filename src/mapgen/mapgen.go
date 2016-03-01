@@ -53,15 +53,15 @@ func setFitnesses(generation *Generation) {
 
 		if generation.currentLowestFitness == nil {
 			generation.currentLowestFitness = &currMap
-		} else if generation.currentSecondBestFitness == nil && currMap.fitness > generation.currentLowestFitness.fitness {
+		} else if generation.currentSecondBestFitness == nil && currMap.fitness < generation.currentLowestFitness.fitness {
 			generation.currentSecondBestFitness = &currMap
-		} else if generation.currentSecondBestFitness == nil && currMap.fitness <= generation.currentLowestFitness.fitness {
+		} else if generation.currentSecondBestFitness == nil && currMap.fitness >= generation.currentLowestFitness.fitness {
 			generation.currentSecondBestFitness = generation.currentLowestFitness
 			generation.currentLowestFitness = &currMap
-		} else if currMap.fitness < generation.currentLowestFitness.fitness {
+		} else if currMap.fitness > generation.currentLowestFitness.fitness {
 			generation.currentSecondBestFitness = generation.currentLowestFitness
 			generation.currentLowestFitness = &currMap
-		} else if currMap.fitness > generation.currentLowestFitness.fitness && currMap.fitness < generation.currentSecondBestFitness.fitness {
+		} else if currMap.fitness < generation.currentLowestFitness.fitness && currMap.fitness > generation.currentSecondBestFitness.fitness {
 			generation.currentSecondBestFitness = &currMap
 		}
 	}
@@ -92,7 +92,7 @@ func GenerateMap(numberOfPlayers int) Field {
 		generation = newGeneration(maps, nil, nil)
 		setFitnesses(generation)
 		numberOfGenerations := 0
-		for generation.currentLowestFitness.fitness != 0 && numberOfGenerations < 10000 {
+		for generation.currentLowestFitness.fitness <= 500 && numberOfGenerations < 10000 {
 			crossDivider := rand.Intn(numberOfCells)
 			childCellList := make([]Cell, numberOfCells)
 			for i := 0; i < crossDivider; i++ {
@@ -138,7 +138,7 @@ func GenerateMap(numberOfPlayers int) Field {
 	return Field{vec.V{float64(maximumXPosition), float64(maximumYPosition)}, circles, playerIndex}
 }
 
-func calculateFitnesses(cells []Cell) float64 {
+/*func calculateFitnesses(cells []Cell) float64 {
 	for _, currCellOne := range cells {
 		for _, currCellTwo := range cells {
 			if currCellOne != currCellTwo {
@@ -152,6 +152,47 @@ func calculateFitnesses(cells []Cell) float64 {
 		}
 	}
 	return 0
+}*/
+func calculateFitnesses(cells []Cell) float64 {
+	allSmallestDistances := make([]float64, len(cells))
+	for i, currCellOne := range cells {
+		var smallestDistance float64
+		for _, currCellTwo := range cells {
+			if currCellOne != currCellTwo {
+				deltaX := currCellOne.xPosition - currCellTwo.xPosition
+				deltaY := currCellOne.yPosition - currCellTwo.yPosition
+				currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
+				if currentDistance <= CellMaximumSize*DistanceFactor {
+					return 0
+				} else if smallestDistance == 0 || smallestDistance < currentDistance {
+					smallestDistance = currentDistance
+				}
+			}
+		}
+		allSmallestDistances[i] = smallestDistance
+	}
+
+	return (getLowestValue(allSmallestDistances) / getHighestValue(allSmallestDistances)) * 1000
+}
+
+func getLowestValue(values []float64) float64 {
+	var lowest float64
+	for _, value := range values {
+		if lowest == 0 || value < lowest {
+			lowest = value
+		}
+	}
+	return lowest
+}
+
+func getHighestValue(values []float64) float64 {
+	var highest float64
+	for _, value := range values {
+		if highest == 0 || value > highest {
+			highest = value
+		}
+	}
+	return highest
 }
 
 func generateCellList(maximumXPosition int, maximumYPosition, numberOfCells int) []Cell {
