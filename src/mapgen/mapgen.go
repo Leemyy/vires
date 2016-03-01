@@ -15,7 +15,7 @@ const (
 	CellMaximumSize           = 200
 	DistanceFactor            = 1.1
 	NumberOfMapsPerGeneration = 8
-	NeededFitness             = 400
+	NeededFitness             = 500
 )
 
 type Field struct {
@@ -144,9 +144,8 @@ func calculateFitnesses(cells []Cell, mapMid vec.V) float64 {
 	for i, currCellOne := range cells {
 		var smallestDistance float64
 		currentDistance := calculateDistance(currCellOne.xPosition, int(mapMid.X), currCellOne.yPosition, int(mapMid.Y))
-		if smallestDistanceToMapMid == 0 || smallestDistanceToMapMid < currentDistance {
-			//CHECK DIS!!!
-			smallestDistanceToMapMid = (currentDistance / (mapMid.X / 2)) * 100
+		if smallestDistanceToMapMid == 0 || smallestDistanceToMapMid > currentDistance {
+			smallestDistanceToMapMid = currentDistance
 		}
 		for _, currCellTwo := range cells {
 			if currCellOne != currCellTwo {
@@ -160,7 +159,8 @@ func calculateFitnesses(cells []Cell, mapMid vec.V) float64 {
 		}
 		allSmallestDistances[i] = smallestDistance
 	}
-	//fmt.Println(smallestDistanceToMapMid)
+	smallestDistanceToMapMid = (smallestDistanceToMapMid / (mapMid.X / 2)) * 100
+	//fmt.Println(smallestDistanceToMapMid)0
 	return ((getLowestValue(allSmallestDistances) / getHighestValue(allSmallestDistances)) * 1000) - smallestDistanceToMapMid
 }
 
