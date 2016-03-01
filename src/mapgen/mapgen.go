@@ -22,29 +22,38 @@ const (
 	NeededFitness             = 500
 )
 
+//Represents a gamefield which consists of its size,
+//cells and manned cells
 type Field struct {
 	Size          vec.V
 	Cells         []ent.Circle
 	StartCellIdxs []int
 }
 
+//Represents a single cell which consists of its size,
+//and position on the field
 type Cell struct {
 	xPosition int
 	yPosition int
 	size      int
 }
 
+//Represents a single map which consists of its cells and its fitness
 type Map struct {
 	cells   []Cell
 	fitness float64
 }
 
+//Represents a single generation which consists of maps and the maps
+//with the best and 2nd best fitness
 type Generation struct {
 	maps                     []Map
 	currentLowestFitness     *Map
 	currentSecondBestFitness *Map
 }
 
+//Generation struct constructor
+//returns a pointer to a generation struct
 func newGeneration(maps []Map, lowestFitness *Map, secondLowestFitness *Map) *Generation {
 	return &Generation{
 		maps:                     maps,
@@ -53,6 +62,7 @@ func newGeneration(maps []Map, lowestFitness *Map, secondLowestFitness *Map) *Ge
 	}
 }
 
+//sets the fitnesses of all maps inherited in a single generation.
 func setFitnesses(generation *Generation) {
 	for _, currMap := range generation.maps {
 
@@ -72,6 +82,8 @@ func setFitnesses(generation *Generation) {
 	}
 }
 
+//Generates a map by using a genetic algorithm.
+//Returns a fieldstruct with several values concerning the map.
 func GenerateMap(numberOfPlayers int) Field {
 	var maximumXPosition int
 	var maximumYPosition int
@@ -141,6 +153,8 @@ func GenerateMap(numberOfPlayers int) Field {
 	return Field{vec.V{float64(maximumXPosition), float64(maximumYPosition)}, circles, playerIndex}
 }
 
+//Calculates fitness by using distancealgorithms.
+//Returns fitness between 0-1000 as a float64 value.
 func calculateFitnesses(cells []Cell, mapMid vec.V) float64 {
 	allSmallestDistances := make([]float64, len(cells))
 	var smallestDistanceToMapMid float64
@@ -166,12 +180,15 @@ func calculateFitnesses(cells []Cell, mapMid vec.V) float64 {
 	return ((getLowestValue(allSmallestDistances) / getHighestValue(allSmallestDistances)) * 1000) - smallestDistanceToMapMid
 }
 
+//Calculates the distance between two 2dimensional points.
+//Returns the distance as a float64 value
 func calculateDistance(xPositionOne int, xPositionTwo int, yPositionOne int, yPositionTwo int) float64 {
 	deltaX := xPositionOne - xPositionTwo
 	deltaY := yPositionOne - yPositionTwo
 	return math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
 }
 
+//Returns the lowest value inside an array
 func getLowestValue(values []float64) float64 {
 	var lowest float64
 	for _, value := range values {
@@ -182,6 +199,7 @@ func getLowestValue(values []float64) float64 {
 	return lowest
 }
 
+//Returns the highest value inside an array
 func getHighestValue(values []float64) float64 {
 	var highest float64
 	for _, value := range values {
@@ -192,6 +210,8 @@ func getHighestValue(values []float64) float64 {
 	return highest
 }
 
+//Generates a list containing a given number of cells.
+//Returns a cell list
 func generateCellList(maximumXPosition int, maximumYPosition, numberOfCells int) []Cell {
 	var cells []Cell
 	for i := 0; i < numberOfCells; i++ {
@@ -200,9 +220,10 @@ func generateCellList(maximumXPosition int, maximumYPosition, numberOfCells int)
 	return cells
 }
 
-func contains(s []int, e int) bool {
-	for _, a := range s {
-		if a == e {
+//Determines whether an array contains a given value
+func contains(array []int, value int) bool {
+	for _, a := range array {
+		if a == value {
 			return true
 		}
 	}
