@@ -105,14 +105,14 @@ func GenerateMap(numberOfPlayers int) Field {
 				if rand.Int31n(100) >= 2 {
 					childCellList = append(childCellList, generation.currentLowestFitness.cells[i])
 				} else {
-					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn((CellMaximumSize-CellMinimumSize)+CellMinimumSize) / 2})
+					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), (rand.Intn((CellMaximumSize - CellMinimumSize)) + CellMinimumSize) / 2})
 				}
 			}
 			for i := crossDivider; i < numberOfCells; i++ {
 				if rand.Int31n(100) >= 2 {
 					childCellList = append(childCellList, generation.currentSecondBestFitness.cells[i])
 				} else {
-					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn((CellMaximumSize-CellMinimumSize)+CellMinimumSize) / 2})
+					childCellList = append(childCellList, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), (rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize) / 2})
 				}
 			}
 			for i, currentMap := range generation.maps {
@@ -164,7 +164,7 @@ func calculateFitnesses(cells []Cell) float64 {
 func generateCellList(maximumXPosition int, maximumYPosition, numberOfCells int) []Cell {
 	var cells []Cell
 	for i := 0; i < numberOfCells; i++ {
-		cells = append(cells, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), rand.Intn((CellMaximumSize-CellMinimumSize)+CellMinimumSize) / 2})
+		cells = append(cells, Cell{rand.Intn(maximumXPosition), rand.Intn(maximumYPosition), (rand.Intn(CellMaximumSize-CellMinimumSize) + CellMinimumSize) / 2})
 	}
 	return cells
 }
