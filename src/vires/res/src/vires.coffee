@@ -75,7 +75,7 @@ initialize = ->
 		#Load resources and start the game
 		prepareLoop()
 	else 
-		console.log("Error creating WebGL context!")
+		console.err("Error creating WebGL context!")
 		#Inform the user about the WebGL error
 		# and point him to https://get.webgl.org/
 	return
@@ -93,10 +93,6 @@ initializeGL = ->
 			# WebGL could not be initialized
 			return false
 
-		GL.enable(GL.DEPTH_TEST)
-		GL.depthFunc(GL.GREATER)
-		GL.clearColor(1.0, 1.0, 1.0, 1.0)
-		GL.clearDepth(-1.0)
 	return true
 	
 
@@ -208,6 +204,8 @@ nextInput = ->
 	input.right = input.next.right
 	input.middle = input.next.middle
 	input.left = input.next.left
+	#Mousewheel delta can vary greatly between Browsers
+	# clamp it to 1, 0 or -1 to ensure compatible camera controls
 	input.scroll = Math.sign(input.next.scroll)
 	input.x = input.next.x
 	input.y = input.next.y

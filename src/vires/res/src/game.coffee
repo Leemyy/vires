@@ -257,8 +257,8 @@ vires.states.match =
 			switch Msg.Type
 				when "Movement"
 					@movements[data.ID] = new Movement(data)
-					console.log "Movement #{data.ID}"
-					console.log @movements[data.ID]
+					#console.log "Movement #{data.ID}"
+					#console.log @movements[data.ID]
 				when "Replication"
 					for update in data
 						@cells[update.ID].Stationed = update.Stationed
@@ -270,9 +270,9 @@ vires.states.match =
 				when "Collision"
 					A = @movements[data.A.ID]
 					B = @movements[data.B.ID]
-					console.log "Collision #{data.A.ID} #{data.B.ID}"
-					console.log A
-					console.log B
+					#console.log "Collision #{data.A.ID} #{data.B.ID}"
+					#console.log A
+					#console.log B
 					if(data.A.Moving > 0)
 						A.update(data.A)
 					else
@@ -641,25 +641,25 @@ class Movement
 	#Modifies this movement after a Collision
 	# was received from the server
 	update: (Data)->
-		console.log "updating #{@ID}"
+		#console.log "updating #{@ID}"
 		@Moving = Data.Moving
-		console.log "O: "
-		console.log @O[0], @O[1]
+		#console.log "O: "
+		#console.log @O[0], @O[1]
 		vec2.set(@O, Data.Body.Location.X, Data.Body.Location.Y)
-		console.log @O[0], @O[1]
+		#console.log @O[0], @O[1]
 		@Radius = Data.Body.Radius
-		console.log "V: "
-		console.log @V[0], @V[1]
+		#console.log "V: "
+		#console.log @V[0], @V[1]
 		vec2.set(@V, Data.Direction.X, Data.Direction.Y)
-		console.log @V[0], @V[1]
-		console.log "birth: #{@birth}"
+		#console.log @V[0], @V[1]
+		#console.log "birth: #{@birth}"
 		@birth = vires.time
-		console.log @birth
-		console.log "pos:"
-		console.log @pos[0], @pos[1]
+		#console.log @birth
+		#console.log "pos:"
+		#console.log @pos[0], @pos[1]
 		vec2.copy(@pos, @O)
-		console.log @pos[0], @pos[1]
-		console.log "--updated!"
+		#console.log @pos[0], @pos[1]
+		#console.log "--updated!"
 
 		@primitive.scale = @Radius
 		return

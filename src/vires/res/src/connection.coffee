@@ -20,8 +20,8 @@ connection=
 			try
 				Packet = JSON.parse(msg.data)
 				connection.messages.unshift(Packet)
-				if (Packet.Type != "Replication")
-					connection.debug.unshift(msg.data)
+				#if (Packet.Type != "Replication")
+				#	connection.debug.unshift(msg.data)
 			catch err
 				console.error(err)
 				#...

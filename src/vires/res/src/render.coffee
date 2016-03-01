@@ -17,6 +17,11 @@ gfx =
 	matVP: mat4.create()
 
 	init: ->
+		GL.enable(GL.DEPTH_TEST)
+		GL.depthFunc(GL.GREATER)
+		GL.clearColor(1.0, 1.0, 1.0, 1.0)
+		GL.clearDepth(-1.0)
+		
 		#Load All resources into Graphics memory
 		for res in gfx.resources
 			res.load()
@@ -162,7 +167,7 @@ class Program
 			GL.useProgram(null)
 
 		if @err.any
-			console.log("Error compiling shader: #{[key, value] for key, value of @err}" )
+			console.err("Error compiling shader: #{[key, value] for key, value of @err}" )
 		return
 
 	use: ->
