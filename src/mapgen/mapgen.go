@@ -15,6 +15,7 @@ const (
 	CellMaximumSize           = 200
 	DistanceFactor            = 1.1
 	NumberOfMapsPerGeneration = 8
+	NeededFitness             = 800
 )
 
 type Field struct {
@@ -92,7 +93,7 @@ func GenerateMap(numberOfPlayers int) Field {
 		generation = newGeneration(maps, nil, nil)
 		setFitnesses(generation)
 		numberOfGenerations := 0
-		for generation.currentLowestFitness.fitness <= 500 && numberOfGenerations < 10000 {
+		for generation.currentLowestFitness.fitness <= NeededFitness && numberOfGenerations < 10000 {
 			crossDivider := rand.Intn(numberOfCells)
 			childCellList := make([]Cell, numberOfCells)
 			for i := 0; i < crossDivider; i++ {

@@ -6,8 +6,8 @@ import (
 )
 
 func TestMapgen(t *testing.T) {
-	for i := 1; i < 20; i++ {
-		field := GenerateMap(i)
+	for i := 1; i < 1; i++ {
+		field := GenerateMap(20)
 		for _, currCircleOne := range field.Cells {
 			for _, currCircleTwo := range field.Cells {
 				if currCircleOne != currCircleTwo {
