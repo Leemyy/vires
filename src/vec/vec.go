@@ -69,3 +69,9 @@ func Unit(v V) V {
 func Scale(v V, n float64) V {
 	return Mul(Unit(v), n)
 }
+
+// Dist calculates the distance
+// between two vectors.
+func Dist(v1 V, v2 V) float64 {
+	return Abs(SubV(v1, v2))
+}

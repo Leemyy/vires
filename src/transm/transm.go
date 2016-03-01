@@ -203,13 +203,13 @@ func (t *Transmitter) Conflict(m *ent.Movement, c *ent.Cell) {
 }
 
 // Eliminate transmits a packet meaning that a player was eliminated.
-func (t *Transmitter) Eliminate(p ent.Player) {
+func (t *Transmitter) Eliminate(p *ent.Player) {
 	e := EliminatedPlayer(p.ID())
 	t.sendTX("EliminatedPlayer", &e)
 }
 
 // Win transmits a packet meaning that a player won the game.
-func (t *Transmitter) Win(p ent.Player) {
+func (t *Transmitter) Win(p *ent.Player) {
 	w := Winner(p.ID())
 	t.sendTX("Winner", &w)
 }

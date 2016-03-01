@@ -17,7 +17,7 @@ const (
 
 // Field represents a game instance of a field.
 type Field struct {
-	players     map[ent.ID]ent.Player
+	players     map[ent.ID]*ent.Player
 	cells       map[ent.ID]*ent.Cell
 	movements   map[ent.ID]*ent.Movement
 	movementID  ent.ID
@@ -30,15 +30,23 @@ type Field struct {
 // using the specified transmitter to notify the caller
 // about things that happen in the game.
 func NewField(players []ent.ID, t *transm.Transmitter) *Field {
-	ps := make(map[ent.ID]ent.Player, len(players))
+	ps := make(map[ent.ID]*ent.Player, len(players))
 	for _, id := range players {
 		ps[id] = ent.NewPlayer(id)
 	}
-	field := mapgen.GenerateMap(20)
+	field := mapgen.GenerateMap(len(players))
 	cells := make(map[ent.ID]*ent.Cell)
 	for i, c := range field.Cells {
 		id := ent.ID(i)
-		cells[id] = ent.NewCell(id, c.Radius, nil, c.Location)
+		cells[id] = ent.NewCell(id, c.Radius, c.Location)
+	}
+	fmt.Println("Capacities:")
+	for _, c := range cells {
+		fmt.Println(c.Capacity())
+	}
+	fmt.Println("Replications:")
+	for _, c := range cells {
+		fmt.Println(c.Replication())
 	}
 	i := 0
 	for _, p := range ps {
@@ -58,18 +66,6 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	}
 	// handle this here instead of in the caller to avoid the caller trying to read the cells
 	// while we're running our game loop
-	for _, c1 := range f.cells {
-		for _, c2 := range f.cells {
-			if c1 == c2 {
-				continue
-			}
-			d := vec.Abs(vec.SubV(c1.Body().Location, c2.Body().Location))
-			if d < c1.Body().Radius+c2.Body().Radius {
-				fmt.Println("Overlap!")
-				fmt.Println(d, c1.Body().Radius, c2.Body().Radius)
-			}
-		}
-	}
 	t.GenerateField(f.cells, f.size)
 	f.startReplication()
 	return f
@@ -95,13 +91,16 @@ func (f *Field) Close() {
 }
 
 func (f *Field) checkDominationVictory() {
-	if len(f.players) > 1 {
+	if len(f.players) > 0 {
 		return
 	}
-	var winner ent.Player
+	var winner *ent.Player
 	// get first winner
 	for _, winner = range f.players {
 		break
+	}
+	if winner == nil {
+		winner = ent.NewPlayer(0)
 	}
 	f.transmitter.Win(winner)
 }
@@ -129,15 +128,11 @@ func (f *Field) removePlayer(p ent.ID) {
 
 func (f *Field) findCollisions(m *ent.Movement) {
 	for _, m2 := range f.movements {
-		fmt.Println(m.ID(), m2.ID())
 		collideAt, collides := m.CollidesWith(m2)
-		fmt.Println(collides)
 		if !collides {
 			continue
 		}
-		fmt.Println("Starting a collision now!")
 		m2 := m2
-		fmt.Println(collideAt)
 		stopCollision := f.ops.Start(collideAt, func() {
 			f.collide(m, m2)
 		})
@@ -161,24 +156,16 @@ func (f *Field) viresChanged(m *ent.Movement) {
 }
 
 func (f *Field) collide(m, m2 *ent.Movement) {
-	fmt.Println("Bodies:")
-	fmt.Println(m.Body().Location)
-	fmt.Println(m2.Body().Location)
 	m.Collide(m2)
-	fmt.Println(m.ID(), m2.ID())
 	f.transmitter.Collide(m, m2)
 	// make sure that the dead movement is removed first
 	// to avoid that the same collision is found again
 	// when recalculating collisions
-	if m.Moving() < 0 {
-		f.viresChanged(m)
-		f.viresChanged(m2)
-	} else {
-		f.viresChanged(m2)
-		f.viresChanged(m)
+	if m2.Moving() <= 0 {
+		m, m2 = m2, m
 	}
-	fmt.Println(m.Body().Location)
-	fmt.Println(m2.Body().Location)
+	f.viresChanged(m)
+	f.viresChanged(m2)
 }
 
 func (f *Field) conflict(mv *ent.Movement) {
@@ -190,7 +177,7 @@ func (f *Field) conflict(mv *ent.Movement) {
 	f.transmitter.Conflict(mv, target)
 	if defender != nil && defender.IsDead() {
 		defid := defender.ID()
-		f.transmitter.Eliminate(*defender)
+		f.transmitter.Eliminate(defender)
 		f.removePlayer(defid)
 	}
 }

@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"fmt"
 	"math"
 	"time"
 
@@ -27,8 +26,8 @@ type Player struct {
 // NewPlayer creates a new player
 // with the specified ID and
 // an amount of cells of 1.
-func NewPlayer(id ID) Player {
-	return Player{id, 1}
+func NewPlayer(id ID) *Player {
+	return &Player{id, 1}
 }
 
 // ID gets the id of the player.
@@ -55,6 +54,7 @@ type Circle struct {
 // Cell represents a cell on the field.
 type Cell struct {
 	id       ID
+	force    float64
 	capacity Vires
 	// [Replication] = vires/cycle
 	replication Vires
@@ -66,16 +66,15 @@ type Cell struct {
 
 // NewCell creates a new cell with the specified id,
 // the specified force, which determines its capacity, its
-// replication and its radius, the owner, which may be
-// nil if the cell is neutral, and loc, which is the
+// replication and its radius and loc, which is the
 // location of the cell.
-func NewCell(id ID, force float64, owner *Player, loc vec.V) *Cell {
+func NewCell(id ID, force float64, loc vec.V) *Cell {
 	return &Cell{
 		id:          id,
+		force:       force,
 		capacity:    capacity(force),
-		replication: replication(force),
+		replication: neutralReplication(force),
 		stationed:   0,
-		owner:       owner,
 		body:        Circle{loc, cellRadius(force)},
 	}
 }
@@ -107,11 +106,7 @@ func (c *Cell) Stationed() Vires {
 // Owner gets the owner of this cell.
 // May be nil if the cell is neutral.
 func (c *Cell) Owner() *Player {
-	if c.owner == nil {
-		return nil
-	}
-	clone := *c.owner
-	return &clone
+	return c.owner
 }
 
 func (c *Cell) OwnerID() ID {
@@ -130,12 +125,16 @@ func (c *Cell) Body() Circle {
 
 func capacity(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(10 * force)
+	return Vires(math.Pi * sq(force) / 200)
 }
 
 func replication(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(force)
+	return Vires(force / 5)
+}
+
+func neutralReplication(force float64) Vires {
+	return replication(force) / 2
 }
 
 func cellRadius(force float64) float64 {
@@ -180,12 +179,14 @@ func (c *Cell) IsNeutral() bool {
 // SetOwner sets the owner of this cell,
 // removes the cell from the original owner
 // and adds the cell to the new owner.
-func (c *Cell) SetOwner(o Player) {
-	if !c.IsNeutral() {
+func (c *Cell) SetOwner(o *Player) {
+	if c.IsNeutral() {
+		c.replication = replication(c.force)
+	} else {
 		c.owner.cells--
 	}
 	o.cells++
-	c.owner = &o
+	c.owner = o
 }
 
 // Neutralize resets the owner of this cell
@@ -196,19 +197,18 @@ func (c *Cell) Neutralize() {
 	}
 	c.owner.cells--
 	c.owner = nil
+	c.replication = neutralReplication(c.force)
 }
 
 func radius(n Vires) float64 {
-	// placeholder, needs testing
-	return float64(n) / 100
+	return 10 * math.Sqrt(float64(n)/math.Pi)
 }
 
-func speed(n Vires) float64 {
-	// placeholder, needs testing
-	if n == 0 {
+func speed(radius float64) float64 {
+	if radius == 0 {
 		return 0
 	}
-	return 10000 / float64(n)
+	return 3000 / radius
 }
 
 // Move creates a movement which describes
@@ -217,14 +217,15 @@ func speed(n Vires) float64 {
 func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 	moving := src.stationed / 2
 	start := src.body.Location
+	r := radius(moving)
 	mov := &Movement{
 		id:         mvid,
-		owner:      *src.owner,
+		owner:      src.owner,
 		moving:     moving,
 		target:     tgt,
-		body:       Circle{start, radius(moving)},
+		body:       Circle{start, r},
 		lastTime:   time.Now(),
-		direction:  vec.Scale(vec.SubV(tgt.body.Location, start), speed(moving)),
+		direction:  vec.Scale(vec.SubV(tgt.body.Location, start), speed(r)),
 		collisions: map[*Movement]func(){},
 	}
 	src.Merge(-moving)
@@ -235,7 +236,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 // moving in between cells.
 type Movement struct {
 	id       ID
-	owner    Player
+	owner    *Player
 	moving   Vires
 	target   *Cell
 	body     Circle
@@ -254,7 +255,7 @@ func (m *Movement) ID() ID {
 // Owner gets the owner of the movement,
 // ie the player that sent the movement.
 func (m *Movement) Owner() Player {
-	return m.owner
+	return *m.owner
 }
 
 // Moving gets the amount of vires present
@@ -321,8 +322,9 @@ func (m *Movement) Merge(n Vires) {
 		newMoving = 0
 	}
 	m.moving = newMoving
-	m.direction = vec.Scale(m.direction, speed(newMoving))
-	m.body.Radius = radius(newMoving)
+	r := radius(newMoving)
+	m.direction = vec.Scale(m.direction, speed(r))
+	m.body.Radius = r
 }
 
 // Kill sets the amount of vires of this movement to 0.
@@ -370,8 +372,17 @@ func (m *Movement) Collide(m2 *Movement) {
 	m2.UpdatePosition()
 	// merge movements if two movements with the same owner and the same target collide
 	if m.owner.ID() == m2.owner.ID() {
-		if m.target == m2.target {
+		mt := m.target
+		m2t := m2.target
+		if mt == m2t {
 			// collision with friendly movement
+			d1 := vec.Dist(mt.body.Location, m.body.Location)
+			d2 := vec.Dist(m2t.body.Location, m2.body.Location)
+			// merge movement that is further away into
+			// movement that is closer
+			if d2 < d1 {
+				m, m2 = m2, m
+			}
 			m.Merge(m2.moving)
 			m2.Kill()
 			return
@@ -380,8 +391,9 @@ func (m *Movement) Collide(m2 *Movement) {
 		return
 	}
 	// standard collision
+	mov := m.moving
 	m.Merge(-m2.moving)
-	m2.Merge(-m.moving)
+	m2.Merge(-mov)
 }
 
 // IsDead returns whether the movement is dead.
@@ -402,7 +414,6 @@ func collideIn(m1 *Movement, m2 *Movement) (float64, bool) {
 	// the center of the larger movement is at (0, 0).
 	b1 := m1.body
 	b2 := m2.body
-	fmt.Println("Locations: ", b1.Location, b2.Location)
 	p := vec.SubV(b1.Location, b2.Location)
 	v := vec.SubV(m1.direction, m2.direction)
 	r := math.Max(b1.Radius, b2.Radius)
@@ -436,9 +447,7 @@ func at(in float64) time.Time {
 
 func (m *Movement) UpdatePosition() {
 	now := time.Now()
-	fmt.Println(m.Body().Location)
 	m.body.Location = vec.AddV(m.body.Location, vec.Mul(m.direction, float64(now.Sub(m.lastTime))/float64(time.Second)))
-	fmt.Println(m.Body().Location)
 	m.lastTime = now
 }
 
@@ -456,7 +465,6 @@ func (m *Movement) CollidesWith(m2 *Movement) (collideAt time.Time, collides boo
 		m.UpdatePosition()
 		m2.UpdatePosition()
 		in, collides := collideIn(m, m2)
-		fmt.Println("In: ", in)
 		return at(in), collides
 	}
 	return time.Now(), false
