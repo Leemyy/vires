@@ -545,10 +545,16 @@ class Player
 	#Unique identifier sent by the server
 	ID: 0
 	#Color of this Player's cells
-	color: gfx.color[0]
+	color: gfx.makeColor(0)
+	alive: true
 	
 	constructor: (@ID)->
+		@alive = true
 		return
+
+	kill: ->
+		vec4.copy(@color, gfx.color[0])
+		@alive = false
 
 
 class Cell 
