@@ -2,10 +2,14 @@ settings =
 	minZoom: 1
 	maxZoom: 100
 	zoomSpeed: 0.2
+	factorLight: 0.3
+	factorDark: 0.4
 	indexNeutral: 10
 	indexSelf: 30
 	indexOther: 20
 	indexMarker: 50
+	offsetMovement: -100
+	gauge: 0.1
 
 vires =
 	room: 0
@@ -147,7 +151,6 @@ vires.states.match =
 			if (hover?)
 				#Cursor is over a Cell
 				if !(@target?)
-					#console.log "1"
 					#No Cell is currently marked as target
 					#Mark hovered Cell
 					@target = hover
@@ -158,7 +161,6 @@ vires.states.match =
 					if (@markers[@target.ID]?)
 						@markers[@target.ID].mark.unlink()
 				else if (@target.ID != hover.ID)
-					#console.log "2"
 					#Another Cell is marked as target
 					if (@target.Owner == vires.Self)
 						#Place source marker
@@ -178,17 +180,14 @@ vires.states.match =
 						@markers[@target.ID].mark.unlink()
 
 			else if (@target?)
-				#console.log "3"
 				#Cursor just left a Cell
 				if (@target.Owner == vires.Self)
-					#console.log "3.1"
 					#That Cell was owned by the Player
 					#Place source marker
 					if !(@markers[@target.ID]?)
 						@markers[@target.ID] = 
 							mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
 							cell: @target
-						#console.log @markers[@target.ID]
 					else
 						@markers[@target.ID].mark.link()
 				#Remove target marker
@@ -261,11 +260,11 @@ vires.states.match =
 					#console.log @movements[data.ID]
 				when "Replication"
 					for update in data
-						@cells[update.ID].Stationed = update.Stationed
+						@cells[update.ID].update(update.Stationed)
 				when "Conflict"
 					@movements[data.Movement].kill()
 					delete @movements[data.Movement]
-					@cells[data.Cell.ID].Stationed = data.Cell.Stationed
+					@cells[data.Cell.ID].update(data.Cell.Stationed)
 					@cells[data.Cell.ID].switchOwner(@players[data.Cell.Owner])
 				when "Collision"
 					A = @movements[data.A.ID]
@@ -301,6 +300,10 @@ vires.states.match =
 		
 		return
 
+
+	clearMarkers: ->
+		gfx.material.marker.clear()
+		return
 
 	killPlayer: (ID)->
 		@players[ID].kill()
@@ -545,10 +548,22 @@ class Player
 	#Unique identifier sent by the server
 	ID: 0
 	#Color of this Player's cells
-	color: gfx.color[0]
+	#Never swap these for other colors.
+	# modify these colors instead. (vec4.set)
+	color: null
+	colorLight: null
+	colorDark: null
 	
 	constructor: (@ID)->
+		color: gfx.color[0]
+		colorDark: vec4.lerp(vec4.create(), @color, gfx.black, settings.factorDark)
+		colorLight: vec4.lerp(vec4.create(), @color, gfx.white, settings.factorLight)
 		return
+
+	swapColor: (color)->
+		vec4.copy(@color, color)
+		vec4.lerp(@colorLight, @color, gfx.white, settings.factorLight)
+		vec4.lerp(@colorDark, @color, gfx.black, settings.factorDark)
 
 
 class Cell 
@@ -558,9 +573,13 @@ class Cell
 	Owner: 0
 	Pos: vec2.fromValues(0, 0)
 	Radius: 1
+	Capacity: 1
 	Stationed: 0
 	#This oject's graphical representation
-	primitive: null
+	body: null
+	gauge: null
+	antigauge: null
+	marker: null
 
 	#Constructs a Cell out of data, which
 	# was received from the server
@@ -568,22 +587,51 @@ class Cell
 		@ID = Data.ID
 		@Pos = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y)
 		@Radius = Data.Body.Radius
+		@Capacity = Data.Capacity
 
-		@primitive = new Primitive(@Pos, gfx.mesh.round, gfx.material.cell)
-		@primitive.height = settings.indexNeutral
-		@primitive.scale = @Radius
-		@primitive.color = gfx.color[0]
+		@body = new Primitive(@Pos, gfx.mesh.round, gfx.material.cell)
+		@gauge = new Primitive(@Pos, gfx.mesh.round, gfx.material.cell)
+		@antigauge = new Primitive(@Pos, gfx.mesh.round, gfx.material.cell)
+		@marker = new Primitive(@Pos, gfx.mesh.mark, gfx.material.marker)
+		@switchHeight(settings.indexNeutral)
+		@body.color = gfx.color[0]
+		@gauge.color = gfx.black
+		@antigauge.color = gfx.color[0]
+		@body.scale = @Radius
 		return
 
 	switchOwner: (owner)->
 		@Owner = owner.ID
 		if (@Owner == vires.Self)
-			@primitive.height = settings.indexSelf
+			@switchHeight(settings.indexSelf)
 		else if (@Owner == 0)
-			@primitive.height = settings.indexNeutral
+			@switchHeight(settings.indexNeutral)
 		else
-			@primitive.height = settings.indexOther
-		@primitive.color = owner.color
+			@switchHeight(settings.indexOther)
+		@body.color = owner.color
+		@antigauge.color = owner.color
+		return
+
+	switchHeight: (height)->
+		@body.height = height
+		@gauge.height = height + 1
+		@antigauge.height = height + 2
+		@marker.height = height + 5
+
+	update: (stationed)->
+		@Stationed = stationed
+		fullnes = stationed /  @Capacity
+		trailing = Math.max( fullnes-settings.gauge, 0)
+		@gauge.scale = fullnes
+		@antigauge.scale = trailing
+		return
+
+	mark: ->
+		@mark.link()
+		return
+
+	unmark: ->
+		@mark.unlink()
 		return
 
 
@@ -603,7 +651,7 @@ class Movement
 	birth: 0
 	pos: vec2.fromValues(0, 0)
 	#This oject's graphical representation
-	primitive: null
+	body: null
 
 	#Constructs a Movement out of data, which
 	# was received from the server
@@ -617,15 +665,15 @@ class Movement
 		@birth = vires.time
 		@pos = vec2.clone(@O)
 
-		@primitive = new Primitive(@pos, gfx.mesh.round, gfx.material.movement)
+		@body = new Primitive(@pos, gfx.mesh.round, gfx.material.movement)
 		if (@Owner == vires.Self)
-			@primitive.height = settings.indexSelf - 1
+			@body.height = settings.indexSelf + settings.offsetMovement
 		else if (@Owner == 0)
-			@primitive.height = settings.indexNeutral - 1
+			@body.height = settings.indexNeutral + settings.offsetMovement
 		else
-			@primitive.height = settings.indexOther - 1
-		@primitive.scale = @Radius
-		@primitive.color = vires.states.match.players[@Owner].color
+			@body.height = settings.indexOther + settings.offsetMovement
+		@body.scale = @Radius
+		@body.color = vires.states.match.players[@Owner].color
 		return
 
 	#Updates the position of this Movement
@@ -635,7 +683,7 @@ class Movement
 
 	#Stops this Movement from being displayed
 	kill: ->
-		@primitive.unlink()
+		@body.unlink()
 		return
 
 	#Modifies this movement after a Collision
@@ -661,5 +709,5 @@ class Movement
 		#console.log @pos[0], @pos[1]
 		#console.log "--updated!"
 
-		@primitive.scale = @Radius
+		@body.scale = @Radius
 		return

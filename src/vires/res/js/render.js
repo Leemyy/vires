@@ -12,6 +12,8 @@ gfx = {
   mesh: {},
   texture: {},
   color: new Array(0),
+  black: vec4.fromValues(0, 0, 0, 1),
+  white: vec4.fromValues(1, 1, 1, 1),
   boundMesh: "",
   camera: null,
   matVP: mat4.create(),

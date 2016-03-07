@@ -6,10 +6,14 @@ settings = {
   minZoom: 1,
   maxZoom: 100,
   zoomSpeed: 0.2,
+  factorLight: 0.3,
+  factorDark: 0.4,
   indexNeutral: 10,
   indexSelf: 30,
   indexOther: 20,
-  indexMarker: 50
+  indexMarker: 50,
+  offsetMovement: -100,
+  gauge: 0.1
 };
 
 vires = {
@@ -236,13 +240,13 @@ vires.states.match = {
         case "Replication":
           for (l = 0, len = data.length; l < len; l++) {
             update = data[l];
-            this.cells[update.ID].Stationed = update.Stationed;
+            this.cells[update.ID].update(update.Stationed);
           }
           break;
         case "Conflict":
           this.movements[data.Movement].kill();
           delete this.movements[data.Movement];
-          this.cells[data.Cell.ID].Stationed = data.Cell.Stationed;
+          this.cells[data.Cell.ID].update(data.Cell.Stationed);
           this.cells[data.Cell.ID].switchOwner(this.players[data.Cell.Owner]);
           break;
         case "Collision":
@@ -284,6 +288,9 @@ vires.states.match = {
       mov = ref[k];
       mov.move(time);
     }
+  },
+  clearMarkers: function() {
+    gfx.material.marker.clear();
   },
   killPlayer: function(ID) {
     var cell, l, len, len1, m, move, ref, ref1;
@@ -527,12 +534,27 @@ Random = (function() {
 Player = (function() {
   Player.prototype.ID = 0;
 
-  Player.prototype.color = gfx.color[0];
+  Player.prototype.color = null;
+
+  Player.prototype.colorLight = null;
+
+  Player.prototype.colorDark = null;
 
   function Player(ID1) {
     this.ID = ID1;
+    ({
+      color: gfx.color[0],
+      colorDark: vec4.lerp(vec4.create(), this.color, gfx.black, settings.factorDark),
+      colorLight: vec4.lerp(vec4.create(), this.color, gfx.white, settings.factorLight)
+    });
     return;
   }
+
+  Player.prototype.swapColor = function(color) {
+    vec4.copy(this.color, color);
+    vec4.lerp(this.colorLight, this.color, gfx.white, settings.factorLight);
+    return vec4.lerp(this.colorDark, this.color, gfx.black, settings.factorDark);
+  };
 
   return Player;
 
@@ -547,31 +569,70 @@ Cell = (function() {
 
   Cell.prototype.Radius = 1;
 
+  Cell.prototype.Capacity = 1;
+
   Cell.prototype.Stationed = 0;
 
-  Cell.prototype.primitive = null;
+  Cell.prototype.body = null;
+
+  Cell.prototype.gauge = null;
+
+  Cell.prototype.antigauge = null;
+
+  Cell.prototype.marker = null;
 
   function Cell(Data) {
     this.ID = Data.ID;
     this.Pos = vec2.fromValues(Data.Body.Location.X, Data.Body.Location.Y);
     this.Radius = Data.Body.Radius;
-    this.primitive = new Primitive(this.Pos, gfx.mesh.round, gfx.material.cell);
-    this.primitive.height = settings.indexNeutral;
-    this.primitive.scale = this.Radius;
-    this.primitive.color = gfx.color[0];
+    this.Capacity = Data.Capacity;
+    this.body = new Primitive(this.Pos, gfx.mesh.round, gfx.material.cell);
+    this.gauge = new Primitive(this.Pos, gfx.mesh.round, gfx.material.cell);
+    this.antigauge = new Primitive(this.Pos, gfx.mesh.round, gfx.material.cell);
+    this.marker = new Primitive(this.Pos, gfx.mesh.mark, gfx.material.marker);
+    this.switchHeight(settings.indexNeutral);
+    this.body.color = gfx.color[0];
+    this.gauge.color = gfx.black;
+    this.antigauge.color = gfx.color[0];
+    this.body.scale = this.Radius;
     return;
   }
 
   Cell.prototype.switchOwner = function(owner) {
     this.Owner = owner.ID;
     if (this.Owner === vires.Self) {
-      this.primitive.height = settings.indexSelf;
+      this.switchHeight(settings.indexSelf);
     } else if (this.Owner === 0) {
-      this.primitive.height = settings.indexNeutral;
+      this.switchHeight(settings.indexNeutral);
     } else {
-      this.primitive.height = settings.indexOther;
+      this.switchHeight(settings.indexOther);
     }
-    this.primitive.color = owner.color;
+    this.body.color = owner.color;
+    this.antigauge.color = owner.color;
+  };
+
+  Cell.prototype.switchHeight = function(height) {
+    this.body.height = height;
+    this.gauge.height = height + 1;
+    this.antigauge.height = height + 2;
+    return this.marker.height = height + 5;
+  };
+
+  Cell.prototype.update = function(stationed) {
+    var fullnes, trailing;
+    this.Stationed = stationed;
+    fullnes = stationed / this.Capacity;
+    trailing = Math.max(fullnes - settings.gauge, 0);
+    this.gauge.scale = fullnes;
+    this.antigauge.scale = trailing;
+  };
+
+  Cell.prototype.mark = function() {
+    this.mark.link();
+  };
+
+  Cell.prototype.unmark = function() {
+    this.mark.unlink();
   };
 
   return Cell;
@@ -595,7 +656,7 @@ Movement = (function() {
 
   Movement.prototype.pos = vec2.fromValues(0, 0);
 
-  Movement.prototype.primitive = null;
+  Movement.prototype.body = null;
 
   function Movement(Data) {
     this.ID = Data.ID;
@@ -606,16 +667,16 @@ Movement = (function() {
     this.V = vec2.fromValues(Data.Direction.X, Data.Direction.Y);
     this.birth = vires.time;
     this.pos = vec2.clone(this.O);
-    this.primitive = new Primitive(this.pos, gfx.mesh.round, gfx.material.movement);
+    this.body = new Primitive(this.pos, gfx.mesh.round, gfx.material.movement);
     if (this.Owner === vires.Self) {
-      this.primitive.height = settings.indexSelf - 1;
+      this.body.height = settings.indexSelf + settings.offsetMovement;
     } else if (this.Owner === 0) {
-      this.primitive.height = settings.indexNeutral - 1;
+      this.body.height = settings.indexNeutral + settings.offsetMovement;
     } else {
-      this.primitive.height = settings.indexOther - 1;
+      this.body.height = settings.indexOther + settings.offsetMovement;
     }
-    this.primitive.scale = this.Radius;
-    this.primitive.color = vires.states.match.players[this.Owner].color;
+    this.body.scale = this.Radius;
+    this.body.color = vires.states.match.players[this.Owner].color;
     return;
   }
 
@@ -624,7 +685,7 @@ Movement = (function() {
   };
 
   Movement.prototype.kill = function() {
-    this.primitive.unlink();
+    this.body.unlink();
   };
 
   Movement.prototype.update = function(Data) {
@@ -634,7 +695,7 @@ Movement = (function() {
     vec2.set(this.V, Data.Direction.X, Data.Direction.Y);
     this.birth = vires.time;
     vec2.copy(this.pos, this.O);
-    this.primitive.scale = this.Radius;
+    this.body.scale = this.Radius;
   };
 
   return Movement;
