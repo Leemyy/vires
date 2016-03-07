@@ -547,14 +547,17 @@ class Random
 class Player
 	#Unique identifier sent by the server
 	ID: 0
-	#Color of this Player's cells
+	#Color of this Player's Cells
 	#Never swap these for other colors.
 	# modify these colors instead. (vec4.set)
 	color: null
 	colorLight: null
 	colorDark: null
+
+	alive: true
 	
 	constructor: (@ID)->
+		@alive = true
 		color: gfx.color[0]
 		colorDark: vec4.lerp(vec4.create(), @color, gfx.black, settings.factorDark)
 		colorLight: vec4.lerp(vec4.create(), @color, gfx.white, settings.factorLight)
@@ -564,6 +567,10 @@ class Player
 		vec4.copy(@color, color)
 		vec4.lerp(@colorLight, @color, gfx.white, settings.factorLight)
 		vec4.lerp(@colorDark, @color, gfx.black, settings.factorDark)
+
+	kill: ->
+		vec4.copy(@color, gfx.color[0])
+		@alive = false
 
 
 class Cell 

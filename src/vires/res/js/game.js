@@ -540,8 +540,11 @@ Player = (function() {
 
   Player.prototype.colorDark = null;
 
+  Player.prototype.alive = true;
+
   function Player(ID1) {
     this.ID = ID1;
+    this.alive = true;
     ({
       color: gfx.color[0],
       colorDark: vec4.lerp(vec4.create(), this.color, gfx.black, settings.factorDark),
@@ -554,6 +557,11 @@ Player = (function() {
     vec4.copy(this.color, color);
     vec4.lerp(this.colorLight, this.color, gfx.white, settings.factorLight);
     return vec4.lerp(this.colorDark, this.color, gfx.black, settings.factorDark);
+  };
+
+  Player.prototype.kill = function() {
+    vec4.copy(this.color, gfx.color[0]);
+    return this.alive = false;
   };
 
   return Player;
