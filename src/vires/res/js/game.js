@@ -49,7 +49,7 @@ vires.states.match = {
   cells: null,
   movements: null,
   lookup: null,
-  markers: null,
+  selection: null,
   targetMarker: null,
   target: null,
   random: null,
@@ -70,7 +70,7 @@ vires.states.match = {
     this.cells = new Array(Field.Cells.length);
     this.lookup = new Array(Field.Cells.length);
     this.movements = {};
-    this.markers = {};
+    this.selection = {};
     this.timeStart = vires.time;
     this.targetMarker = new Primitive(vec2.create(), gfx.mesh.target, gfx.material.marker, settings.indexMarker);
     this.targetMarker.unlink();
@@ -132,47 +132,27 @@ vires.states.match = {
     if (input.left && !this.spectating) {
       hover = this.cellAt(input.cursor);
       if ((hover != null)) {
+        if (hover.Owner === vires.Self) {
+          this.selection[hover.ID] = hover;
+        }
         if (!(this.target != null)) {
           this.target = hover;
           this.targetMarker.pos = hover.Pos;
           this.targetMarker.scale = hover.Radius;
-          if (this.targetMarker.index < 0) {
-            this.targetMarker.link();
-          }
-          if ((this.markers[this.target.ID] != null)) {
-            this.markers[this.target.ID].mark.unlink();
-          }
+          this.targetMarker.link();
+          hover.unmark();
         } else if (this.target.ID !== hover.ID) {
           if (this.target.Owner === vires.Self) {
-            if (!(this.markers[this.target.ID] != null)) {
-              this.markers[this.target.ID] = {
-                mark: new Primitive(this.target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker),
-                cell: this.target
-              };
-            } else {
-              this.markers[this.target.ID].mark.link();
-            }
+            this.target.mark();
           }
           this.target = hover;
           this.targetMarker.pos = hover.Pos;
           this.targetMarker.scale = hover.Radius;
-          if (this.targetMarker.index < 0) {
-            this.targetMarker.link();
-          }
-          if ((this.markers[this.target.ID] != null)) {
-            this.markers[this.target.ID].mark.unlink();
-          }
+          hover.unmark();
         }
       } else if ((this.target != null)) {
         if (this.target.Owner === vires.Self) {
-          if (!(this.markers[this.target.ID] != null)) {
-            this.markers[this.target.ID] = {
-              mark: new Primitive(this.target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker),
-              cell: this.target
-            };
-          } else {
-            this.markers[this.target.ID].mark.link();
-          }
+          this.target.mark();
         }
         this.target = null;
         this.targetMarker.unlink();

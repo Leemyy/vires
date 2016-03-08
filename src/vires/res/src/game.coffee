@@ -47,7 +47,7 @@ vires.states.match =
 	#Faster lookup of cells, needs to be sorted by x-coordinates
 	lookup: null
 	#Cell Markers
-	markers: null
+	selection: null
 	targetMarker: null
 	target: null
 	#Synchronized random number generator
@@ -71,7 +71,7 @@ vires.states.match =
 		@cells = new Array(Field.Cells.length)
 		@lookup = new Array(Field.Cells.length)
 		@movements = { }
-		@markers = { }
+		@selection = { }
 
 		@timeStart = vires.time
 		@targetMarker = new Primitive(vec2.create(), gfx.mesh.target, gfx.material.marker, settings.indexMarker)
@@ -150,46 +150,36 @@ vires.states.match =
 			hover = @cellAt(input.cursor)
 			if (hover?)
 				#Cursor is over a Cell
+				if (hover.Owner == vires.Self)
+						#Hovered Cell is owned by the Player
+						#Save it as selected
+						@selection[hover.ID] = hover
 				if !(@target?)
 					#No Cell is currently marked as target
-					#Mark hovered Cell
+					#Mark hovered Cell as target
 					@target = hover
 					@targetMarker.pos = hover.Pos
 					@targetMarker.scale = hover.Radius
-					if (@targetMarker.index < 0)
-						@targetMarker.link()
-					if (@markers[@target.ID]?)
-						@markers[@target.ID].mark.unlink()
+					@targetMarker.link()
+					hover.unmark()
 				else if (@target.ID != hover.ID)
 					#Another Cell is marked as target
 					if (@target.Owner == vires.Self)
+						#That Cell was owned by the Player
 						#Place source marker
-						if !(@markers[@target.ID]?)
-							@markers[@target.ID] = 
-								mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
-								cell: @target
-						else
-							@markers[@target.ID].mark.link()
-					#Assign new target
+						@target.mark()
+					#Mark hovered Cell as target
 					@target = hover
 					@targetMarker.pos = hover.Pos
 					@targetMarker.scale = hover.Radius
-					if (@targetMarker.index < 0)
-						@targetMarker.link()
-					if (@markers[@target.ID]?)
-						@markers[@target.ID].mark.unlink()
+					hover.unmark()
 
 			else if (@target?)
 				#Cursor just left a Cell
 				if (@target.Owner == vires.Self)
 					#That Cell was owned by the Player
 					#Place source marker
-					if !(@markers[@target.ID]?)
-						@markers[@target.ID] = 
-							mark: new Primitive(@target.Pos, gfx.mesh.mark, gfx.material.marker, settings.indexMarker)
-							cell: @target
-					else
-						@markers[@target.ID].mark.link()
+					@target.mark()
 				#Remove target marker
 				@target = null
 				@targetMarker.unlink()
