@@ -595,6 +595,9 @@ class Cell
 		@gauge.color = gfx.black
 		@antigauge.color = gfx.color[0]
 		@body.scale = @Radius
+		@marker.scale = @Radius
+		@gauge.scale = 0
+		@antigauge.scale = 0
 		return
 
 	switchOwner: (owner)->
@@ -619,6 +622,8 @@ class Cell
 		@Stationed = stationed
 		fullnes = stationed /  @Capacity
 		trailing = Math.max( fullnes-settings.gauge, 0)
+		fullnes *= @Radius
+		trailing *= @Radius
 		@gauge.scale = fullnes
 		@antigauge.scale = trailing
 		return

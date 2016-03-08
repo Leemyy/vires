@@ -583,6 +583,9 @@ Cell = (function() {
     this.gauge.color = gfx.black;
     this.antigauge.color = gfx.color[0];
     this.body.scale = this.Radius;
+    this.marker.scale = this.Radius;
+    this.gauge.scale = 0;
+    this.antigauge.scale = 0;
     return;
   }
 
@@ -611,6 +614,8 @@ Cell = (function() {
     this.Stationed = stationed;
     fullnes = stationed / this.Capacity;
     trailing = Math.max(fullnes - settings.gauge, 0);
+    fullnes *= this.Radius;
+    trailing *= this.Radius;
     this.gauge.scale = fullnes;
     this.antigauge.scale = trailing;
   };
