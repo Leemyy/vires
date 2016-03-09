@@ -122,6 +122,8 @@ vires.states.match =
 				@spectating = false
 				firstCell = @cells[start.Cell]
 
+		@clearMarkers()
+
 		settings.minZoom = 800 / @fieldSize[1]
 		settings.maxZoom = 200 / @minCellSize 
 		if (@spectating)
@@ -188,20 +190,20 @@ vires.states.match =
 			hover = @cellAt(input.cursor)
 			if (hover?)
 				#Send Movements
-				#console.log @markers
+				#console.log @selection
 				sources = []
-				for id, marked of @markers
-					if(marked.cell.ID != hover.ID)
-						sources.push(marked.cell)
+				for id, marked of @selection
+					if(marked.ID != hover.ID)
+						sources.push(marked)
 				#console.log "---"
 				#console.log sources
 				#console.log "-@-"
 				#console.log hover
 				#console.log "---"
 				connection.sendMove(hover, sources)
-			#Remove all markers
+			#Remove all selection
 			@target = null
-			@markers = { }
+			@selection = { }
 			gfx.material.marker.clear()
 					
 
@@ -548,9 +550,9 @@ class Player
 	
 	constructor: (@ID)->
 		@alive = true
-		color: gfx.color[0]
-		colorDark: vec4.lerp(vec4.create(), @color, gfx.black, settings.factorDark)
-		colorLight: vec4.lerp(vec4.create(), @color, gfx.white, settings.factorLight)
+		@color= gfx.color[0]
+		@colorDark= vec4.lerp(vec4.create(), @color, gfx.black, settings.factorDark)
+		@colorLight= vec4.lerp(vec4.create(), @color, gfx.white, settings.factorLight)
 		return
 
 	swapColor: (color)->
@@ -629,11 +631,11 @@ class Cell
 		return
 
 	mark: ->
-		@mark.link()
+		@marker.link()
 		return
 
 	unmark: ->
-		@mark.unlink()
+		@marker.unlink()
 		return
 
 
