@@ -44,6 +44,10 @@ var (
 	roomQuits = make(chan *room.Room, 32)
 )
 
+func httpsRedirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "https://vires.one"+r.RequestURI, http.StatusMovedPermanently)
+}
+
 // roomID gets the id of the current room from the url of an http request.
 func roomID(r *http.Request) string {
 	return mux.Vars(r)["roomid"]
@@ -91,14 +95,15 @@ func quitRooms() {
 }
 
 func startServer() {
-	var err error
 	if cfg.UseTLS {
-		err = http.ListenAndServeTLS(":80", cfg.CertPath, cfg.PrivateKeyPath, nil)
-	} else {
-		err = http.ListenAndServe(":80", nil)
+		go func() {
+			if err := http.ListenAndServeTLS(":443", cfg.CertPath, cfg.PrivateKeyPath, nil); err != nil {
+				log.Fatalf("Cannot start HTTPS webserver: %s\n", err)
+			}
+		}()
 	}
-	if err != nil {
-		log.Fatalf("Cannot start webserver: %s\n", err)
+	if err := http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect)); err != nil {
+		log.Fatalf("Cannot start HTTP webserver: %s\n", err)
 	}
 }
 
@@ -110,11 +115,12 @@ func main() {
 	}
 	cfg = cfgT.(*Config)
 	r := mux.NewRouter()
+	r.StrictSlash(true)
 	// Rooms
-	r.PathPrefix("/res").Handler(http.StripPrefix("/res", http.FileServer(http.Dir("./res/"))))
+	r.PathPrefix("/res").Handler(http.StripPrefix("/res", http.FileServer(http.Dir("res")))).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s", roomIDPattern), onRoom).Methods("GET")
-	r.HandleFunc(fmt.Sprintf("/%s/c", roomIDPattern), connectToRoom)
-	r.HandleFunc(fmt.Sprintf("/%s/s", roomIDPattern), startMatch)
+	r.HandleFunc(fmt.Sprintf("/%s/c", roomIDPattern), connectToRoom).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/%s/s", roomIDPattern), startMatch).Methods("GET")
 	go quitRooms()
 	http.Handle("/", r)
 	fmt.Println("Webserver starting.")
