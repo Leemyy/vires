@@ -9,7 +9,28 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/mhuisi/fcfg/jsoncfg"
 	"github.com/mhuisi/vires/src/room"
+)
+
+type Config struct {
+	UseTLS         bool
+	PrivateKeyPath string
+	CertPath       string
+}
+
+func (c *Config) Copy() interface{} {
+	clone := *c
+	return &clone
+}
+
+var (
+	defaultCfg = &Config{
+		false,
+		"",
+		"",
+	}
+	cfg *Config
 )
 
 const (
@@ -70,6 +91,12 @@ func quitRooms() {
 }
 
 func main() {
+	cfgLoader := jsoncfg.New("cfg.json", defaultCfg)
+	cfgT, err := cfgLoader.Load()
+	if err != nil {
+		log.Fatalf("Cannot load config file: %s\n", err)
+	}
+	cfg = cfgT.(*Config)
 	r := mux.NewRouter()
 	// Rooms
 	r.PathPrefix("/res").Handler(http.StripPrefix("/res", http.FileServer(http.Dir("./res/"))))
@@ -79,8 +106,7 @@ func main() {
 	go quitRooms()
 	http.Handle("/", r)
 	fmt.Println("Webserver starting.")
-	err := http.ListenAndServe(":80", nil)
-	if err != nil {
+	if err := http.ListenAndServe(":80", nil); err != nil {
 		log.Fatalf("Cannot start webserver: %s\n", err)
 	}
 }
