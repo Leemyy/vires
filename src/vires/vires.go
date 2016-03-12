@@ -90,6 +90,18 @@ func quitRooms() {
 	}
 }
 
+func startServer() {
+	var err error
+	if cfg.UseTLS {
+		err = http.ListenAndServeTLS(":80", cfg.CertPath, cfg.PrivateKeyPath, nil)
+	} else {
+		err = http.ListenAndServe(":80", nil)
+	}
+	if err != nil {
+		log.Fatalf("Cannot start webserver: %s\n", err)
+	}
+}
+
 func main() {
 	cfgLoader := jsoncfg.New("cfg.json", defaultCfg)
 	cfgT, err := cfgLoader.Load()
@@ -106,7 +118,5 @@ func main() {
 	go quitRooms()
 	http.Handle("/", r)
 	fmt.Println("Webserver starting.")
-	if err := http.ListenAndServe(":80", nil); err != nil {
-		log.Fatalf("Cannot start webserver: %s\n", err)
-	}
+	startServer()
 }
