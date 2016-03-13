@@ -1,6 +1,6 @@
 connection=
 	version: "0.1"
-	url: "ws://" + window.location.host + "/#{vires.room}/c"
+	url: "wss://" + window.location.host + "/#{vires.room}/c"
 	messages: new Array(0)
 	socket: null
 	debug: new Array(0)
