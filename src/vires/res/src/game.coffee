@@ -623,6 +623,7 @@ class Cell
 	update: (stationed)->
 		@Stationed = stationed
 		fullnes = stationed /  @Capacity
+		fullnes = Math.sqrt(fullnes)
 		trailing = Math.max( fullnes-settings.gauge, 0)
 		fullnes *= @Radius
 		trailing *= @Radius
