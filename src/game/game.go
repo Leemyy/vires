@@ -35,27 +35,27 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 	for _, id := range players {
 		ps[id] = ent.NewPlayer(id)
 	}
-	field := mapgen.GenerateMap(len(players))
+	field := mapgen.Generate(len(players))
 	cells := make(map[ent.ID]*ent.Cell)
-	for i, c := range field.Cells {
-		id := ent.ID(i)
-		cells[id] = ent.NewCell(id, c.Radius, c.Location)
-	}
-	i := 0
-	for _, p := range ps {
-		cells[ent.ID(field.StartCellIdxs[i])].SetOwner(p)
-		i++
+	id := ent.ID(0)
+	startCell := 0
+	for c := range field.Cells {
+		cell := ent.NewCell(id, c.Radius, c.Location)
+		if _, ok := field.StartCells[c]; ok {
+			cell.SetOwner(ps[players[startCell]])
+			startCell++
+		}
+		cells[id] = cell
+		id++
 	}
 	f := &Field{
-		players: ps,
-		// change to cells from mapgen algorithm later!
+		players:     ps,
 		cells:       cells,
 		movements:   map[ent.ID]*ent.Movement{},
 		movementID:  0,
 		ops:         timed.New(),
 		transmitter: t,
-		// hardcoded for now
-		size: vec.V{field.Size.X, field.Size.Y},
+		size:        vec.V{field.Size.X, field.Size.Y},
 	}
 	// handle this here instead of in the caller to avoid the caller trying to read the cells
 	// while we're running our game loop

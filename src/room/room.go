@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/websocket"
+	"github.com/mhuisi/logg"
 	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/game"
 	"github.com/mhuisi/vires/src/transm"
@@ -66,6 +67,7 @@ func (r *Room) userWriter(c userConn) {
 	for tx := range c.send {
 		err := c.conn.WriteJSON(tx)
 		if err != nil {
+			logg.Info("Error while writing to conn of user %d in room %s: %s", c.id, r.id, err)
 			r.kill <- c
 			return
 		}
@@ -84,6 +86,7 @@ func (r *Room) userReader(c userConn) {
 		p := transm.MakeRX(c.id)
 		err := c.conn.ReadJSON(&p)
 		if err != nil {
+			logg.Info("Error while reading from conn of user %d in room %s: %s", c.id, r.id, err)
 			r.kill <- c
 			return
 		}
@@ -94,7 +97,8 @@ func (r *Room) userReader(c userConn) {
 // killUser disconnects a user completly,
 // cleaning up all of his resources.
 func (r *Room) killUser(c userConn) {
-	if _, ok := r.users[c.conn]; !ok {
+	u, ok := r.users[c.conn]
+	if !ok {
 		return
 	}
 	delete(r.users, c.conn)
@@ -108,6 +112,7 @@ func (r *Room) killUser(c userConn) {
 	if len(r.users) == 0 {
 		close(r.quit)
 	}
+	logg.Info("Killing player %d in room %s.", u.id, r.id)
 }
 
 // send sends a message to the specified user.
@@ -118,12 +123,14 @@ func (r *Room) send(c userConn, tx transm.TX) {
 	select {
 	case c.send <- tx:
 	default:
+		logg.Info("User %d in room %s too slow, killing user.", c.id, r.id)
 		r.killUser(c)
 	}
 }
 
 // broadcast sends a message to everyone in the room.
 func (r *Room) broadcast(tx transm.TX) {
+	logg.Debug("Sending packet '%s' in room %s: %+v", tx.Type, r.id, tx.Data)
 	for _, userConn := range r.users {
 		r.send(userConn, tx)
 	}
@@ -136,7 +143,9 @@ func (r *Room) handleRX(p transm.RX) {
 		return
 	}
 	unmarshal := func(v interface{}) error {
-		return json.Unmarshal(p.Data, v)
+		err := json.Unmarshal(p.Data, v)
+		logg.Debug("Received packet '%s' in room %s: %+v", p.Type, r.id, v)
+		return err
 	}
 	switch p.Type {
 	case "Movement":
@@ -174,6 +183,7 @@ func (r *Room) handler() {
 			go r.userWriter(uconn)
 			r.uid++
 			r.users[conn] = uconn
+			logg.Info("Client %s joined room %s and was assigned ID %d.", conn.RemoteAddr(), r.id, id)
 			r.send(uconn, transm.MakeOwnID(id))
 			r.broadcast(transm.MakeUserJoined(id))
 		case u := <-kill:
@@ -181,8 +191,9 @@ func (r *Room) handler() {
 		case m := <-read:
 			r.handleRX(m)
 		case p := <-gameMsgs.Packets():
-			switch p.Type {
-			case "Winner":
+			switch data := p.Data.(type) {
+			case transm.Winner:
+				logg.Info("Player %d won the match in room %s!", data, r.id)
 				r.field.Close()
 				// set nil to block future movements
 				r.field = nil
@@ -204,6 +215,7 @@ func (r *Room) handler() {
 			r.gameMsgs.Open()
 			r.field = game.NewField(uids, r.gameMsgs)
 		case <-quit:
+			logg.Info("Closing room %s.", r.id)
 			r.notifyQuit <- r
 			// we assume that when a quit msg is sent, proper cleanup has already occured
 			return

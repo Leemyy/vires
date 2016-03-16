@@ -4,19 +4,21 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/mhuisi/fcfg/jsoncfg"
+	"github.com/mhuisi/logg"
 	"github.com/mhuisi/vires/src/room"
 )
 
 type Config struct {
+	IP             string
 	UseTLS         bool
 	PrivateKeyPath string
 	CertPath       string
+	Debug          bool
 }
 
 func (c *Config) Copy() interface{} {
@@ -26,9 +28,7 @@ func (c *Config) Copy() interface{} {
 
 var (
 	defaultCfg = &Config{
-		false,
-		"",
-		"",
+		IP: "localhost",
 	}
 	cfg *Config
 )
@@ -45,10 +45,9 @@ var (
 )
 
 func httpsRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "https://vires.one"+r.RequestURI, http.StatusMovedPermanently)
+	http.Redirect(w, r, "https://"+cfg.IP+r.RequestURI, http.StatusMovedPermanently)
 }
 
-// roomID gets the id of the current room from the url of an http request.
 func roomID(r *http.Request) string {
 	return mux.Vars(r)["roomid"]
 }
@@ -85,6 +84,7 @@ func startMatch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Match already started.", 400)
 		return
 	}
+	logg.Info("Started match in room %s.", id)
 	fmt.Fprintf(w, "Match started.")
 }
 
@@ -96,14 +96,20 @@ func quitRooms() {
 
 func startServer() {
 	if cfg.UseTLS {
+		logg.Info("Starting HTTPS webservers.")
 		go func() {
 			if err := http.ListenAndServeTLS(":443", cfg.CertPath, cfg.PrivateKeyPath, nil); err != nil {
-				log.Fatalf("Cannot start HTTPS webserver: %s\n", err)
+				logg.Fatal("Cannot start HTTPS webserver: %s", err)
 			}
 		}()
-	}
-	if err := http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect)); err != nil {
-		log.Fatalf("Cannot start HTTP webserver: %s\n", err)
+		if err := http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect)); err != nil {
+			logg.Fatal("Cannot start HTTP webserver (https redirect): %s", err)
+		}
+	} else {
+		logg.Info("Starting HTTP webserver.")
+		if err := http.ListenAndServe(":80", nil); err != nil {
+			logg.Fatal("Cannot start HTTP webserver: %s", err)
+		}
 	}
 }
 
@@ -111,9 +117,11 @@ func main() {
 	cfgLoader := jsoncfg.New("cfg.json", defaultCfg)
 	cfgT, err := cfgLoader.Load()
 	if err != nil {
-		log.Fatalf("Cannot load config file: %s\n", err)
+		logg.Fatal("Cannot load config file: %s", err)
 	}
 	cfg = cfgT.(*Config)
+	logg.Info("Configuration loaded.")
+	logg.UseDebug = cfg.Debug
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	// Rooms
@@ -123,6 +131,5 @@ func main() {
 	r.HandleFunc(fmt.Sprintf("/%s/s", roomIDPattern), startMatch).Methods("GET")
 	go quitRooms()
 	http.Handle("/", r)
-	fmt.Println("Webserver starting.")
 	startServer()
 }

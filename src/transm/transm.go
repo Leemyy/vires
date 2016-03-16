@@ -194,22 +194,22 @@ func (t *Transmitter) Move(m *ent.Movement) {
 
 // Collide transmits a collision packet.
 func (t *Transmitter) Collide(a, b *ent.Movement) {
-	t.sendTX("Collision", &Collision{newMov(a), newMov(b)})
+	t.sendTX("Collision", Collision{newMov(a), newMov(b)})
 }
 
 // Conflict transmits a conflict packet.
 func (t *Transmitter) Conflict(m *ent.Movement, c *ent.Cell) {
-	t.sendTX("Conflict", &Conflict{m.ID(), makeConflCell(c)})
+	t.sendTX("Conflict", Conflict{m.ID(), makeConflCell(c)})
 }
 
 // Eliminate transmits a packet meaning that a player was eliminated.
 func (t *Transmitter) Eliminate(p ent.ID) {
-	t.sendTX("EliminatedPlayer", &p)
+	t.sendTX("EliminatedPlayer", EliminatedPlayer(p))
 }
 
 // Win transmits a packet meaning that a player won the game.
 func (t *Transmitter) Win(p ent.ID) {
-	t.sendTX("Winner", &p)
+	t.sendTX("Winner", Winner(p))
 }
 
 // Replicate transmits a packet containing updated
@@ -221,7 +221,7 @@ func (t *Transmitter) Replicate(field map[ent.ID]*ent.Cell) {
 		cvs[i] = makeCellVires(c)
 		i++
 	}
-	t.sendTX("Replication", cvs)
+	t.sendTX("Replication", Replication(cvs))
 }
 
 // GenerateField transmits a packet containing the entire
@@ -237,7 +237,7 @@ func (t *Transmitter) GenerateField(fieldCells map[ent.ID]*ent.Cell, size vec.V)
 		}
 		i++
 	}
-	t.sendTX("Field", &Field{cells, startCells, size})
+	t.sendTX("Field", Field{cells, startCells, size})
 }
 
 // UserJoined is transmitted by the server

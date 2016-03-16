@@ -1,5 +1,7 @@
 {
+	"IP": "localhost",
 	"UseTLS": false,
 	"PrivateKeyPath": "",
-	"CertPath": ""
+	"CertPath": "",
+	"Debug": false
 }
