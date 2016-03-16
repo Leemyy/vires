@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	gap                = 10
-	minRadius          = 40
-	maxRadius          = 120
+	gap                = 80
+	minRadius          = 100
+	maxRadius          = 200
 	minStartCellRadius = 0.8 * maxRadius
 	// radius needed to avoid overlapping with
 	// another cell and its gap
@@ -20,6 +20,10 @@ const (
 	// space needed to avoid overlapping with
 	// another cell and its gap
 	safeSpace = math.Pi * safeRadius * safeRadius
+	// radius for area considered close to cell
+	nearRadius = 3 * maxRadius
+	// amount of cells that should be near start cell
+	cellsNearStartCell = 4
 	// no hard limits, just rough estimates
 	minCellsPerPlayer = 10
 	maxCellsPerPlayer = 15
@@ -100,11 +104,52 @@ func (f *Field) generateNeutralCells(nplayers, cellsPerPlayer int) {
 	}
 }
 
+func randPointInCircle(c ent.Circle) vec.V {
+	angle := rand.Float64() * 2 * math.Pi
+	r := c.Radius * math.Sqrt(rand.Float64())
+	l := c.Location
+	x := l.X + r*math.Cos(angle)
+	y := l.Y + r*math.Sin(angle)
+	return vec.V{x, y}
+}
+
+func (f *Field) improveFairness() {
+	cells := f.Cells
+	for sc := range f.StartCells {
+		n := 0
+		// find the amount of cells that overlap
+		// with the nearRadius circle
+		for c := range cells {
+			if sc != c && vec.Dist(sc.Location, c.Location) < nearRadius+c.Radius {
+				n++
+			}
+		}
+		closeCircle := ent.Circle{
+			Location: sc.Location,
+			Radius:   nearRadius,
+		}
+		// generate cells until we have enough cells
+		for n < cellsNearStartCell {
+			c := &ent.Circle{
+				Location: randPointInCircle(closeCircle),
+				Radius:   randRangeF(minRadius, maxRadius),
+			}
+			// generating circles outside of the field within
+			// the close circle is possible because we
+			// adapt the size of the field later
+			if !f.overlaps(c) {
+				cells[c] = struct{}{}
+				n++
+			}
+		}
+	}
+}
+
 func (f *Field) adaptSize() {
-	minx := f.Size.X
-	maxx := 0.0
-	miny := f.Size.Y
-	maxy := 0.0
+	minx := math.MaxFloat64
+	maxx := -math.MaxFloat64
+	miny := math.MaxFloat64
+	maxy := -math.MaxFloat64
 	for c := range f.Cells {
 		l := c.Location
 		x := l.X
@@ -128,6 +173,7 @@ func Generate(nplayers int) Field {
 	f := Field{map[*ent.Circle]struct{}{}, map[*ent.Circle]struct{}{}, size}
 	f.generateStartCells(nplayers)
 	f.generateNeutralCells(nplayers, cellsPerPlayer)
+	f.improveFairness()
 	f.adaptSize()
 	return f
 }
