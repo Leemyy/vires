@@ -104,7 +104,7 @@ vires.states.match = {
     for (i = m = 0, ref1 = Field.StartCells.length; 0 <= ref1 ? m < ref1 : m > ref1; i = 0 <= ref1 ? ++m : --m) {
       start = Field.StartCells[i];
       owner = new Player(start.Owner);
-      owner.color = palette[i % palette.length];
+      owner.color = vec4.clone(palette[i % palette.length]);
       this.players[start.Owner] = owner;
       this.cells[start.Cell].switchOwner(owner);
       if (owner.ID === vires.Self) {
@@ -210,7 +210,7 @@ vires.states.match = {
     vec2.min(gfx.camera.pos, gfx.camera.pos, this.fieldSize);
   },
   digestTraffic: function() {
-    var A, B, Msg, data, l, len, update;
+    var A, B, Msg, cell, data, id, l, len, ref, update;
     Msg = connection.messages.pop();
     while ((Msg != null)) {
       data = Msg.Data;
@@ -249,6 +249,12 @@ vires.states.match = {
         case "EliminatedPlayer":
           if (vires.Self === data) {
             this.spectating = true;
+            ref = this.selection;
+            for (id in ref) {
+              cell = ref[id];
+              cell.unmark();
+            }
+            this.targetMarker.unlink();
           }
           this.killPlayer(data);
           break;
