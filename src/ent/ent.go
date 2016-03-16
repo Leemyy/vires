@@ -219,6 +219,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 		id:         mvid,
 		owner:      src.owner,
 		moving:     moving,
+		source:     src,
 		target:     tgt,
 		body:       Circle{start, r},
 		lastTime:   time.Now(),
@@ -235,6 +236,7 @@ type Movement struct {
 	id       ID
 	owner    *Player
 	moving   Vires
+	source   *Cell
 	target   *Cell
 	body     Circle
 	lastTime time.Time
@@ -259,6 +261,13 @@ func (m *Movement) Owner() Player {
 // in this movement.
 func (m *Movement) Moving() Vires {
 	return m.moving
+}
+
+// Source gets the cell from which this
+// movement moves.
+// The return value should not be mutated.
+func (m *Movement) Source() *Cell {
+	return m.source
 }
 
 // Target gets the cell towards which this
