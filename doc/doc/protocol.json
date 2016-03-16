@@ -151,7 +151,8 @@
                 "X": 2,
                 "Y": 3
         },
-        "NeutralReplication": 0.5
+        "NeutralReplication": 0.5,
+        "ReplicationInterval": 1.5
 }
 "UserJoined (sent by the server when a user joins the room):"
 1
