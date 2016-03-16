@@ -8,29 +8,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/mhuisi/fcfg/jsoncfg"
 	"github.com/mhuisi/logg"
+	"github.com/mhuisi/vires/src/cfg"
 	"github.com/mhuisi/vires/src/room"
-)
-
-type Config struct {
-	IP             string
-	UseTLS         bool
-	PrivateKeyPath string
-	CertPath       string
-	Debug          bool
-}
-
-func (c *Config) Copy() interface{} {
-	clone := *c
-	return &clone
-}
-
-var (
-	defaultCfg = &Config{
-		IP: "localhost",
-	}
-	cfg *Config
 )
 
 const (
@@ -45,7 +25,7 @@ var (
 )
 
 func httpsRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "https://"+cfg.IP+r.RequestURI, http.StatusMovedPermanently)
+	http.Redirect(w, r, "https://"+cfg.General.IP+r.RequestURI, http.StatusMovedPermanently)
 }
 
 func roomID(r *http.Request) string {
@@ -95,10 +75,10 @@ func quitRooms() {
 }
 
 func startServer() {
-	if cfg.UseTLS {
+	if cfg.General.UseTLS {
 		logg.Info("Starting HTTPS webservers.")
 		go func() {
-			if err := http.ListenAndServeTLS(":443", cfg.CertPath, cfg.PrivateKeyPath, nil); err != nil {
+			if err := http.ListenAndServeTLS(":443", cfg.General.CertPath, cfg.General.PrivateKeyPath, nil); err != nil {
 				logg.Fatal("Cannot start HTTPS webserver: %s", err)
 			}
 		}()
@@ -114,14 +94,7 @@ func startServer() {
 }
 
 func main() {
-	cfgLoader := jsoncfg.New("cfg.json", defaultCfg)
-	cfgT, err := cfgLoader.Load()
-	if err != nil {
-		logg.Fatal("Cannot load config file: %s", err)
-	}
-	cfg = cfgT.(*Config)
-	logg.Info("Configuration loaded.")
-	logg.UseDebug = cfg.Debug
+	logg.UseDebug = cfg.General.DebugLogging
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	// Rooms

@@ -5,28 +5,20 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/mhuisi/vires/src/cfg"
 	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/vec"
 )
 
-const (
-	gap                = 80
-	minRadius          = 80
-	maxRadius          = 160
-	minStartCellRadius = 0.8 * maxRadius
+var (
 	// radius needed to avoid overlapping with
 	// another cell and its gap
-	safeRadius = 3*maxRadius + gap
+	safeRadius = 3*cfg.Mapgen.MaxRadius + cfg.Mapgen.Gap
 	// space needed to avoid overlapping with
 	// another cell and its gap
 	safeSpace = math.Pi * safeRadius * safeRadius
 	// radius for area considered close to cell
-	nearRadius = 3 * maxRadius
-	// amount of cells that should be near start cell
-	cellsNearStartCell = 4
-	// no hard limits, just rough estimates
-	minCellsPerPlayer = 10
-	maxCellsPerPlayer = 15
+	nearRadius = 3 * cfg.Mapgen.MaxRadius
 )
 
 func init() {
@@ -62,7 +54,7 @@ func (f *Field) randLoc() vec.V {
 }
 
 func tooClose(c1, c2 *ent.Circle) bool {
-	return vec.Dist(c1.Location, c2.Location) < c1.Radius+c2.Radius+gap
+	return vec.Dist(c1.Location, c2.Location) < c1.Radius+c2.Radius+cfg.Mapgen.Gap
 }
 
 func (f *Field) overlaps(cell *ent.Circle) bool {
@@ -77,7 +69,7 @@ func (f *Field) overlaps(cell *ent.Circle) bool {
 func (f *Field) generateStartCells(nplayers int) {
 	cells := f.Cells
 	startCells := f.StartCells
-	startCellRadius := randRangeF(minStartCellRadius, maxRadius)
+	startCellRadius := randRangeF(cfg.Mapgen.MinStartCellRadius, cfg.Mapgen.MaxRadius)
 	for len(cells) < nplayers {
 		c := &ent.Circle{
 			Location: f.randLoc(),
@@ -96,7 +88,7 @@ func (f *Field) generateNeutralCells(nplayers, cellsPerPlayer int) {
 	for i := 0; i < neutralCells; i++ {
 		c := &ent.Circle{
 			Location: f.randLoc(),
-			Radius:   randRangeF(minRadius, maxRadius),
+			Radius:   randRangeF(cfg.Mapgen.MinRadius, cfg.Mapgen.MaxRadius),
 		}
 		if !f.overlaps(c) {
 			cells[c] = struct{}{}
@@ -129,10 +121,10 @@ func (f *Field) improveFairness() {
 			Radius:   nearRadius,
 		}
 		// generate cells until we have enough cells
-		for n < cellsNearStartCell {
+		for n < cfg.Mapgen.CellsNearStartCell {
 			c := &ent.Circle{
 				Location: randPointInCircle(closeCircle),
-				Radius:   randRangeF(minRadius, maxRadius),
+				Radius:   randRangeF(cfg.Mapgen.MinRadius, cfg.Mapgen.MaxRadius),
 			}
 			// generating circles outside of the field within
 			// the close circle is possible because we
@@ -168,7 +160,7 @@ func (f *Field) adaptSize() {
 }
 
 func Generate(nplayers int) Field {
-	cellsPerPlayer := randRangeI(minCellsPerPlayer, maxCellsPerPlayer)
+	cellsPerPlayer := randRangeI(cfg.Mapgen.MinCellsPerPlayer, cfg.Mapgen.MaxCellsPerPlayer)
 	size := fieldSize(cellsPerPlayer)
 	f := Field{map[*ent.Circle]struct{}{}, map[*ent.Circle]struct{}{}, size}
 	f.generateStartCells(nplayers)

@@ -5,15 +5,12 @@ package game
 import (
 	"time"
 
+	"github.com/mhuisi/vires/src/cfg"
 	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/mapgen"
 	"github.com/mhuisi/vires/src/timed"
 	"github.com/mhuisi/vires/src/transm"
 	"github.com/mhuisi/vires/src/vec"
-)
-
-const (
-	replicationInterval = 1.5 * time.Second
 )
 
 // Field represents a game instance of a field.
@@ -66,7 +63,9 @@ func NewField(players []ent.ID, t *transm.Transmitter) *Field {
 
 func (f *Field) startReplication() {
 	var replicate func()
-	start := func() { f.ops.Start(time.Now().Add(replicationInterval), replicate) }
+	start := func() {
+		f.ops.Start(time.Now().Add(time.Duration(cfg.Gameplay.ReplicationInterval*float64(time.Second))), replicate)
+	}
 	replicate = func() {
 		for _, c := range f.cells {
 			c.Replicate()

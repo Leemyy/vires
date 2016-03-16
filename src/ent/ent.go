@@ -6,11 +6,8 @@ import (
 	"math"
 	"time"
 
+	"github.com/mhuisi/vires/src/cfg"
 	"github.com/mhuisi/vires/src/vec"
-)
-
-const (
-	startStationed = 0.3
 )
 
 type (
@@ -79,8 +76,8 @@ func NewCell(id ID, force float64, loc vec.V) *Cell {
 		force:       force,
 		capacity:    ca,
 		replication: neutralReplication(force),
-		stationed:   Vires(startStationed * float64(ca)),
-		body:        Circle{loc, cellRadius(force)},
+		stationed:   Vires(cfg.Gameplay.StartStationed * float64(ca)),
+		body:        Circle{loc, force},
 	}
 }
 
@@ -130,21 +127,16 @@ func (c *Cell) Body() Circle {
 
 func capacity(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(math.Pi * sq(force) / 200)
+	return Vires(cfg.Gameplay.Capacity * math.Pi * sq(force))
 }
 
 func replication(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(force / 5)
+	return Vires(cfg.Gameplay.Replication * force)
 }
 
 func neutralReplication(force float64) Vires {
-	return replication(force) / 2
-}
-
-func cellRadius(force float64) float64 {
-	// placeholder, needs testing
-	return force
+	return Vires(cfg.Gameplay.NeutralReplication * float64(replication(force)))
 }
 
 // Merge adds the specified amount
@@ -206,14 +198,14 @@ func (c *Cell) Neutralize() {
 }
 
 func radius(n Vires) float64 {
-	return 10 * math.Sqrt(float64(n)/math.Pi)
+	return cfg.Gameplay.MovementRadius * math.Sqrt(float64(n)/math.Pi)
 }
 
 func speed(radius float64) float64 {
 	if radius == 0 {
 		return 0
 	}
-	return 3000 / radius
+	return cfg.Gameplay.MovementSpeed / radius
 }
 
 // Move creates a movement which describes
