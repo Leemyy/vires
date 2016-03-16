@@ -2,9 +2,8 @@
 {
         "Type": "Movement",
         "Version": "0.1",
-        "Data": "some payload, may be any json type, see below"
+        "Data": "c29tZSBwYXlsb2FkLCBtYXkgYmUgYW55IGpzb24gdHlwZSwgc2VlIGJlbG93"
 }
-
 "TX (packets sent by the server):"
 {
         "Type": "Collision",
@@ -12,11 +11,12 @@
         "Data": "some payload, may be any json type, see below"
 }
 
-"Payloads (wrapped in RX):"
-
+"Payloads:"
 "Movement (sent by the server when a movement was started):"
 {
         "ID": 1,
+        "Source": 1,
+        "Target": 1,
         "Owner": 1,
         "Moving": 10,
         "Body": {
@@ -26,17 +26,13 @@
                 },
                 "Radius": 5
         },
-        "Direction": {
-                "X": 2,
-                "Y": 3
-        }
+        "Speed": 15
 }
 "Collision (sent by the server when a collision occurs):"
 {
         "A": {
                 "ID": 1,
-                "Owner": 1,
-                "Moving": 10,
+                "Moving": 100,
                 "Body": {
                         "Location": {
                                 "X": 2,
@@ -44,15 +40,11 @@
                         },
                         "Radius": 5
                 },
-                "Direction": {
-                        "X": 2,
-                        "Y": 3
-                }
+                "Speed": 20
         },
         "B": {
                 "ID": 1,
-                "Owner": 1,
-                "Moving": 10,
+                "Moving": 100,
                 "Body": {
                         "Location": {
                                 "X": 2,
@@ -60,10 +52,7 @@
                         },
                         "Radius": 5
                 },
-                "Direction": {
-                        "X": 2,
-                        "Y": 3
-                }
+                "Speed": 20
         }
 }
 "Conflict (sent by the server when a conflict occurs):"
@@ -79,21 +68,6 @@
 1
 "Winner (sent by the server when a player wins the game):"
 1
-"Replication (sent by the server when all cells replicate):"
-[
-        {
-                "ID": 1,
-                "Stationed": 20
-        },
-        {
-                "ID": 1,
-                "Stationed": 20
-        },
-        {
-                "ID": 1,
-                "Stationed": 20
-        }
-]
 "Field (sent by the server when the field is generated):"
 {
         "Cells": [
@@ -106,7 +80,9 @@
                                 },
                                 "Radius": 5
                         },
-                        "Capacity": 10
+                        "Stationed": 4,
+                        "Capacity": 10,
+                        "Replication": 20
                 },
                 {
                         "ID": 1,
@@ -117,7 +93,9 @@
                                 },
                                 "Radius": 5
                         },
-                        "Capacity": 10
+                        "Stationed": 4,
+                        "Capacity": 10,
+                        "Replication": 20
                 },
                 {
                         "ID": 1,
@@ -128,7 +106,9 @@
                                 },
                                 "Radius": 5
                         },
-                        "Capacity": 10
+                        "Stationed": 4,
+                        "Capacity": 10,
+                        "Replication": 20
                 },
                 {
                         "ID": 1,
@@ -139,7 +119,9 @@
                                 },
                                 "Radius": 5
                         },
-                        "Capacity": 10
+                        "Stationed": 4,
+                        "Capacity": 10,
+                        "Replication": 20
                 },
                 {
                         "ID": 1,
@@ -150,7 +132,9 @@
                                 },
                                 "Radius": 5
                         },
-                        "Capacity": 10
+                        "Stationed": 4,
+                        "Capacity": 10,
+                        "Replication": 20
                 }
         ],
         "StartCells": [
@@ -166,7 +150,8 @@
         "Size": {
                 "X": 2,
                 "Y": 3
-        }
+        },
+        "NeutralReplication": 0.5
 }
 "UserJoined (sent by the server when a user joins the room):"
 1

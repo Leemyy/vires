@@ -2,7 +2,7 @@
 // for the data transmission between client
 // and server as well as for the communication
 // between the game and the server.
-package transm
+package main
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/mhuisi/vires/src/cfg"
 	"github.com/mhuisi/vires/src/ent"
 	"github.com/mhuisi/vires/src/vec"
 )
@@ -53,21 +54,34 @@ func newTX(typ string, data interface{}) TX {
 // Movement represents a movement
 // transmitted to the client.
 type Movement struct {
-	ID        ent.ID
-	Owner     ent.ID
-	Moving    ent.Vires
-	Body      ent.Circle
-	Direction vec.V
+	ID     ent.ID
+	Source ent.ID
+	Target ent.ID
+	Owner  ent.ID
+	Moving ent.Vires
+	Body   ent.Circle
+	Speed  float64
 }
 
 func newMov(m *ent.Movement) *Movement {
-	return &Movement{m.ID(), m.Owner().ID(), m.Moving(), m.Body(), m.Direction()}
+	return &Movement{m.ID(), m.Source().ID(), m.Target().ID(), m.Owner().ID(), m.Moving(), m.Body(), vec.Abs(m.Direction())}
+}
+
+type CollisionMovement struct {
+	ID     ent.ID
+	Moving ent.Vires
+	Body   ent.Circle
+	Speed  float64
+}
+
+func makeCollMov(m *ent.Movement) *CollisionMovement {
+	return &CollisionMovement{m.ID(), m.Moving(), m.Body(), vec.Abs(m.Direction())}
 }
 
 // Collision is transmitted by the server
 // when a collision occurs.
 type Collision struct {
-	A, B *Movement
+	A, B *CollisionMovement
 }
 
 // ConflictCell represents a cell
@@ -98,32 +112,18 @@ type EliminatedPlayer ent.ID
 // If Winner is 0, nobody won the match.
 type Winner ent.ID
 
-// CellVires represents the amount of vires
-// of a cell.
-type CellVires struct {
-	ID        ent.ID
-	Stationed ent.Vires
-}
-
-func makeCellVires(c *ent.Cell) CellVires {
-	return CellVires{c.ID(), c.Stationed()}
-}
-
-// Replication is transmitted by the server
-// when cells replicate (i.e. gain vires through
-// a growth cycle)
-type Replication []CellVires
-
 // GeneratedCell represents a cell that was
 // generated as part of map generation.
 type GeneratedCell struct {
-	ID       ent.ID
-	Body     ent.Circle
-	Capacity ent.Vires
+	ID          ent.ID
+	Body        ent.Circle
+	Stationed   ent.Vires
+	Capacity    ent.Vires
+	Replication ent.Vires
 }
 
 func makeGenCell(c *ent.Cell) GeneratedCell {
-	return GeneratedCell{c.ID(), c.Body(), c.Capacity()}
+	return GeneratedCell{c.ID(), c.Body(), c.Stationed(), c.Capacity(), c.Replication()}
 }
 
 // StartCell represents the cell a player
@@ -140,9 +140,10 @@ func makeStartCell(c *ent.Cell) StartCell {
 // Field is transmitted by the server
 // when a map was generated.
 type Field struct {
-	Cells      []GeneratedCell
-	StartCells []StartCell
-	Size       vec.V
+	Cells              []GeneratedCell
+	StartCells         []StartCell
+	Size               vec.V
+	NeutralReplication float64
 }
 
 // Transmitter is a binding between
@@ -194,34 +195,22 @@ func (t *Transmitter) Move(m *ent.Movement) {
 
 // Collide transmits a collision packet.
 func (t *Transmitter) Collide(a, b *ent.Movement) {
-	t.sendTX("Collision", &Collision{newMov(a), newMov(b)})
+	t.sendTX("Collision", Collision{makeCollMov(a), makeCollMov(b)})
 }
 
 // Conflict transmits a conflict packet.
 func (t *Transmitter) Conflict(m *ent.Movement, c *ent.Cell) {
-	t.sendTX("Conflict", &Conflict{m.ID(), makeConflCell(c)})
+	t.sendTX("Conflict", Conflict{m.ID(), makeConflCell(c)})
 }
 
 // Eliminate transmits a packet meaning that a player was eliminated.
 func (t *Transmitter) Eliminate(p ent.ID) {
-	t.sendTX("EliminatedPlayer", &p)
+	t.sendTX("EliminatedPlayer", EliminatedPlayer(p))
 }
 
 // Win transmits a packet meaning that a player won the game.
 func (t *Transmitter) Win(p ent.ID) {
-	t.sendTX("Winner", &p)
-}
-
-// Replicate transmits a packet containing updated
-// stationed vires in cells after a replication cycle.
-func (t *Transmitter) Replicate(field map[ent.ID]*ent.Cell) {
-	cvs := make([]CellVires, len(field))
-	i := 0
-	for _, c := range field {
-		cvs[i] = makeCellVires(c)
-		i++
-	}
-	t.sendTX("Replication", cvs)
+	t.sendTX("Winner", Winner(p))
 }
 
 // GenerateField transmits a packet containing the entire
@@ -237,7 +226,7 @@ func (t *Transmitter) GenerateField(fieldCells map[ent.ID]*ent.Cell, size vec.V)
 		}
 		i++
 	}
-	t.sendTX("Field", &Field{cells, startCells, size})
+	t.sendTX("Field", Field{cells, startCells, size, cfg.Gameplay.NeutralReplication})
 }
 
 // UserJoined is transmitted by the server
@@ -273,10 +262,9 @@ type ReceivedMovement struct {
 func protocolExample() {
 	v := vec.V{2.0, 3.0}
 	c := ent.Circle{v, 5.0}
-	mv := &Movement{1, 1, 10, c, v}
-	cell := GeneratedCell{1, c, 10}
+	collMov := &CollisionMovement{1, 100, c, 20}
+	cell := GeneratedCell{1, c, 4, 10, 20}
 	startCell := StartCell{1, 2}
-	cv := CellVires{1, 20}
 	ex := []interface{}{
 		"RX (packets sent to the server):",
 		RX{
@@ -288,9 +276,9 @@ func protocolExample() {
 		newTX("Collision", "some payload, may be any json type, see below"),
 		"Payloads:",
 		"Movement (sent by the server when a movement was started):",
-		mv,
+		&Movement{1, 1, 1, 1, 10, c, 15},
 		"Collision (sent by the server when a collision occurs):",
-		Collision{mv, mv},
+		Collision{collMov, collMov},
 		"Conflict (sent by the server when a conflict occurs):",
 		Conflict{
 			5,
@@ -304,13 +292,12 @@ func protocolExample() {
 		1,
 		"Winner (sent by the server when a player wins the game):",
 		1,
-		"Replication (sent by the server when all cells replicate):",
-		Replication([]CellVires{cv, cv, cv}),
 		"Field (sent by the server when the field is generated):",
 		Field{
 			[]GeneratedCell{cell, cell, cell, cell, cell},
 			[]StartCell{startCell, startCell},
 			v,
+			0.5,
 		},
 		"UserJoined (sent by the server when a user joins the room):",
 		1,

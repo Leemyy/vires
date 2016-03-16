@@ -1,29 +1,19 @@
 package mapgen
 
-import (
-	"math"
-	"testing"
-)
+import "testing"
 
 func TestMapgen(t *testing.T) {
-	for i := 1; i < 20; i++ {
-		field := GenerateMap(i)
-		for _, currCircleOne := range field.Cells {
-			for _, currCircleTwo := range field.Cells {
-				if currCircleOne != currCircleTwo {
-					deltaX := currCircleOne.Location.X - currCircleTwo.Location.X
-					deltaY := currCircleOne.Location.Y - currCircleTwo.Location.Y
-					currentDistance := math.Sqrt((math.Pow(float64(deltaX), 2) + math.Pow(float64(deltaY), 2)))
-					if currentDistance < CellMaximumSize*DistanceFactor {
-						t.Error("Expected distance more than ", CellMaximumSize*DistanceFactor, " got ", currentDistance, " instead")
-					}
-				}
+	f := Generate(20)
+	if len(f.StartCells) != 20 {
+		t.Fatalf("len(Generate(20).StartCells) = %d", len(f.StartCells))
+	}
+	for c1 := range f.Cells {
+		for c2 := range f.Cells {
+			if c1 == c2 {
+				continue
 			}
-		}
-		for _, currentPlayer := range field.StartCellIdxs {
-			cellSize := field.Cells[currentPlayer].Radius
-			if cellSize != PlayerCellDefaultSize/2 {
-				t.Error("Expected Cellsize of ", PlayerCellDefaultSize/2, " got ", cellSize, " instead ")
+			if tooClose(c1, c2) {
+				t.Fatalf("Generate(20).Cells: too close: %+v, %+v", c1, c2)
 			}
 		}
 	}
@@ -31,6 +21,6 @@ func TestMapgen(t *testing.T) {
 
 func BenchmarkMapgen(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		GenerateMap(20)
+		Generate(20)
 	}
 }

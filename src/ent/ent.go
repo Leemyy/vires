@@ -6,6 +6,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/mhuisi/vires/src/cfg"
 	"github.com/mhuisi/vires/src/vec"
 )
 
@@ -69,13 +70,14 @@ type Cell struct {
 // replication and its radius and loc, which is the
 // location of the cell.
 func NewCell(id ID, force float64, loc vec.V) *Cell {
+	ca := capacity(force)
 	return &Cell{
 		id:          id,
 		force:       force,
-		capacity:    capacity(force),
+		capacity:    ca,
 		replication: neutralReplication(force),
-		stationed:   0,
-		body:        Circle{loc, cellRadius(force)},
+		stationed:   Vires(cfg.Gameplay.StartStationed * float64(ca)),
+		body:        Circle{loc, force},
 	}
 }
 
@@ -125,21 +127,16 @@ func (c *Cell) Body() Circle {
 
 func capacity(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(math.Pi * sq(force) / 200)
+	return Vires(cfg.Gameplay.Capacity * math.Pi * sq(force))
 }
 
 func replication(force float64) Vires {
 	// placeholder, needs testing
-	return Vires(force / 5)
+	return Vires(cfg.Gameplay.Replication * force)
 }
 
 func neutralReplication(force float64) Vires {
-	return replication(force) / 2
-}
-
-func cellRadius(force float64) float64 {
-	// placeholder, needs testing
-	return force
+	return Vires(cfg.Gameplay.NeutralReplication * float64(replication(force)))
 }
 
 // Merge adds the specified amount
@@ -201,14 +198,14 @@ func (c *Cell) Neutralize() {
 }
 
 func radius(n Vires) float64 {
-	return 10 * math.Sqrt(float64(n)/math.Pi)
+	return cfg.Gameplay.MovementRadius * math.Sqrt(float64(n)/math.Pi)
 }
 
 func speed(radius float64) float64 {
 	if radius == 0 {
 		return 0
 	}
-	return 3000 / radius
+	return cfg.Gameplay.MovementSpeed / radius
 }
 
 // Move creates a movement which describes
@@ -222,6 +219,7 @@ func (src *Cell) Move(mvid ID, tgt *Cell) *Movement {
 		id:         mvid,
 		owner:      src.owner,
 		moving:     moving,
+		source:     src,
 		target:     tgt,
 		body:       Circle{start, r},
 		lastTime:   time.Now(),
@@ -238,6 +236,7 @@ type Movement struct {
 	id       ID
 	owner    *Player
 	moving   Vires
+	source   *Cell
 	target   *Cell
 	body     Circle
 	lastTime time.Time
@@ -262,6 +261,13 @@ func (m *Movement) Owner() Player {
 // in this movement.
 func (m *Movement) Moving() Vires {
 	return m.moving
+}
+
+// Source gets the cell from which this
+// movement moves.
+// The return value should not be mutated.
+func (m *Movement) Source() *Cell {
+	return m.source
 }
 
 // Target gets the cell towards which this
