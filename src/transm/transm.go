@@ -2,7 +2,7 @@
 // for the data transmission between client
 // and server as well as for the communication
 // between the game and the server.
-package main
+package transm
 
 import (
 	"bytes"
@@ -140,10 +140,11 @@ func makeStartCell(c *ent.Cell) StartCell {
 // Field is transmitted by the server
 // when a map was generated.
 type Field struct {
-	Cells              []GeneratedCell
-	StartCells         []StartCell
-	Size               vec.V
-	NeutralReplication float64
+	Cells               []GeneratedCell
+	StartCells          []StartCell
+	Size                vec.V
+	NeutralReplication  float64
+	ReplicationInterval float64
 }
 
 // Transmitter is a binding between
@@ -226,7 +227,7 @@ func (t *Transmitter) GenerateField(fieldCells map[ent.ID]*ent.Cell, size vec.V)
 		}
 		i++
 	}
-	t.sendTX("Field", Field{cells, startCells, size, cfg.Gameplay.NeutralReplication})
+	t.sendTX("Field", Field{cells, startCells, size, cfg.Gameplay.NeutralReplication, cfg.Gameplay.ReplicationInterval})
 }
 
 // UserJoined is transmitted by the server
@@ -298,6 +299,7 @@ func protocolExample() {
 			[]StartCell{startCell, startCell},
 			v,
 			0.5,
+			1.5,
 		},
 		"UserJoined (sent by the server when a user joins the room):",
 		1,
