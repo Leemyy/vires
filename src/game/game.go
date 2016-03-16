@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	replicationInterval = 1 * time.Second
+	replicationInterval = 1.5 * time.Second
 )
 
 // Field represents a game instance of a field.

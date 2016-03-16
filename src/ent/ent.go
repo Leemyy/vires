@@ -9,6 +9,10 @@ import (
 	"github.com/mhuisi/vires/src/vec"
 )
 
+const (
+	startStationed = 0.3
+)
+
 type (
 	// Vires represents a game unit
 	Vires int
@@ -69,12 +73,13 @@ type Cell struct {
 // replication and its radius and loc, which is the
 // location of the cell.
 func NewCell(id ID, force float64, loc vec.V) *Cell {
+	ca := capacity(force)
 	return &Cell{
 		id:          id,
 		force:       force,
-		capacity:    capacity(force),
+		capacity:    ca,
 		replication: neutralReplication(force),
-		stationed:   0,
+		stationed:   Vires(startStationed * float64(ca)),
 		body:        Circle{loc, cellRadius(force)},
 	}
 }

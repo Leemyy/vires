@@ -117,13 +117,14 @@ type Replication []CellVires
 // GeneratedCell represents a cell that was
 // generated as part of map generation.
 type GeneratedCell struct {
-	ID       ent.ID
-	Body     ent.Circle
-	Capacity ent.Vires
+	ID        ent.ID
+	Body      ent.Circle
+	Stationed ent.Vires
+	Capacity  ent.Vires
 }
 
 func makeGenCell(c *ent.Cell) GeneratedCell {
-	return GeneratedCell{c.ID(), c.Body(), c.Capacity()}
+	return GeneratedCell{c.ID(), c.Body(), c.Stationed(), c.Capacity()}
 }
 
 // StartCell represents the cell a player
@@ -274,7 +275,7 @@ func protocolExample() {
 	v := vec.V{2.0, 3.0}
 	c := ent.Circle{v, 5.0}
 	mv := &Movement{1, 1, 10, c, v}
-	cell := GeneratedCell{1, c, 10}
+	cell := GeneratedCell{1, c, 4, 10}
 	startCell := StartCell{1, 2}
 	cv := CellVires{1, 20}
 	ex := []interface{}{

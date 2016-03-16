@@ -11,8 +11,8 @@ import (
 
 const (
 	gap                = 80
-	minRadius          = 100
-	maxRadius          = 200
+	minRadius          = 80
+	maxRadius          = 160
 	minStartCellRadius = 0.8 * maxRadius
 	// radius needed to avoid overlapping with
 	// another cell and its gap
