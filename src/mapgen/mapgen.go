@@ -18,7 +18,7 @@ var (
 	// another cell and its gap
 	safeSpace = math.Pi * safeRadius * safeRadius
 	// radius for area considered close to cell
-	nearRadius = 3 * cfg.Mapgen.MaxRadius
+	nearRadius = 3*cfg.Mapgen.MaxRadius + cfg.Mapgen.Gap
 )
 
 func init() {
@@ -96,9 +96,9 @@ func (f *Field) generateNeutralCells(nplayers, cellsPerPlayer int) {
 	}
 }
 
-func randPointInCircle(c ent.Circle) vec.V {
+func randPointInCircle(c ent.Circle, offset float64) vec.V {
 	angle := rand.Float64() * 2 * math.Pi
-	r := c.Radius * math.Sqrt(rand.Float64())
+	r := offset + (c.Radius-offset)*math.Sqrt(rand.Float64())
 	l := c.Location
 	x := l.X + r*math.Cos(angle)
 	y := l.Y + r*math.Sin(angle)
@@ -122,9 +122,10 @@ func (f *Field) improveFairness() {
 		}
 		// generate cells until we have enough cells
 		for n < cfg.Mapgen.CellsNearStartCell {
+			r := randRangeF(cfg.Mapgen.MinRadius, cfg.Mapgen.MaxRadius)
 			c := &ent.Circle{
-				Location: randPointInCircle(closeCircle),
-				Radius:   randRangeF(cfg.Mapgen.MinRadius, cfg.Mapgen.MaxRadius),
+				Location: randPointInCircle(closeCircle, sc.Radius+r+cfg.Mapgen.Gap),
+				Radius:   r,
 			}
 			// generating circles outside of the field within
 			// the close circle is possible because we
