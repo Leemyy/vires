@@ -114,7 +114,7 @@ vires.states.match =
 		for i in [0...Field.StartCells.length]
 			start = Field.StartCells[i]
 			owner = new Player(start.Owner)
-			owner.color = palette[i%palette.length]
+			owner.color = vec4.clone(palette[i%palette.length])
 			@players[start.Owner] = owner
 			@cells[start.Cell].switchOwner(owner)
 
@@ -277,6 +277,9 @@ vires.states.match =
 				when "EliminatedPlayer"
 					if(vires.Self == data)
 						@spectating = true
+						for id, cell of @selection
+							cell.unmark()
+						@targetMarker.unlink()
 					@killPlayer(data)
 				when "Winner"
 					vires.load("lobby", @players[data].color)
