@@ -11,6 +11,7 @@
 		"MinRadius": 80,
 		"MaxRadius": 160,
 		"MinStartCellRadius": 120,
+		"MinStartCellDist": 500,
 		"CellsNearStartCell": 4,
 		"MinCellsPerPlayer": 10,
 		"MaxCellsPerPlayer": 15

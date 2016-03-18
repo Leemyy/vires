@@ -11,12 +11,11 @@ import (
 )
 
 var (
-	// radius needed to avoid overlapping with
-	// another cell and its gap
-	safeRadius = 3*cfg.Mapgen.MaxRadius + cfg.Mapgen.Gap
+	// radius needed to be able to place all start cells
+	safeLength = 6 * cfg.Mapgen.MinStartCellDist
 	// space needed to avoid overlapping with
-	// another cell and its gap
-	safeSpace = math.Pi * safeRadius * safeRadius
+	// another start cell
+	safeSpace = safeLength * safeLength
 	// radius for area considered close to cell
 	nearRadius = 3*cfg.Mapgen.MaxRadius + cfg.Mapgen.Gap
 )
@@ -39,8 +38,8 @@ type Field struct {
 	Size       vec.V
 }
 
-func fieldSize(cellsPerPlayer int) vec.V {
-	neededSpace := safeSpace * float64(cellsPerPlayer)
+func fieldSize(nplayers int) vec.V {
+	neededSpace := safeSpace * float64(nplayers)
 	sideLength := math.Sqrt(neededSpace)
 	return vec.V{sideLength, sideLength}
 }
@@ -53,19 +52,6 @@ func (f *Field) randLoc() vec.V {
 	return vec.V{randCoord(f.Size.X), randCoord(f.Size.Y)}
 }
 
-func tooClose(c1, c2 *ent.Circle) bool {
-	return vec.Dist(c1.Location, c2.Location) < c1.Radius+c2.Radius+cfg.Mapgen.Gap
-}
-
-func (f *Field) overlaps(cell *ent.Circle) bool {
-	for c := range f.Cells {
-		if tooClose(c, cell) {
-			return true
-		}
-	}
-	return false
-}
-
 func (f *Field) generateStartCells(nplayers int) {
 	cells := f.Cells
 	startCells := f.StartCells
@@ -75,11 +61,27 @@ func (f *Field) generateStartCells(nplayers int) {
 			Location: f.randLoc(),
 			Radius:   startCellRadius,
 		}
-		if !f.overlaps(c) {
+		tooClose := false
+		for c2 := range f.StartCells {
+			if vec.Dist(c2.Location, c.Location) < cfg.Mapgen.MinStartCellDist {
+				tooClose = true
+				break
+			}
+		}
+		if !tooClose {
 			cells[c] = struct{}{}
 			startCells[c] = struct{}{}
 		}
 	}
+}
+
+func (f *Field) overlaps(cell *ent.Circle) bool {
+	for c := range f.Cells {
+		if vec.Dist(c.Location, cell.Location) < c.Radius+cell.Radius+cfg.Mapgen.Gap {
+			return true
+		}
+	}
+	return false
 }
 
 func (f *Field) generateNeutralCells(nplayers, cellsPerPlayer int) {
@@ -161,10 +163,10 @@ func (f *Field) adaptSize() {
 }
 
 func Generate(nplayers int) Field {
-	cellsPerPlayer := randRangeI(cfg.Mapgen.MinCellsPerPlayer, cfg.Mapgen.MaxCellsPerPlayer)
-	size := fieldSize(cellsPerPlayer)
+	size := fieldSize(nplayers)
 	f := Field{map[*ent.Circle]struct{}{}, map[*ent.Circle]struct{}{}, size}
 	f.generateStartCells(nplayers)
+	cellsPerPlayer := randRangeI(cfg.Mapgen.MinCellsPerPlayer, cfg.Mapgen.MaxCellsPerPlayer)
 	f.generateNeutralCells(nplayers, cellsPerPlayer)
 	f.improveFairness()
 	f.adaptSize()

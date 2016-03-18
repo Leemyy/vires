@@ -18,6 +18,7 @@ type MapgenCfg struct {
 	MinRadius          float64
 	MaxRadius          float64
 	MinStartCellRadius float64
+	MinStartCellDist   float64
 	CellsNearStartCell int
 	MinCellsPerPlayer  int
 	MaxCellsPerPlayer  int
@@ -54,6 +55,7 @@ var (
 			MinRadius:          80,
 			MaxRadius:          160,
 			MinStartCellRadius: 120,
+			MinStartCellDist:   500,
 			CellsNearStartCell: 4,
 			MinCellsPerPlayer:  10,
 			MaxCellsPerPlayer:  15,
@@ -96,6 +98,9 @@ func init() {
 	}
 	if Mapgen.MinStartCellRadius > Mapgen.MaxRadius {
 		validationErr("MinStartCellRadius may not be larger than MaxRadius.")
+	}
+	if Mapgen.MinStartCellDist < 2*Mapgen.MaxRadius+Mapgen.Gap {
+		validationErr("MinStartCellDist may not be smaller than 2 * MaxRadius + Gap (start cells may otherwise overlap).")
 	}
 	if Mapgen.CellsNearStartCell < 0 || Mapgen.CellsNearStartCell > 8 {
 		validationErr("CellsNearStartCell must be a value between 0 and 8 (for every value larger than 8 you're running risk of never finishing the map generation).")
